@@ -6,6 +6,7 @@
 - Added verified Hermes and WorkBuddy/CodeBuddy MCP templates.
 - Included all README-linked documentation in the Pi npm package from version 0.1.1.
 - Added a Git-backed Codex marketplace and a one-command plugin MCP path through pinned `uvx`.
+- Added a Claude Code marketplace that installs the same eight Skills and pinned local MCP server.
 
 ## [0.1.0] - 2026-09-10
 

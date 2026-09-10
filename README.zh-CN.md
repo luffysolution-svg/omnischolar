@@ -63,6 +63,24 @@ uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
 
 采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
 
+### Claude Code 插件安装
+
+先安装 [`uv`](https://docs.astral.sh/uv/getting-started/installation/)。在 Claude Code 中添加 GitHub Marketplace 并安装插件：
+
+```text
+/plugin marketplace add luffysolution-svg/omnischolar
+/plugin install omnischolar@omnischolar
+```
+
+如需在脚本或普通终端中执行，可使用非交互式命令：
+
+```sh
+claude plugin marketplace add luffysolution-svg/omnischolar
+claude plugin install omnischolar@omnischolar --scope user
+```
+
+如果安装结果提示需要重新加载，请运行 `/reload-plugins`，然后新建会话。插件会自动启动同一个固定版本的 `uvx` MCP，并提供 `/omnischolar:scholar-search` 等带命名空间的 Skills，无需另行安装 Python 包。
+
 ### Agent 配置安装器
 
 先查看将要修改的文件，再安装本地 MCP 配置和 Skills：

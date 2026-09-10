@@ -62,6 +62,42 @@ codex plugin marketplace remove omnischolar
 
 Removing the marketplace is optional and should be done only after removing plugins installed from it.
 
+## Install in Claude Code
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) first. From an interactive Claude Code session, run:
+
+```text
+/plugin marketplace add luffysolution-svg/omnischolar
+/plugin install omnischolar@omnischolar
+```
+
+Or use the shell commands for scripting and non-interactive setup:
+
+```sh
+claude plugin marketplace add luffysolution-svg/omnischolar
+claude plugin install omnischolar@omnischolar --scope user
+```
+
+Choose `--scope project` to share the enabled plugin through repository settings, or `--scope local` to enable it only for yourself in the current repository. If Claude reports `Run /reload-plugins to activate`, run that command before using the plugin.
+
+Claude Code copies the repository-root plugin into its versioned cache, discovers the eight folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command is pinned to:
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+The first MCP start needs package-index access. Skills are namespaced with `omnischolar`, for example `/omnischolar:scholar-search` and `/omnischolar:zotero-research`.
+
+Update or remove the installation with:
+
+```sh
+claude plugin marketplace update omnischolar
+claude plugin uninstall omnischolar@omnischolar --scope user
+claude plugin marketplace remove omnischolar
+```
+
+Remove the marketplace only after uninstalling plugins that came from it.
+
 ## Install local MCP and Skills
 
 ```sh

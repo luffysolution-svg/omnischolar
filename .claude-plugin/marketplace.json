@@ -1,0 +1,28 @@
+{
+  "name": "omnischolar",
+  "owner": {
+    "name": "OmniScholar contributors",
+    "email": "LuffySolution@gmail.com",
+    "url": "https://github.com/luffysolution-svg"
+  },
+  "description": "Research plugins for literature, Zotero, PDFs, citations, materials, and scientific figures.",
+  "plugins": [
+    {
+      "name": "omnischolar",
+      "displayName": "OmniScholar",
+      "source": "./",
+      "description": "Search literature, read local Zotero data, parse PDFs, verify citations, query materials data, and create scientific figures.",
+      "author": {
+        "name": "OmniScholar contributors",
+        "email": "LuffySolution@gmail.com"
+      },
+      "homepage": "https://github.com/luffysolution-svg/omnischolar",
+      "repository": "https://github.com/luffysolution-svg/omnischolar.git",
+      "license": "MIT",
+      "keywords": ["research", "literature", "zotero", "mineru", "mcp"],
+      "category": "Research",
+      "tags": ["academic", "citations", "materials-science"],
+      "defaultEnabled": true
+    }
+  ]
+}

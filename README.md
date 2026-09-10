@@ -65,6 +65,24 @@ uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
 
 No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
 
+### Claude Code plugin
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) first. In Claude Code, add the GitHub marketplace and install the plugin:
+
+```text
+/plugin marketplace add luffysolution-svg/omnischolar
+/plugin install omnischolar@omnischolar
+```
+
+For scripts or a regular terminal, use the non-interactive shell commands:
+
+```sh
+claude plugin marketplace add luffysolution-svg/omnischolar
+claude plugin install omnischolar@omnischolar --scope user
+```
+
+Run `/reload-plugins` if the install summary asks for it, then start a new session. The plugin automatically starts the same pinned `uvx` MCP server and exposes namespaced Skills such as `/omnischolar:scholar-search`. No separate Python installation is required.
+
 ### Host configuration installer
 
 Preview the files that will change, then install the local MCP entry and Skills:

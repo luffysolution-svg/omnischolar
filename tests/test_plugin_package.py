@@ -38,6 +38,24 @@ class CodexPluginPackageTests(unittest.TestCase):
         )
         self.assertEqual(plugin["source"]["ref"], "main")
 
+    def test_claude_marketplace_exposes_root_plugin(self) -> None:
+        path = ROOT / ".claude-plugin" / "marketplace.json"
+        document = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(document["name"], "omnischolar")
+        self.assertEqual(document["owner"]["email"], "LuffySolution@gmail.com")
+        self.assertEqual(len(document["plugins"]), 1)
+        plugin = document["plugins"][0]
+        self.assertEqual(plugin["name"], "omnischolar")
+        self.assertEqual(plugin["source"], "./")
+
+    def test_claude_and_portable_mcp_launchers_match(self) -> None:
+        portable = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))
+        claude = json.loads((ROOT / ".mcp.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            claude["mcpServers"]["omnischolar"],
+            portable["mcpServers"]["omnischolar"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

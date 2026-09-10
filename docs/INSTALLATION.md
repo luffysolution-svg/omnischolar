@@ -62,6 +62,42 @@ codex plugin marketplace remove omnischolar
 
 只有在已卸载其中插件后才建议移除 Marketplace 来源。
 
+## 安装到 Claude Code
+
+先安装 [`uv`](https://docs.astral.sh/uv/getting-started/installation/)。在 Claude Code 交互会话中运行：
+
+```text
+/plugin marketplace add luffysolution-svg/omnischolar
+/plugin install omnischolar@omnischolar
+```
+
+在脚本或非交互式环境中可使用 shell 命令：
+
+```sh
+claude plugin marketplace add luffysolution-svg/omnischolar
+claude plugin install omnischolar@omnischolar --scope user
+```
+
+使用 `--scope project` 可通过仓库设置与协作者共享启用状态；使用 `--scope local` 则只在当前仓库为自己启用。如果 Claude 提示 `Run /reload-plugins to activate`，请先运行该命令。
+
+Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 8 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令固定为：
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+第一次启动 MCP 需要能够访问 Python 包索引。Skills 使用 `omnischolar` 命名空间，例如 `/omnischolar:scholar-search` 和 `/omnischolar:zotero-research`。
+
+更新或移除安装：
+
+```sh
+claude plugin marketplace update omnischolar
+claude plugin uninstall omnischolar@omnischolar --scope user
+claude plugin marketplace remove omnischolar
+```
+
+请在卸载来自该 Marketplace 的插件后再移除 Marketplace。
+
 ## 安装本地 MCP 与 Skills
 
 ```sh
