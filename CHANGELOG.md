@@ -5,6 +5,7 @@
 - Added the npm-published Pi MCP bridge Extension and Pi Extension + Skills installation flow.
 - Added verified Hermes and WorkBuddy/CodeBuddy MCP templates.
 - Included all README-linked documentation in the Pi npm package from version 0.1.1.
+- Added a Git-backed Codex marketplace and a one-command plugin MCP path through pinned `uvx`.
 
 ## [0.1.0] - 2026-09-10
 

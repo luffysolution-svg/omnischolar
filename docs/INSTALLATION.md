@@ -21,6 +21,47 @@ omnischolar --version
 omnischolar doctor --json
 ```
 
+如果采用下面的 Codex 插件安装方式，则无需预先安装上述 Python 命令；插件会通过 `uvx` 运行固定版本的 PyPI 包。
+
+## 安装到 Codex App 或 Codex CLI
+
+本仓库本身就是 Codex Git Marketplace。先安装 [`uv`](https://docs.astral.sh/uv/getting-started/installation/)，并确认两个命令可用：
+
+```sh
+codex --version
+uv --version
+```
+
+添加 Marketplace 并安装 OmniScholar：
+
+```sh
+codex plugin marketplace add luffysolution-svg/omnischolar --ref main
+codex plugin add omnischolar@omnischolar
+```
+
+添加 Marketplace 后请重启 ChatGPT 桌面应用，打开 **Plugins**，切换到 **OmniScholar** 来源，再安装或启用插件。Codex CLI 用户可以运行 `/plugins` 并选择同一条目。
+
+安装后的插件包含 `plugin.json`、`skills/` 和 `mcp.json`。其 MCP 配置执行：
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+`uvx` 会创建隔离环境并缓存该精确版本，因此无需另行运行 `pip install`。第一次启动需要能够访问 Python 包索引。若要更新 Git Marketplace：
+
+```sh
+codex plugin marketplace upgrade omnischolar
+```
+
+卸载插件或移除 Marketplace 来源：
+
+```sh
+codex plugin remove omnischolar@omnischolar
+codex plugin marketplace remove omnischolar
+```
+
+只有在已卸载其中插件后才建议移除 Marketplace 来源。
+
 ## 安装本地 MCP 与 Skills
 
 ```sh

@@ -1,0 +1,21 @@
+{
+  "name": "omnischolar",
+  "interface": {
+    "displayName": "OmniScholar"
+  },
+  "plugins": [
+    {
+      "name": "omnischolar",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/luffysolution-svg/omnischolar.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

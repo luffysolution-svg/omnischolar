@@ -44,6 +44,27 @@ omnischolar doctor --json
 
 ## 连接 Agent
 
+### Codex App 与 Codex CLI 插件安装
+
+先安装 [`uv`](https://docs.astral.sh/uv/getting-started/installation/)，再添加 OmniScholar Git Marketplace 并安装插件：
+
+```sh
+codex plugin marketplace add luffysolution-svg/omnischolar --ref main
+codex plugin add omnischolar@omnischolar
+```
+
+在 ChatGPT 桌面应用中重启应用，打开 **Plugins**，选择 **OmniScholar** Marketplace，然后安装或启用 **OmniScholar**。在 Codex CLI 中可运行 `/plugins` 浏览同一 Marketplace。
+
+插件会同时安装 8 个 Skills，并使用固定的 PyPI 版本启动本地 MCP：
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
+
+### Agent 配置安装器
+
 先查看将要修改的文件，再安装本地 MCP 配置和 Skills：
 
 ```sh

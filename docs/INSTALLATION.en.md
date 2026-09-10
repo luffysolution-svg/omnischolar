@@ -21,6 +21,47 @@ omnischolar --version
 omnischolar doctor --json
 ```
 
+The Python command installation above is optional when you use the Codex plugin path below. The plugin runs the pinned PyPI package through `uvx` instead.
+
+## Install in the Codex app or Codex CLI
+
+This repository is a Codex Git marketplace. Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) and verify that both commands are available:
+
+```sh
+codex --version
+uv --version
+```
+
+Add the marketplace and install OmniScholar:
+
+```sh
+codex plugin marketplace add luffysolution-svg/omnischolar --ref main
+codex plugin add omnischolar@omnischolar
+```
+
+Restart the ChatGPT desktop app after adding the marketplace. Open **Plugins**, switch to the **OmniScholar** source, and install or enable the plugin. Codex CLI users can run `/plugins` and choose the same entry.
+
+The installed plugin contains `plugin.json`, `skills/`, and `mcp.json`. Its MCP entry executes:
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+`uvx` creates an isolated environment and caches the exact release, so this route does not require a separate `pip install`. The first start requires package-index access. To fetch updates to the Git marketplace, run:
+
+```sh
+codex plugin marketplace upgrade omnischolar
+```
+
+To uninstall the plugin or remove its marketplace source:
+
+```sh
+codex plugin remove omnischolar@omnischolar
+codex plugin marketplace remove omnischolar
+```
+
+Removing the marketplace is optional and should be done only after removing plugins installed from it.
+
 ## Install local MCP and Skills
 
 ```sh

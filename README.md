@@ -46,6 +46,27 @@ omnischolar doctor --json
 
 ## Connect an agent
 
+### Codex app and Codex CLI plugin
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) first, then add the OmniScholar Git marketplace and install the plugin:
+
+```sh
+codex plugin marketplace add luffysolution-svg/omnischolar --ref main
+codex plugin add omnischolar@omnischolar
+```
+
+In the ChatGPT desktop app, restart the app, open **Plugins**, select the **OmniScholar** marketplace, and install or enable **OmniScholar**. In Codex CLI, run `/plugins` to browse the same marketplace.
+
+The plugin bundles all eight Skills and starts its local MCP server with the pinned PyPI release:
+
+```sh
+uvx --from luffysolution-omnischolar==0.1.0 omnischolar mcp
+```
+
+No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
+
+### Host configuration installer
+
 Preview the files that will change, then install the local MCP entry and Skills:
 
 ```sh
