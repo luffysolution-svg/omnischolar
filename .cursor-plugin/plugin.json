@@ -10,6 +10,7 @@
   "repository": "https://github.com/luffysolution-svg/omnischolar.git",
   "license": "MIT",
   "keywords": ["research", "literature", "zotero", "mineru", "mcp"],
+  "logo": "./assets/logo.svg",
   "skills": "./skills/",
   "mcpServers": "./mcp.json"
 }

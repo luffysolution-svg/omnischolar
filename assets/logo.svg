@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">OmniScholar logo</title>
+  <desc id="description">An open book and orbit mark on a blue square.</desc>
+  <rect width="512" height="512" rx="112" fill="#0B1020"/>
+  <circle cx="256" cy="230" r="142" fill="none" stroke="#60A5FA" stroke-width="24"/>
+  <path d="M104 350c54-31 105-36 152-13v73c-47-23-98-18-152 13z" fill="#F8FAFC"/>
+  <path d="M408 350c-54-31-105-36-152-13v73c47-23 98-18 152 13z" fill="#DBEAFE"/>
+  <path d="M256 337v73" stroke="#2563EB" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="383" cy="130" r="30" fill="#FBBF24"/>
+</svg>

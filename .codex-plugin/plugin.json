@@ -27,6 +27,8 @@
       "Summarize the notes and annotations for this DOI in my Zotero library.",
       "Find citation candidates and verify their bibliographic identity."
     ],
-    "brandColor": "#2563EB"
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/logo.svg",
+    "logo": "./assets/logo.svg"
   }
 }
