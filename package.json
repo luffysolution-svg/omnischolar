@@ -1,6 +1,6 @@
 {
   "name": "@luffysolution/omnischolar-pi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Pi MCP bridge for the OmniScholar research toolkit",
   "type": "module",
   "license": "MIT",
@@ -29,7 +29,14 @@
   "files": [
     "pi-extension/dist",
     "README.md",
-    "LICENSE"
+    "README.zh-CN.md",
+    "LICENSE",
+    "PRIVACY.md",
+    "TERMS.md",
+    "THIRD_PARTY_NOTICES.md",
+    "omnischolar.config.example.json",
+    "docs",
+    "host-configs"
   ],
   "pi": {
     "extensions": [

@@ -4,7 +4,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { Type } from "typebox";
 
-const CLIENT_INFO = { name: "omnischolar-pi", version: "0.1.0" };
+const CLIENT_INFO = { name: "omnischolar-pi", version: "0.1.1" };
 
 export function resultText(result: CallToolResult): string {
   return result.content
