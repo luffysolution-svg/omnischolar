@@ -1,0 +1,53 @@
+"""Schema-versioned OmniScholar configuration."""
+
+from .credentials import ResolvedCredential, resolve_credential, validate_env_name
+from .loader import ConfigSource, LoadedConfig, config_json_schema, discover_config, load_config
+from .models import (
+    Ai4ScholarConfig,
+    CasConfig,
+    DataConfig,
+    DefaultsConfig,
+    MaterialsProjectConfig,
+    MediaConfig,
+    MediaModelPin,
+    MediaProviderConfig,
+    MinerUConfig,
+    OmniScholarConfig,
+    OutputConfig,
+    ResearchConfig,
+    ResearchProviderConfig,
+    RuntimeConfig,
+    SyncConfig,
+    ToolGroups,
+    ToolsConfig,
+    ZoteroConfig,
+)
+
+__all__ = [
+    "Ai4ScholarConfig",
+    "CasConfig",
+    "ConfigSource",
+    "DataConfig",
+    "DefaultsConfig",
+    "LoadedConfig",
+    "MaterialsProjectConfig",
+    "MediaConfig",
+    "MediaModelPin",
+    "MediaProviderConfig",
+    "MinerUConfig",
+    "OmniScholarConfig",
+    "OutputConfig",
+    "ResearchConfig",
+    "ResearchProviderConfig",
+    "ResolvedCredential",
+    "RuntimeConfig",
+    "SyncConfig",
+    "ToolGroups",
+    "ToolsConfig",
+    "ZoteroConfig",
+    "config_json_schema",
+    "discover_config",
+    "load_config",
+    "resolve_credential",
+    "validate_env_name",
+]

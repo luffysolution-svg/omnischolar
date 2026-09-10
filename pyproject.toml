@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "luffysolution-omnischolar"
+version = "0.1.0"
+description = "Literature, Zotero, PDF, citation, materials, and scientific image tools for local MCP agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "OmniScholar contributors", email = "LuffySolution@gmail.com" }]
+keywords = ["mcp", "agent-plugin", "research", "zotero", "mineru", "literature"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
+dependencies = [
+  "anyio>=4.8,<5",
+  "defusedxml>=0.7,<1",
+  "httpx>=0.28,<1",
+  "jsonschema>=4.23,<5",
+  "mcp>=1.12.4,<2",
+  "platformdirs>=4.3,<5",
+  "pydantic>=2.11,<3",
+  "tomlkit>=0.13,<1",
+  "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+media-google = ["google-auth>=2.38,<3"]
+
+[project.scripts]
+omnischolar = "omnischolar.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/luffysolution-svg/omnischolar"
+Repository = "https://github.com/luffysolution-svg/omnischolar.git"
+Issues = "https://github.com/luffysolution-svg/omnischolar/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/omnischolar"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "omnischolar/share/skills"
+"docs" = "omnischolar/share/docs"
+"host-configs" = "omnischolar/share/host-configs"
+"plugin.json" = "omnischolar/share/plugin.json"
+"mcp.json" = "omnischolar/share/mcp.json"
+".mcp.json" = "omnischolar/share/.mcp.json"
+".claude-plugin" = "omnischolar/share/.claude-plugin"
+".codex-plugin" = "omnischolar/share/.codex-plugin"
+".cursor-plugin" = "omnischolar/share/.cursor-plugin"
+"omnischolar.config.example.json" = "omnischolar/share/omnischolar.config.example.json"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100

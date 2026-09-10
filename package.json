@@ -1,0 +1,63 @@
+{
+  "name": "@luffysolution/omnischolar-pi",
+  "version": "0.1.0",
+  "description": "Pi MCP bridge for the OmniScholar research toolkit",
+  "type": "module",
+  "license": "MIT",
+  "author": "OmniScholar contributors <LuffySolution@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luffysolution-svg/omnischolar.git"
+  },
+  "homepage": "https://github.com/luffysolution-svg/omnischolar#readme",
+  "bugs": {
+    "url": "https://github.com/luffysolution-svg/omnischolar/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "mcp",
+    "research",
+    "literature",
+    "zotero"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "exports": "./pi-extension/dist/index.js",
+  "types": "./pi-extension/dist/index.d.ts",
+  "files": [
+    "pi-extension/dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./pi-extension/dist/index.js"
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p pi-extension/tsconfig.json",
+    "check": "tsc -p pi-extension/tsconfig.json --noEmit",
+    "test": "tsx --test pi-extension/test/*.test.ts",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test && npm run check"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "typebox": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.85.1",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.21.0",
+    "typebox": "^1.3.30",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

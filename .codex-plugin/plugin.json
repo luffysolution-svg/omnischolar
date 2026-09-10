@@ -1,0 +1,32 @@
+{
+  "name": "omnischolar",
+  "version": "0.1.0",
+  "description": "Literature, Zotero, PDF, citation, materials, and scientific image tools",
+  "author": {
+    "name": "OmniScholar contributors",
+    "email": "LuffySolution@gmail.com",
+    "url": "https://github.com/luffysolution-svg"
+  },
+  "homepage": "https://github.com/luffysolution-svg/omnischolar",
+  "repository": "https://github.com/luffysolution-svg/omnischolar.git",
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "OmniScholar",
+    "shortDescription": "Research literature, Zotero, PDFs, citations, materials, and figures",
+    "longDescription": "A local research toolkit for literature discovery, read-only Zotero access, PDF parsing, citation checks, materials data, and scientific figure workflows.",
+    "developerName": "OmniScholar contributors",
+    "category": "Productivity",
+    "capabilities": ["Research", "Read", "Write"],
+    "websiteURL": "https://github.com/luffysolution-svg/omnischolar",
+    "privacyPolicyURL": "https://github.com/luffysolution-svg/omnischolar/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/luffysolution-svg/omnischolar/blob/main/TERMS.md",
+    "defaultPrompt": [
+      "Find recent reviews on solid-state battery interfaces.",
+      "Summarize the notes and annotations for this DOI in my Zotero library.",
+      "Find citation candidates and verify their bibliographic identity."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

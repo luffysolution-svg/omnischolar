@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "omnischolar": {
+      "type": "stdio",
+      "command": "omnischolar",
+      "args": ["mcp"]
+    }
+  }
+}

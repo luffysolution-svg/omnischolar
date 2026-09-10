@@ -1,0 +1,13 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "omnischolar",
+  "version": "0.1.0",
+  "description": "Literature, Zotero, PDF, citation, materials, and scientific image tools",
+  "author": {
+    "name": "OmniScholar contributors"
+  },
+  "homepage": "https://github.com/luffysolution-svg/omnischolar",
+  "repository": "https://github.com/luffysolution-svg/omnischolar.git",
+  "license": "MIT",
+  "keywords": ["research", "literature", "zotero", "mineru", "mcp"]
+}

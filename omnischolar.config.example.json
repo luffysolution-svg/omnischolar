@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "runtime": {
+    "cacheDirectory": ".omnischolar/cache",
+    "python": "python",
+    "logLevel": "info",
+    "maxOutputBytes": 51200,
+    "maxOutputLines": 2000,
+    "maxResponseBytes": 16777216,
+    "requestTimeoutSeconds": 30,
+    "workspaceRoots": ["."]
+  },
+  "tools": {
+    "groups": {
+      "literature": true,
+      "ai4scholar": true,
+      "zotero": true,
+      "parsing": true,
+      "citation": true,
+      "materials": true,
+      "chemistry": true,
+      "media": true
+    },
+    "disabled": []
+  },
+  "defaults": {
+    "language": "en",
+    "citationStyle": "apa",
+    "literatureLimit": 20,
+    "preferredLiteratureProviders": ["semantic-scholar", "openalex", "crossref"],
+    "defaultImageProvider": "openai"
+  },
+  "research": {
+    "fallback": true,
+    "maxPages": 10,
+    "cacheTtlSeconds": 3600,
+    "providers": {
+      "semantic-scholar": {
+        "enabled": true,
+        "apiKeyEnv": "OMNISCHOLAR_SEMANTIC_SCHOLAR_API_KEY",
+        "maxPages": 10
+      },
+      "openalex": {
+        "enabled": true,
+        "email": "researcher@example.edu",
+        "maxPages": 10
+      },
+      "pubmed": {
+        "enabled": true,
+        "apiKeyEnv": "OMNISCHOLAR_NCBI_API_KEY",
+        "email": "researcher@example.edu",
+        "tool": "omnischolar",
+        "maxPages": 10
+      },
+      "arxiv": {
+        "enabled": true,
+        "maxPages": 10
+      },
+      "crossref": {
+        "enabled": true,
+        "email": "researcher@example.edu",
+        "maxPages": 10
+      },
+      "unpaywall": {
+        "enabled": false,
+        "email": "researcher@example.edu",
+        "maxPages": 10
+      },
+      "easyscholar": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_EASYSCHOLAR_API_KEY",
+        "maxPages": 5
+      }
+    }
+  },
+  "ai4scholar": {
+    "enabled": false,
+    "baseUrl": "https://ai4scholar.net",
+    "apiKeyEnv": "OMNISCHOLAR_AI4SCHOLAR_API_KEY",
+    "timeoutSeconds": 60,
+    "maxResponseBytes": 16777216,
+    "allowPaid": false
+  },
+  "zotero": {
+    "enabled": true,
+    "baseUrl": "http://127.0.0.1:23119/api",
+    "maxItems": 500
+  },
+  "mineru": {
+    "enabled": false,
+    "baseUrl": "https://mineru.net/api/v4",
+    "lightweightBaseUrl": "https://mineru.net/api/v1/agent",
+    "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY",
+    "model": "pipeline",
+    "cacheDirectory": ".omnischolar/mineru",
+    "pollIntervalSeconds": 2,
+    "pollTimeoutSeconds": 600,
+    "maxPdfBytes": 209715200,
+    "allowExternalUpload": false,
+    "allowLightweightFallback": false
+  },
+  "data": {
+    "materialsProject": {
+      "enabled": false,
+      "baseUrl": "https://api.materialsproject.org",
+      "apiKeyEnv": "OMNISCHOLAR_MATERIALS_PROJECT_API_KEY",
+      "maxPages": 10
+    },
+    "casCommonChemistry": {
+      "enabled": false,
+      "apiKeyEnv": "OMNISCHOLAR_CAS_API_KEY",
+      "baseUrl": null,
+      "contractFile": null
+    }
+  },
+  "media": {
+    "allowExternalUpload": false,
+    "allowPaid": false,
+    "maxInputBytes": 26214400,
+    "maxArtifactBytes": 52428800,
+    "providers": {
+      "openai": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_OPENAI_API_KEY",
+        "baseUrl": "https://api.openai.com/v1",
+        "models": {
+          "gpt-image-1": {
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "paid": true
+          }
+        },
+        "options": {}
+      },
+      "google": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_GEMINI_API_KEY",
+        "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+        "models": {},
+        "options": {}
+      },
+      "vertex": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_VERTEX_ACCESS_TOKEN",
+        "project": "your-project",
+        "location": "us-central1",
+        "models": {},
+        "options": {}
+      },
+      "xai": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_XAI_API_KEY",
+        "baseUrl": "https://api.x.ai/v1",
+        "models": {},
+        "options": {}
+      },
+      "fal": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_FAL_API_KEY",
+        "baseUrl": "https://fal.run",
+        "models": {},
+        "options": {}
+      },
+      "dashscope": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
+        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {}
+      },
+      "qwen-cloud": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
+        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {}
+      },
+      "atlas": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_ATLAS_API_KEY",
+        "baseUrl": "https://your-atlas-provider.example/v1",
+        "models": {},
+        "options": {}
+      },
+      "custom": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_CUSTOM_IMAGE_API_KEY",
+        "baseUrl": "https://images.example.edu/v1",
+        "models": {
+          "explicit-model-id": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          }
+        },
+        "options": {
+          "generationEndpoint": "images/generations",
+          "editEndpoint": "images/edits"
+        }
+      }
+    }
+  },
+  "sync": {
+    "namespace": null,
+    "cacheDirectory": ".omnischolar/sync",
+    "conflictPolicy": "preserve-local",
+    "recovery": true,
+    "backup": true,
+    "avoidUnnecessaryParse": true
+  },
+  "output": {
+    "rootDirectory": "omnischolar-output",
+    "conflictDirectory": ".conflicts",
+    "safeWrites": true
+  }
+}

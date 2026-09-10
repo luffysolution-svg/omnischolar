@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "omnischolar": {
+      "type": "local",
+      "command": ["omnischolar", "mcp"],
+      "enabled": true,
+      "timeout": 10000
+    }
+  }
+}

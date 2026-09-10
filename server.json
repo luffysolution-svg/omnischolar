@@ -1,0 +1,28 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.luffysolution-svg/omnischolar",
+  "title": "OmniScholar",
+  "description": "Literature, Zotero, PDF, citation, materials, and scientific image tools for research agents.",
+  "repository": {
+    "url": "https://github.com/luffysolution-svg/omnischolar",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "luffysolution-omnischolar",
+      "version": "0.1.0",
+      "runtimeHint": "uvx",
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
