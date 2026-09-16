@@ -42,7 +42,7 @@ class LoadedConfig:
 def user_config_file(user_directory: Path | None = None) -> Path:
     """Return the single user-level configuration file path."""
 
-    return (user_directory or user_config_path("omnischolar")) / _CONFIG_NAME
+    return (user_directory or user_config_path("omnischolar", appauthor=False)) / _CONFIG_NAME
 
 
 def ensure_user_config(
@@ -93,12 +93,8 @@ def discover_config(
     elif env.get("OMNISCHOLAR_CONFIG"):
         candidates.append(("environment", Path(env["OMNISCHOLAR_CONFIG"]).expanduser()))
     else:
-        candidates.extend(
-            [
-                ("project", current / _CONFIG_NAME),
-                ("user", (user_directory or user_config_path("omnischolar")) / _CONFIG_NAME),
-            ]
-        )
+        candidates.append(("project", current / _CONFIG_NAME))
+        candidates.append(("user", user_config_file(user_directory)))
     for kind, candidate in candidates:
         path = candidate if candidate.is_absolute() else current / candidate
         if path.is_file():

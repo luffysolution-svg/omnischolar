@@ -11,12 +11,12 @@ The first matching file is used; files are not merged:
 1. the path passed with `--config PATH`
 2. the file named by `OMNISCHOLAR_CONFIG`
 3. `omnischolar.config.json` in the current project
-4. `omnischolar/omnischolar.config.json` in the user config directory
+4. `omnischolar.config.json` in the user config directory
 5. built-in defaults
 
 Relative paths resolve from the config file. Misspelled fields and invalid values are rejected.
 
-If none of the first four sources exists, the first MCP start or installer run creates one user-level configuration file. On Windows this is normally `%LOCALAPPDATA%\\omnischolar\\omnischolar.config.json`; other platforms follow `platformdirs`. You can also run `omnischolar config init`. Existing configuration is never overwritten.
+If none of the first four sources exists, the first MCP start or installer run creates one user-level configuration file. On Windows this is normally `%LOCALAPPDATA%\\omnischolar\\omnischolar.config.json`, on Linux `~/.config/omnischolar/omnischolar.config.json`, and on macOS `~/Library/Application Support/omnischolar/omnischolar.config.json`. You can also run `omnischolar config init`. Existing configuration is never overwritten. Nested files created by older versions are not migrated or read automatically; copy settings manually if needed.
 
 ## Minimal config
 

@@ -5,10 +5,18 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from omnischolar.config import ensure_user_config, load_config
+from omnischolar.config import ensure_user_config, load_config, user_config_file
 
 
 class ConfigBootstrapTests(unittest.TestCase):
+    def test_default_path_uses_one_level_app_directory(self) -> None:
+        from platformdirs import user_config_path
+
+        self.assertEqual(
+            user_config_file(),
+            user_config_path("omnischolar", appauthor=False) / "omnischolar.config.json",
+        )
+
     def test_creates_one_user_config_with_all_tool_groups_enabled(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             user_directory = Path(temporary) / "config" / "omnischolar"

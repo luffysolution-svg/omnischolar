@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4] - 2026-09-16
+
+- Fixed the user configuration directory to use one cross-platform app directory level.
+- Stopped reading legacy nested configuration paths; existing legacy files are left untouched.
+- Documented environment-variable-based API key setup and platform-specific user paths.
+
 ## [0.1.3] - 2026-09-16
 
 - Fixed release-version drift between Python, MCP launchers, Pi, and plugin manifests.
