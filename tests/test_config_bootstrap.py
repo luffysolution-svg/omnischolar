@@ -5,7 +5,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from omnischolar.config import ensure_user_config, load_config, resolve_credential, user_config_file
+from omnischolar.config import (
+    OmniScholarConfig,
+    ensure_user_config,
+    load_config,
+    resolve_credential,
+    user_config_file,
+)
 
 
 class ConfigBootstrapTests(unittest.TestCase):
@@ -38,6 +44,7 @@ class ConfigBootstrapTests(unittest.TestCase):
             self.assertIn("location", document["media"]["providers"]["vertex"])
             self.assertEqual(document["output"]["literatureDirectory"], "Literatures")
             self.assertEqual(document["output"]["filenameSeparator"], "-")
+            self.assertIn("{title}", document["output"]["folderNameTemplate"])
             self.assertIn("{title}", document["output"]["filenameTemplate"])
             self.assertIn("{extension}", document["output"]["assetFilenameTemplate"])
             self.assertEqual(load_config(user_directory=user_directory).source.kind, "user")
@@ -67,6 +74,20 @@ class ConfigBootstrapTests(unittest.TestCase):
         self.assertTrue(credential.configured)
         self.assertEqual(credential.source, "config.apiKey")
         self.assertEqual(credential.reveal(), "inline-key")
+
+    def test_underscore_is_a_valid_shared_separator(self) -> None:
+        config = OmniScholarConfig.model_validate(
+            {
+                "output": {
+                    "filenameSeparator": "_",
+                    "folderNameTemplate": "{author}{separator}{year}",
+                    "filenameTemplate": "{title}",
+                    "assetFilenameTemplate": "figure{separator}{index}{extension}",
+                }
+            }
+        )
+
+        self.assertEqual(config.output.filename_separator, "_")
 
 
 if __name__ == "__main__":

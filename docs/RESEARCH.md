@@ -81,14 +81,15 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
   "output": {
     "rootDirectory": "F:/个人知识库",
     "literatureDirectory": "文献/已解析",
+    "folderNameTemplate": "{author}{separator}{year}",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
     "filenameSeparator": "+",
-    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
+    "assetFilenameTemplate": "figure{separator}{index}{separator}{original}{extension}"
   }
 }
 ```
 
-支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`filenameSeparator` 当前支持 `-` 或 `+`。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}` 和 `{extension}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。
+支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
 
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
 

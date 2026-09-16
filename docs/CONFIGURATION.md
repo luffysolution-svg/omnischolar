@@ -46,14 +46,15 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
   "output": {
     "rootDirectory": "F:/个人知识库",
     "literatureDirectory": "文献/已解析",
+    "folderNameTemplate": "{author}{separator}{year}",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
     "filenameSeparator": "+",
-    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
+    "assetFilenameTemplate": "figure{separator}{index}{separator}{original}{extension}"
   }
 }
 ```
 
-文献文件名模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；连接符目前支持 `-` 和 `+`。附件图片模板支持 `{index}`、`{original}`、`{extension}`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。
+文献和文件夹模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；`folderNameTemplate` 控制每篇文献目录名。连接符目前支持 `-`、`+` 和 `_`，并由文献、文件夹、附件模板共用。附件图片模板支持 `{index}`、`{original}`、`{extension}`、`{separator}`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。这里的附件图片是解析生成的图片，不是 Zotero 原始 PDF 附件。
 
 ## API key
 

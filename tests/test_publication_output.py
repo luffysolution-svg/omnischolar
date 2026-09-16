@@ -73,12 +73,13 @@ class PublicationContentTests(unittest.TestCase):
             "Title",
             "![](images/figure-b.PNG)\n![](images/figure-a.jpg)\n",
             {"images/figure-a.jpg": b"a", "images/figure-b.PNG": b"b"},
-            asset_filename_template="figure-{index}-{original}{extension}",
+            asset_filename_template="figure{separator}{index}{separator}{original}{extension}",
+            asset_filename_separator="+",
         )
 
-        self.assertIn("![](assets/figure-1-figure-b.png)", markdown)
-        self.assertIn("![](assets/figure-2-figure-a.jpg)", markdown)
-        self.assertEqual(list(assets), ["figure-1-figure-b.png", "figure-2-figure-a.jpg"])
+        self.assertIn("![](assets/figure+1+figure-b.png)", markdown)
+        self.assertIn("![](assets/figure+2+figure-a.jpg)", markdown)
+        self.assertEqual(list(assets), ["figure+1+figure-b.png", "figure+2+figure-a.jpg"])
 
 
 class PaperStemTests(unittest.TestCase):
@@ -113,6 +114,22 @@ class PaperStemTests(unittest.TestCase):
             ),
             "2024+Yang+A paper title",
         )
+
+    def test_folder_template_is_separate_from_file_template(self) -> None:
+        paper = {
+            "creators": [{"creatorType": "author", "lastName": "Yang"}],
+            "year": "2024",
+            "title": "A paper title",
+        }
+        service = SyncService(
+            Path("."),
+            literature_directory="Papers",
+            folder_name_template="{author}{separator}{year}",
+            filename_template="{title}",
+            filename_separator="_",
+        )
+
+        self.assertEqual(service._publication_relative_path(paper), "Papers/Yang_2024")
 
 
 class SyncActionTests(unittest.TestCase):

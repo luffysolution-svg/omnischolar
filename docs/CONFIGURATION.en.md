@@ -46,14 +46,15 @@ The new-paper subfolder and file name can be customized as well:
   "output": {
     "rootDirectory": "F:/Personal Knowledge Base",
     "literatureDirectory": "Literature/Parsed",
+    "folderNameTemplate": "{author}{separator}{year}",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
     "filenameSeparator": "+",
-    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
+    "assetFilenameTemplate": "figure{separator}{index}{separator}{original}{extension}"
   }
 }
 ```
 
-The paper filename template supports `{author}`, `{year}`, `{title}`, and `{separator}`; the separator currently accepts `-` or `+`. Attachment filenames support `{index}`, `{original}`, and `{extension}`. These settings affect new publications only; existing sync records keep the path stored in the manifest.
+Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` controls each paper directory name. The shared separator accepts `-`, `+`, and `_` and is available to paper, folder, and attachment templates. Attachment filenames support `{index}`, `{original}`, `{extension}`, and `{separator}`. These settings affect new publications only; existing sync records keep the path stored in the manifest. Here, attachment means a parsed image asset, not the original Zotero PDF attachment.
 
 ## API keys
 

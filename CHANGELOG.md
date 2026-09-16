@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.10] - 2026-09-16
+
+- Added `_` as a supported shared filename separator alongside `-` and `+`.
+- Added a separate folder-name template for per-publication directories.
+- Applied the shared separator to paper, folder, and parsed-image asset naming.
+
 ## [0.1.9] - 2026-09-16
 
 - Added title-only and author/title filename template combinations.

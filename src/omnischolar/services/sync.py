@@ -164,6 +164,7 @@ class SyncService:
         namespace: str | None = None,
         backup: bool = True,
         literature_directory: str = "Literatures",
+        folder_name_template: str = "{author}{separator}{year}{separator}{title}",
         filename_template: str = "{author}{separator}{year}{separator}{title}",
         filename_separator: str = "-",
     ) -> None:
@@ -171,6 +172,7 @@ class SyncService:
         self.namespace = namespace or f"vault-{stable_hash(str(self.root))[:16]}"
         self.backup = backup
         self.literature_directory = literature_directory.strip("/\\")
+        self.folder_name_template = folder_name_template
         self.filename_template = filename_template
         self.filename_separator = filename_separator
         self.state_root = self.root / ".omnischolar"
@@ -182,7 +184,7 @@ class SyncService:
     def _publication_relative_path(self, paper: dict[str, Any]) -> str:
         stem = paper_stem(
             paper,
-            template=self.filename_template,
+            template=self.folder_name_template,
             separator=self.filename_separator,
         )
         return "/".join(part for part in (self.literature_directory, stem) if part)

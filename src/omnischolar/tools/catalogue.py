@@ -78,6 +78,7 @@ def _prepare_publication_content(
     assets: dict[str, bytes],
     *,
     asset_filename_template: str = "image-{index}{extension}",
+    asset_filename_separator: str = "-",
 ) -> tuple[str, dict[str, bytes]]:
     body = markdown.lstrip("\ufeff\r\n")
     first_line, separator, remainder = body.partition("\n")
@@ -132,6 +133,7 @@ def _prepare_publication_content(
             index=index,
             original=original_stem or f"image-{index}",
             extension=original_path.suffix.lower() or ".bin",
+            separator=asset_filename_separator,
         )
         candidate = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", candidate).strip(" .")
         if not candidate or Path(candidate).name != candidate:
@@ -296,6 +298,7 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         parsed.markdown,
         parsed.assets,
         asset_filename_template=app.loaded.config.output.asset_filename_template,
+        asset_filename_separator=app.loaded.config.output.filename_separator,
     )
     published = await services.sync.publish(
         paper,

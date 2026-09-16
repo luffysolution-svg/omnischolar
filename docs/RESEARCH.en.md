@@ -81,14 +81,15 @@ The output location and new-file naming can be customized in the global configur
   "output": {
     "rootDirectory": "F:/Personal Knowledge Base",
     "literatureDirectory": "Literature/Parsed",
+    "folderNameTemplate": "{author}{separator}{year}",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
     "filenameSeparator": "+",
-    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
+    "assetFilenameTemplate": "figure{separator}{index}{separator}{original}{extension}"
   }
 }
 ```
 
-Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `filenameSeparator` currently accepts `-` or `+`. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, and `{extension}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization.
+Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` independently controls each paper directory name. `filenameSeparator` accepts `-`, `+`, and `_`, and is shared by paper, folder, and attachment templates. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, `{extension}`, and `{separator}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization. Here, attachment images means parsed image assets, not the original Zotero PDF attachment.
 
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 

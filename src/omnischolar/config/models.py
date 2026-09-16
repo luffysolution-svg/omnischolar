@@ -206,8 +206,9 @@ class SyncConfig(ConfigModel):
 class OutputConfig(ConfigModel):
     root_directory: Path = Path("omnischolar-output")
     literature_directory: str = "Literatures"
+    folder_name_template: str = "{author}{separator}{year}{separator}{title}"
     filename_template: str = "{author}{separator}{year}{separator}{title}"
-    filename_separator: Literal["-", "+"] = "-"
+    filename_separator: Literal["-", "+", "_"] = "-"
     asset_filename_template: str = "image-{index}{extension}"
     conflict_directory: str = ".conflicts"
     safe_writes: bool = True
@@ -222,9 +223,9 @@ class OutputConfig(ConfigModel):
             raise ValueError("literatureDirectory cannot contain . or .. path segments")
         return "/".join(part for part in normalized.split("/") if part)
 
-    @field_validator("filename_template")
+    @field_validator("folder_name_template", "filename_template")
     @classmethod
-    def supported_filename_template(cls, value: str) -> str:
+    def supported_name_template(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("filenameTemplate must not be empty")
         allowed = {"author", "year", "title", "separator"}
@@ -234,7 +235,7 @@ class OutputConfig(ConfigModel):
                     "filenameTemplate supports only author, year, title, and separator"
                 )
         if "/" in value or "\\" in value:
-            raise ValueError("filenameTemplate must describe a file name, not a path")
+            raise ValueError("name templates must describe a single name, not a path")
         return value
 
     @field_validator("asset_filename_template")
@@ -242,11 +243,11 @@ class OutputConfig(ConfigModel):
     def supported_asset_filename_template(cls, value: str) -> str:
         if not value.strip():
             raise ValueError("assetFilenameTemplate must not be empty")
-        allowed = {"index", "original", "extension"}
+        allowed = {"index", "original", "extension", "separator"}
         for _, field_name, _, _ in Formatter().parse(value):
             if field_name is not None and field_name not in allowed:
                 raise ValueError(
-                    "assetFilenameTemplate supports only index, original, and extension"
+                    "assetFilenameTemplate supports only index, original, extension, and separator"
                 )
         if "/" in value or "\\" in value:
             raise ValueError("assetFilenameTemplate must describe a file name, not a path")

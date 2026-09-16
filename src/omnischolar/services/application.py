@@ -206,6 +206,7 @@ class OmniScholarApplication:
                 namespace=config.sync.namespace,
                 backup=config.sync.backup,
                 literature_directory=config.output.literature_directory,
+                folder_name_template=config.output.folder_name_template,
                 filename_template=config.output.filename_template,
                 filename_separator=config.output.filename_separator,
             ),

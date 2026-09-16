@@ -58,7 +58,7 @@ codex plugin add omnischolar@omnischolar
 插件会同时安装 8 个 Skills，并使用固定的 PyPI 版本启动本地 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.9 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
 ```
 
 采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
@@ -134,7 +134,7 @@ omnischolar mcp
 
 首次启动 MCP 或执行安装命令时，如果没有可发现的配置，程序会在用户配置目录自动创建包含所有服务区块和认证字段的完整 `omnischolar.config.json` 模板。也可以用 `omnischolar config init` 主动创建。API key 可以直接填写在配置文件的 `apiKey` 中；如果希望使用环境变量，也可以填写 `apiKeyEnv`。
 
-文献导入到 Obsidian 的位置和新文件命名可通过 `output.rootDirectory`、`output.literatureDirectory`、`output.filenameTemplate` 和 `output.filenameSeparator` 自定义，详见[文献与输出配置](docs/RESEARCH.md)。
+文献导入到 Obsidian 的位置、文件夹、Markdown 文件和图片附件命名可通过 `output.rootDirectory`、`output.literatureDirectory`、`output.folderNameTemplate`、`output.filenameTemplate`、`output.filenameSeparator` 和 `output.assetFilenameTemplate` 自定义，详见[文献与输出配置](docs/RESEARCH.md)。
 
 最小的本地配置可以只写 Zotero 和输出目录：
 

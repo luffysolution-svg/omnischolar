@@ -233,6 +233,7 @@
   "output": {
     "rootDirectory": "omnischolar-output",
     "literatureDirectory": "Literatures",
+    "folderNameTemplate": "{author}{separator}{year}{separator}{title}",
     "filenameTemplate": "{author}{separator}{year}{separator}{title}",
     "filenameSeparator": "-",
     "assetFilenameTemplate": "image-{index}{extension}",
