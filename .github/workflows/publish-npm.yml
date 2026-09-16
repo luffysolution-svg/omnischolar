@@ -30,6 +30,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          skip-existing: true
 
   npm:
     runs-on: ubuntu-latest
@@ -43,7 +44,16 @@ jobs:
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
       - run: npm ci
-      - run: npm publish --access public --provenance
+      - name: Publish npm package if the version is missing
+        shell: bash
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          package="@luffysolution/omnischolar-pi"
+          if npm view "${package}@${version}" version --prefer-online >/dev/null 2>&1; then
+            echo "${package}@${version} is already published"
+          else
+            npm publish --access public --provenance
+          fi
 
   github-release:
     needs: [python, npm]
