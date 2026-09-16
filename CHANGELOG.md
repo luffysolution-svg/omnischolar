@@ -2,11 +2,30 @@
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-16
+
+### Added
+
 - Added the npm-published Pi MCP bridge Extension and Pi Extension + Skills installation flow.
+- Added token-free npm trusted publishing through GitHub Actions OIDC.
 - Added verified Hermes and WorkBuddy/CodeBuddy MCP templates.
 - Included all README-linked documentation in the Pi npm package from version 0.1.1.
 - Added a Git-backed Codex marketplace and a one-command plugin MCP path through pinned `uvx`.
 - Added a Claude Code marketplace that installs the same eight Skills and pinned local MCP server.
+
+### Fixed
+
+- Removed duplicate paper titles when MinerU already returns a matching top-level heading.
+- Renamed parsed figures to deterministic `image-N` files in first-reference order and rewrote Markdown links before publication.
+- Flattened nested MinerU asset paths before the sync publisher's filename safety check.
+- Bounded long paper stems with deterministic hash suffixes to avoid Windows path-length failures and truncation collisions.
+- Made sync repair, restore, and apply operations reuse valid MinerU cache entries instead of forcing a paid re-upload; only explicit reparse bypasses the cache.
+- Reported the stored parser cache key in sync plans for existing publications.
+- Added workspace-scoped DashScope and Qwen Cloud endpoints to the example configuration and image-provider documentation.
+
+### Changed
+
+- Unified Python, Pi npm, MCP registry, and agent-plugin package versions at `0.1.2`.
 
 ## [0.1.0] - 2026-09-10
 

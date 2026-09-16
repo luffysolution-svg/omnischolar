@@ -163,16 +163,20 @@
       "dashscope": {
         "enabled": false,
         "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
-        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
+        "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
-        "options": {}
+        "options": {
+          "workspace": "your-workspace"
+        }
       },
       "qwen-cloud": {
         "enabled": false,
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
-        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
+        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
-        "options": {}
+        "options": {
+          "workspace": "your-workspace"
+        }
       },
       "atlas": {
         "enabled": false,

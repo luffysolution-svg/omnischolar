@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes target the latest released OmniScholar version. Version 0.1.0 is the current release.
+Security fixes target the latest released OmniScholar version. Version 0.1.2 is the current release.
 
 ## Report a vulnerability
 

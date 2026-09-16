@@ -1,6 +1,6 @@
 # Privacy notice
 
-OmniScholar is open-source software that runs on the user's computer. The maintainers do not operate an OmniScholar service for version 0.1.0.
+OmniScholar is open-source software that runs on the user's computer. The maintainers do not operate an OmniScholar service for version 0.1.2.
 
 ## Local data
 

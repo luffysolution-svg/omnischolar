@@ -5,7 +5,7 @@
       "command": "uvx",
       "args": [
         "--from",
-        "luffysolution-omnischolar==0.1.0",
+        "luffysolution-omnischolar==0.1.2",
         "omnischolar",
         "mcp"
       ]

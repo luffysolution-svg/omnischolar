@@ -34,6 +34,24 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
         "baseUrl": "https://fal.run",
         "models": {},
         "options": {}
+      },
+      "dashscope": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
+        "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {
+          "workspace": "your-workspace"
+        }
+      },
+      "qwen-cloud": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
+        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {
+          "workspace": "your-workspace"
+        }
       }
     }
   }
@@ -51,7 +69,7 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
 ## 当前服务说明
 
 - fal 已验证队列提交、轮询、data URI 结果、文生图和双参考图编辑。本机若无法解析 fal CDN，data URI 结果仍可保存。
-- DashScope/Qwen 当前需要绑定 workspace 的服务地址，或服务商明确提供的 `baseUrl`。旧通用地址会返回 `dashscope_workspace_required`。
+- DashScope/Qwen 当前需要绑定 workspace 的服务地址，或服务商明确提供的 `baseUrl`。中国区地址形如 `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`，国际区地址形如 `https://<workspace>.ap-southeast-1.maas.aliyuncs.com/api/v1`。旧通用地址会返回 `dashscope_workspace_required`。
 - Gemini 配置中的 `apiKeyEnv` 必须指向已存在的环境变量。
 - Atlas 和自定义服务必须给出可用的服务地址与模型说明。
 

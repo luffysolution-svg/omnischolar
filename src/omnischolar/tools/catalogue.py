@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import difflib
 import hashlib
+import re
+import unicodedata
 from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
@@ -59,6 +62,86 @@ def _authorized(context: ToolExecutionContext, arguments: dict[str, Any]) -> Too
         allow_external_upload=arguments.get("allowExternalUpload") is True,
         allow_paid=arguments.get("allowPaid") is True,
     )
+
+
+_IMAGE_LINK = re.compile(r"(!\[[^\]]*\]\()([^)]+)(\))")
+
+
+def _normalized_title(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value).casefold()
+    return "".join(character for character in normalized if character.isalnum())
+
+
+def _prepare_publication_content(
+    title: str, markdown: str, assets: dict[str, bytes]
+) -> tuple[str, dict[str, bytes]]:
+    body = markdown.lstrip("\ufeff\r\n")
+    first_line, separator, remainder = body.partition("\n")
+    if first_line.startswith("# "):
+        similarity = difflib.SequenceMatcher(
+            None,
+            _normalized_title(title),
+            _normalized_title(first_line[2:].strip()),
+        ).ratio()
+        if similarity >= 0.9:
+            body = remainder.lstrip("\r\n") if separator else ""
+
+    target_to_asset: dict[str, str] = {}
+    normalized_names: dict[str, str] = {}
+    for original_name in assets:
+        normalized_name = original_name.replace("\\", "/")
+        basename = Path(normalized_name).name
+        normalized_names[original_name] = normalized_name
+        for target in (
+            normalized_name,
+            f"./{normalized_name}",
+            basename,
+            f"assets/{basename}",
+        ):
+            existing = target_to_asset.get(target)
+            if existing is not None and existing != original_name:
+                raise OmniScholarError(
+                    "asset_name_collision",
+                    "Generated assets have ambiguous reference names",
+                    category="filesystem",
+                )
+            target_to_asset[target] = original_name
+
+    ordered_assets: list[str] = []
+    for match in _IMAGE_LINK.finditer(body):
+        original_name = target_to_asset.get(match.group(2).strip())
+        if original_name is not None and original_name not in ordered_assets:
+            ordered_assets.append(original_name)
+    ordered_assets.extend(
+        sorted(
+            (name for name in assets if name not in ordered_assets),
+            key=lambda name: normalized_names[name],
+        )
+    )
+
+    renamed = {
+        original_name: f"image-{index}{Path(normalized_names[original_name]).suffix.lower() or '.bin'}"
+        for index, original_name in enumerate(ordered_assets, start=1)
+    }
+
+    def replace_reference(match: re.Match[str]) -> str:
+        original_name = target_to_asset.get(match.group(2).strip())
+        if original_name is None:
+            return match.group(0)
+        return f"{match.group(1)}assets/{renamed[original_name]}{match.group(3)}"
+
+    body = _IMAGE_LINK.sub(replace_reference, body)
+    prepared_assets = {renamed[name]: assets[name] for name in ordered_assets}
+    return f"# {title}\n\n{body}", prepared_assets
+
+
+def _sync_parse_arguments(arguments: dict[str, Any], action: str) -> dict[str, Any]:
+    publish_force = action in {"repair", "restore", "reparse"} or arguments.get("force", False)
+    return {
+        **arguments,
+        "_parseForce": action == "reparse",
+        "_publishForce": publish_force,
+    }
 
 
 async def status_tool(_arguments: dict[str, Any], _context: ToolExecutionContext, app: Any) -> Any:
@@ -185,16 +268,18 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         enable_formula=arguments.get("enableFormula", True),
         enable_table=arguments.get("enableTable", True),
         is_ocr=arguments.get("isOcr", False),
-        force=arguments.get("force", False),
+        force=arguments.get("_parseForce", arguments.get("force", False)),
     )
-    markdown = f"# {paper.get('title', 'Untitled')}\n\n{parsed.markdown}"
+    markdown, assets = _prepare_publication_content(
+        paper.get("title", "Untitled"), parsed.markdown, parsed.assets
+    )
     published = await services.sync.publish(
         paper,
         markdown,
-        parsed.assets,
+        assets,
         parse_key=parsed.parse_key,
         parser_version=parsed.parser_version,
-        force=arguments.get("force", False),
+        force=arguments.get("_publishForce", arguments.get("force", False)),
     )
     return {**parsed.summary(), "publication": published}
 
@@ -225,10 +310,7 @@ async def sync_tool(arguments: dict[str, Any], context: ToolExecutionContext, ap
             raise OmniScholarError(
                 "force_required", "Sync apply requires force=true", category="authorization"
             )
-        parse_args = {
-            **arguments,
-            "force": action in {"repair", "restore", "reparse"} or arguments.get("force", False),
-        }
+        parse_args = _sync_parse_arguments(arguments, action)
         return await parse_tool(parse_args, context, app)
     raise OmniScholarError(
         "invalid_action", f"Unknown sync action: {action}", category="validation"

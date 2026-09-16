@@ -34,6 +34,24 @@ Each model must explicitly declare the operation it supports. A model name appea
         "baseUrl": "https://fal.run",
         "models": {},
         "options": {}
+      },
+      "dashscope": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
+        "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {
+          "workspace": "your-workspace"
+        }
+      },
+      "qwen-cloud": {
+        "enabled": false,
+        "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
+        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        "models": {},
+        "options": {
+          "workspace": "your-workspace"
+        }
       }
     }
   }
@@ -51,7 +69,7 @@ Upload only images you may share with the selected service. After files are save
 ## Current provider notes
 
 - fal has been tested for queue submission, polling, data-URI results, text-to-image, and two-reference editing. If the local machine cannot resolve the fal CDN, a data-URI result can still be saved.
-- DashScope/Qwen currently needs a workspace-scoped endpoint or an explicit `baseUrl` supplied by the provider. A retired generic endpoint returns `dashscope_workspace_required`.
+- DashScope/Qwen currently needs a workspace-scoped endpoint or an explicit `baseUrl` supplied by the provider. China workspaces use an address such as `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`; international workspaces use `https://<workspace>.ap-southeast-1.maas.aliyuncs.com/api/v1`. A retired generic endpoint returns `dashscope_workspace_required`.
 - Gemini's `apiKeyEnv` must name an environment variable that exists.
 - Atlas and custom services need a working endpoint and model description.
 

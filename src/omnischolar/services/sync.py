@@ -98,14 +98,17 @@ def publication_id(paper: dict[str, Any], namespace: str) -> str:
     return f"zotero:{namespace}:{paper.get('zoteroKey')}:{attachment}"
 
 
-def _safe_component(value: str, fallback: str) -> str:
+def _safe_component(value: str, fallback: str, *, max_bytes: int = 200) -> str:
     text = unicodedata.normalize("NFC", re.sub(r"<[^>]*>", "", value))
     text = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', " ", text)
     text = re.sub(r"\s+", " ", text).strip(" .") or fallback
     if re.match(r"^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)", text, re.IGNORECASE):
         text = f"_{text}"
-    while len(text.encode()) > 200:
-        text = text[:-1]
+    if len(text.encode()) > max_bytes:
+        suffix = f"-{stable_hash(text)[:8]}"
+        while text and len(f"{text}{suffix}".encode()) > max_bytes:
+            text = text[:-1]
+        text = f"{text.rstrip(' .-')}{suffix}"
     return text or fallback
 
 
@@ -122,7 +125,11 @@ def paper_stem(paper: dict[str, Any]) -> str:
     )
     author_name = author.get("lastName") or author.get("name") or "UnknownAuthor"
     year = str(paper.get("year") or paper.get("date") or "UnknownYear")[:4]
-    return _safe_component(f"{author_name}-{year}-{paper.get('title') or 'Untitled'}", "Untitled")
+    return _safe_component(
+        f"{author_name}-{year}-{paper.get('title') or 'Untitled'}",
+        "Untitled",
+        max_bytes=72,
+    )
 
 
 @dataclass(slots=True)
@@ -233,6 +240,7 @@ class SyncService:
         identifier = publication_id(paper, self.namespace)
         fingerprint = metadata_fingerprint(paper)
         entry = manifest["entries"].get(identifier)
+        effective_parse_key = parse_key or (entry.get("parseKey") if entry else None)
         if identifier in manifest.get("exclusions", {}) or (entry and entry.get("excluded")):
             return SyncPlan(
                 identifier,
@@ -240,7 +248,7 @@ class SyncService:
                 "skip",
                 "Publication is explicitly excluded",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry.get("relativePath") if entry else None,
                 [],
                 [],
@@ -253,7 +261,7 @@ class SyncService:
                 "recover",
                 "An unfinished transaction requires recovery",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry.get("relativePath") if entry else None,
                 [],
                 [],
@@ -266,7 +274,7 @@ class SyncService:
                 "parse",
                 "No managed publication exists",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 None,
                 [],
                 [],
@@ -280,7 +288,7 @@ class SyncService:
                 "skip",
                 "Published directory is missing; explicit restore is required",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 [],
                 [entry["relativePath"]],
@@ -294,7 +302,7 @@ class SyncService:
                 "skip",
                 "Local managed files differ from their baseline",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 modified,
                 missing,
@@ -307,7 +315,7 @@ class SyncService:
                 "repair",
                 "Managed files are missing",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 [],
                 missing,
@@ -320,7 +328,7 @@ class SyncService:
                 "parse",
                 "PDF or effective parser options changed",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 [],
                 [],
@@ -333,7 +341,7 @@ class SyncService:
                 "render",
                 "Local rendering inputs changed",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 [],
                 [],
@@ -347,7 +355,7 @@ class SyncService:
                 "refresh_metadata",
                 "Zotero metadata changed",
                 fingerprint,
-                parse_key,
+                effective_parse_key,
                 entry["relativePath"],
                 [],
                 [],
@@ -360,7 +368,7 @@ class SyncService:
             "skip",
             "Inputs and managed files match",
             fingerprint,
-            parse_key,
+            effective_parse_key,
             entry["relativePath"],
             [],
             [],

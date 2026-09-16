@@ -1,14 +1,50 @@
 from __future__ import annotations
 
 import json
+import tomllib
 import unittest
 from pathlib import Path
 
+from omnischolar.version import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
+EXPECTED_VERSION = "0.1.2"
 
 
 class CodexPluginPackageTests(unittest.TestCase):
+    def test_release_versions_are_synchronized(self) -> None:
+        pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        self.assertEqual(pyproject["project"]["version"], EXPECTED_VERSION)
+        self.assertEqual(__version__, EXPECTED_VERSION)
+        for relative in (
+            "package.json",
+            "plugin.json",
+            ".codex-plugin/plugin.json",
+            ".claude-plugin/plugin.json",
+            ".cursor-plugin/plugin.json",
+        ):
+            document = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+            self.assertEqual(document["version"], EXPECTED_VERSION, relative)
+        server = json.loads((ROOT / "server.json").read_text(encoding="utf-8"))
+        self.assertEqual(server["version"], EXPECTED_VERSION)
+        self.assertEqual(server["packages"][0]["version"], EXPECTED_VERSION)
+
+    def test_example_uses_workspace_scoped_dashscope_endpoints(self) -> None:
+        document = json.loads(
+            (ROOT / "omnischolar.config.example.json").read_text(encoding="utf-8")
+        )
+        providers = document["media"]["providers"]
+        self.assertEqual(
+            providers["dashscope"]["baseUrl"],
+            "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
+        )
+        self.assertEqual(
+            providers["qwen-cloud"]["baseUrl"],
+            "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        )
+        self.assertEqual(providers["dashscope"]["options"]["workspace"], "your-workspace")
+        self.assertEqual(providers["qwen-cloud"]["options"]["workspace"], "your-workspace")
+
     def test_portable_mcp_uses_pinned_pypi_release(self) -> None:
         document = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))
         server = document["mcpServers"]["omnischolar"]
@@ -18,7 +54,7 @@ class CodexPluginPackageTests(unittest.TestCase):
             server["args"],
             [
                 "--from",
-                "luffysolution-omnischolar==0.1.0",
+                "luffysolution-omnischolar==0.1.2",
                 "omnischolar",
                 "mcp",
             ],
