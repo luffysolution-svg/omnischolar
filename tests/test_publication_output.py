@@ -68,6 +68,18 @@ class PublicationContentTests(unittest.TestCase):
                 {"one/same.png": b"1", "two/same.png": b"2"},
             )
 
+    def test_custom_asset_template_preserves_original_stem_and_extension(self) -> None:
+        markdown, assets = _prepare_publication_content(
+            "Title",
+            "![](images/figure-b.PNG)\n![](images/figure-a.jpg)\n",
+            {"images/figure-a.jpg": b"a", "images/figure-b.PNG": b"b"},
+            asset_filename_template="figure-{index}-{original}{extension}",
+        )
+
+        self.assertIn("![](assets/figure-1-figure-b.png)", markdown)
+        self.assertIn("![](assets/figure-2-figure-a.jpg)", markdown)
+        self.assertEqual(list(assets), ["figure-1-figure-b.png", "figure-2-figure-a.jpg"])
+
 
 class PaperStemTests(unittest.TestCase):
     def test_long_stem_is_bounded_and_deterministic(self) -> None:

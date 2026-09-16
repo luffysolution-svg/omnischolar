@@ -47,12 +47,13 @@ The new-paper subfolder and file name can be customized as well:
     "rootDirectory": "F:/Personal Knowledge Base",
     "literatureDirectory": "Literature/Parsed",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
-    "filenameSeparator": "+"
+    "filenameSeparator": "+",
+    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
   }
 }
 ```
 
-The filename template supports `{author}`, `{year}`, `{title}`, and `{separator}`; the separator currently accepts `-` or `+`. These settings affect new publications only; existing sync records keep the path stored in the manifest.
+The paper filename template supports `{author}`, `{year}`, `{title}`, and `{separator}`; the separator currently accepts `-` or `+`. Attachment filenames support `{index}`, `{original}`, and `{extension}`. These settings affect new publications only; existing sync records keep the path stored in the manifest.
 
 ## API keys
 

@@ -208,6 +208,7 @@ class OutputConfig(ConfigModel):
     literature_directory: str = "Literatures"
     filename_template: str = "{author}{separator}{year}{separator}{title}"
     filename_separator: Literal["-", "+"] = "-"
+    asset_filename_template: str = "image-{index}{extension}"
     conflict_directory: str = ".conflicts"
     safe_writes: bool = True
 
@@ -234,6 +235,21 @@ class OutputConfig(ConfigModel):
                 )
         if "/" in value or "\\" in value:
             raise ValueError("filenameTemplate must describe a file name, not a path")
+        return value
+
+    @field_validator("asset_filename_template")
+    @classmethod
+    def supported_asset_filename_template(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("assetFilenameTemplate must not be empty")
+        allowed = {"index", "original", "extension"}
+        for _, field_name, _, _ in Formatter().parse(value):
+            if field_name is not None and field_name not in allowed:
+                raise ValueError(
+                    "assetFilenameTemplate supports only index, original, and extension"
+                )
+        if "/" in value or "\\" in value:
+            raise ValueError("assetFilenameTemplate must describe a file name, not a path")
         return value
 
 

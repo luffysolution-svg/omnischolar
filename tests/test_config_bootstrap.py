@@ -39,6 +39,7 @@ class ConfigBootstrapTests(unittest.TestCase):
             self.assertEqual(document["output"]["literatureDirectory"], "Literatures")
             self.assertEqual(document["output"]["filenameSeparator"], "-")
             self.assertIn("{title}", document["output"]["filenameTemplate"])
+            self.assertIn("{extension}", document["output"]["assetFilenameTemplate"])
             self.assertEqual(load_config(user_directory=user_directory).source.kind, "user")
 
     def test_does_not_replace_project_config(self) -> None:

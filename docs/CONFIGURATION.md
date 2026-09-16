@@ -47,12 +47,13 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
     "rootDirectory": "F:/个人知识库",
     "literatureDirectory": "文献/已解析",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
-    "filenameSeparator": "+"
+    "filenameSeparator": "+",
+    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
   }
 }
 ```
 
-文件名模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；连接符目前支持 `-` 和 `+`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。
+文献文件名模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；连接符目前支持 `-` 和 `+`。附件图片模板支持 `{index}`、`{original}`、`{extension}`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。
 
 ## API key
 

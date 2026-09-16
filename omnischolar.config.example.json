@@ -235,6 +235,7 @@
     "literatureDirectory": "Literatures",
     "filenameTemplate": "{author}{separator}{year}{separator}{title}",
     "filenameSeparator": "-",
+    "assetFilenameTemplate": "image-{index}{extension}",
     "conflictDirectory": ".conflicts",
     "safeWrites": true
   }

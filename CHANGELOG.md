@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.9] - 2026-09-16
+
+- Added title-only and author/title filename template combinations.
+- Added configurable attachment image filenames with original-stem and extension variables.
+- Added collision and unsafe-name checks for configured attachment filenames.
+
 ## [0.1.8] - 2026-09-16
 
 - Added configurable Obsidian output subfolders.

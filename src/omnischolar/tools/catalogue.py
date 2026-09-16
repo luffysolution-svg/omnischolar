@@ -73,7 +73,11 @@ def _normalized_title(value: str) -> str:
 
 
 def _prepare_publication_content(
-    title: str, markdown: str, assets: dict[str, bytes]
+    title: str,
+    markdown: str,
+    assets: dict[str, bytes],
+    *,
+    asset_filename_template: str = "image-{index}{extension}",
 ) -> tuple[str, dict[str, bytes]]:
     body = markdown.lstrip("\ufeff\r\n")
     first_line, separator, remainder = body.partition("\n")
@@ -119,10 +123,27 @@ def _prepare_publication_content(
         )
     )
 
-    renamed = {
-        original_name: f"image-{index}{Path(normalized_names[original_name]).suffix.lower() or '.bin'}"
-        for index, original_name in enumerate(ordered_assets, start=1)
-    }
+    renamed: dict[str, str] = {}
+    used_names: set[str] = set()
+    for index, original_name in enumerate(ordered_assets, start=1):
+        original_path = Path(normalized_names[original_name])
+        original_stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", original_path.stem).strip(" .")
+        candidate = asset_filename_template.format(
+            index=index,
+            original=original_stem or f"image-{index}",
+            extension=original_path.suffix.lower() or ".bin",
+        )
+        candidate = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", candidate).strip(" .")
+        if not candidate or Path(candidate).name != candidate:
+            raise OmniScholarError(
+                "unsafe_asset_name", "Configured asset filename is unsafe", category="filesystem"
+            )
+        if candidate in used_names:
+            raise OmniScholarError(
+                "asset_name_collision", "Configured asset filenames are not unique", category="filesystem"
+            )
+        renamed[original_name] = candidate
+        used_names.add(candidate)
 
     def replace_reference(match: re.Match[str]) -> str:
         original_name = target_to_asset.get(match.group(2).strip())
@@ -271,7 +292,10 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         force=arguments.get("_parseForce", arguments.get("force", False)),
     )
     markdown, assets = _prepare_publication_content(
-        paper.get("title", "Untitled"), parsed.markdown, parsed.assets
+        paper.get("title", "Untitled"),
+        parsed.markdown,
+        parsed.assets,
+        asset_filename_template=app.loaded.config.output.asset_filename_template,
     )
     published = await services.sync.publish(
         paper,

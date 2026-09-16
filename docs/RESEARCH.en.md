@@ -82,12 +82,13 @@ The output location and new-file naming can be customized in the global configur
     "rootDirectory": "F:/Personal Knowledge Base",
     "literatureDirectory": "Literature/Parsed",
     "filenameTemplate": "{year}{separator}{author}{separator}{title}",
-    "filenameSeparator": "+"
+    "filenameSeparator": "+",
+    "assetFilenameTemplate": "figure-{index}-{original}{extension}"
   }
 }
 ```
 
-Supported filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `filenameSeparator` currently accepts `-` or `+`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization.
+Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `filenameSeparator` currently accepts `-` or `+`. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, and `{extension}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization.
 
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 

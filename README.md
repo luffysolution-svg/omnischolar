@@ -60,7 +60,7 @@ In the ChatGPT desktop app, restart the app, open **Plugins**, select the **Omni
 The plugin bundles all eight Skills and starts its local MCP server with the pinned PyPI release:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.8 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.9 omnischolar mcp
 ```
 
 No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
