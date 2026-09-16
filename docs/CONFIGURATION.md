@@ -39,6 +39,21 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 `workspaceRoots` 限定可读取的本地文件，`output.rootDirectory` 限定写入位置。若要直接写入 Obsidian，可把输出目录设为 Vault 中的一个文件夹。
 
+新文献的子文件夹和文件名可以继续细分：
+
+```json
+{
+  "output": {
+    "rootDirectory": "F:/个人知识库",
+    "literatureDirectory": "文献/已解析",
+    "filenameTemplate": "{year}{separator}{author}{separator}{title}",
+    "filenameSeparator": "+"
+  }
+}
+```
+
+文件名模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；连接符目前支持 `-` 和 `+`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。
+
 ## API key
 
 API key 可以直接写入对应服务的 `apiKey`。例如：

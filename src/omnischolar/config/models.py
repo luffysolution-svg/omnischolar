@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from string import Formatter
 from typing import Any, Literal
 from urllib.parse import urlparse
 
@@ -204,8 +205,36 @@ class SyncConfig(ConfigModel):
 
 class OutputConfig(ConfigModel):
     root_directory: Path = Path("omnischolar-output")
+    literature_directory: str = "Literatures"
+    filename_template: str = "{author}{separator}{year}{separator}{title}"
+    filename_separator: Literal["-", "+"] = "-"
     conflict_directory: str = ".conflicts"
     safe_writes: bool = True
+
+    @field_validator("literature_directory")
+    @classmethod
+    def relative_literature_directory(cls, value: str) -> str:
+        normalized = value.strip().replace("\\", "/")
+        if normalized.startswith("/") or (len(normalized) >= 2 and normalized[1] == ":"):
+            raise ValueError("literatureDirectory must be relative to output.rootDirectory")
+        if any(part in {".", ".."} for part in normalized.split("/")):
+            raise ValueError("literatureDirectory cannot contain . or .. path segments")
+        return "/".join(part for part in normalized.split("/") if part)
+
+    @field_validator("filename_template")
+    @classmethod
+    def supported_filename_template(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("filenameTemplate must not be empty")
+        allowed = {"author", "year", "title", "separator"}
+        for _, field_name, _, _ in Formatter().parse(value):
+            if field_name is not None and field_name not in allowed:
+                raise ValueError(
+                    "filenameTemplate supports only author, year, title, and separator"
+                )
+        if "/" in value or "\\" in value:
+            raise ValueError("filenameTemplate must describe a file name, not a path")
+        return value
 
 
 class OmniScholarConfig(ConfigModel):

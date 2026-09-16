@@ -74,6 +74,21 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
 
 ## 保存到 Markdown 或 Obsidian
 
+输出位置和新文件命名可以在全局配置中自定义：
+
+```json
+{
+  "output": {
+    "rootDirectory": "F:/个人知识库",
+    "literatureDirectory": "文献/已解析",
+    "filenameTemplate": "{year}{separator}{author}{separator}{title}",
+    "filenameSeparator": "+"
+  }
+}
+```
+
+支持的文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`filenameSeparator` 当前支持 `-` 或 `+`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。
+
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
 
 同步会区分新建、无需更新、元数据变化、解析变化、渲染变化、文件缺失、冲突、排除和中断恢复。仅修复元数据、渲染或中断事务时不会上传 PDF。

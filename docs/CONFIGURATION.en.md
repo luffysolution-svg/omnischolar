@@ -39,6 +39,21 @@ If none of the first four sources exists, the first MCP start or installer run c
 
 `workspaceRoots` limits local file reads. `output.rootDirectory` limits file writes. To use Obsidian, set the output directory to a folder inside the vault.
 
+The new-paper subfolder and file name can be customized as well:
+
+```json
+{
+  "output": {
+    "rootDirectory": "F:/Personal Knowledge Base",
+    "literatureDirectory": "Literature/Parsed",
+    "filenameTemplate": "{year}{separator}{author}{separator}{title}",
+    "filenameSeparator": "+"
+  }
+}
+```
+
+The filename template supports `{author}`, `{year}`, `{title}`, and `{separator}`; the separator currently accepts `-` or `+`. These settings affect new publications only; existing sync records keep the path stored in the manifest.
+
 ## API keys
 
 API keys may be entered directly in the provider's `apiKey` field:

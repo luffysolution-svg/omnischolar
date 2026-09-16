@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.8] - 2026-09-16
+
+- Added configurable Obsidian output subfolders.
+- Added configurable filename templates and `-`/`+` separators for new publications.
+- Preserved existing manifest paths when output naming settings change.
+
 ## [0.1.7] - 2026-09-16
 
 - Included the complete configuration-template loader in the published Python package.

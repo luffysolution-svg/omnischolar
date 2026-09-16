@@ -86,6 +86,22 @@ class PaperStemTests(unittest.TestCase):
         self.assertLessEqual(len(first.encode()), 72)
         self.assertRegex(first, r"-[0-9a-f]{8}$")
 
+    def test_custom_template_and_separator_are_supported(self) -> None:
+        paper = {
+            "creators": [{"creatorType": "author", "lastName": "Yang"}],
+            "year": "2024",
+            "title": "A paper title",
+        }
+
+        self.assertEqual(
+            paper_stem(
+                paper,
+                template="{year}{separator}{author}{separator}{title}",
+                separator="+",
+            ),
+            "2024+Yang+A paper title",
+        )
+
 
 class SyncActionTests(unittest.TestCase):
     def test_repair_and_restore_reuse_cache_while_forcing_publication(self) -> None:

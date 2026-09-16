@@ -74,6 +74,21 @@ A correctly formatted reference does not prove the claim. Ai4Scholar's Google Sc
 
 ## Markdown and Obsidian output
 
+The output location and new-file naming can be customized in the global configuration:
+
+```json
+{
+  "output": {
+    "rootDirectory": "F:/Personal Knowledge Base",
+    "literatureDirectory": "Literature/Parsed",
+    "filenameTemplate": "{year}{separator}{author}{separator}{title}",
+    "filenameSeparator": "+"
+  }
+}
+```
+
+Supported filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `filenameSeparator` currently accepts `-` or `+`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization.
+
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 
 Sync distinguishes new content, no change, metadata changes, parse changes, render changes, missing files, conflicts, exclusions, and interrupted recovery. Metadata repair, rerendering, and transaction recovery do not upload a PDF.

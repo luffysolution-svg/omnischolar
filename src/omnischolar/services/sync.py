@@ -112,7 +112,12 @@ def _safe_component(value: str, fallback: str, *, max_bytes: int = 200) -> str:
     return text or fallback
 
 
-def paper_stem(paper: dict[str, Any]) -> str:
+def paper_stem(
+    paper: dict[str, Any],
+    *,
+    template: str = "{author}{separator}{year}{separator}{title}",
+    separator: str = "-",
+) -> str:
     raw_creators = paper.get("creators")
     creators: list[Any] = raw_creators if isinstance(raw_creators, list) else []
     author = next(
@@ -125,11 +130,13 @@ def paper_stem(paper: dict[str, Any]) -> str:
     )
     author_name = author.get("lastName") or author.get("name") or "UnknownAuthor"
     year = str(paper.get("year") or paper.get("date") or "UnknownYear")[:4]
-    return _safe_component(
-        f"{author_name}-{year}-{paper.get('title') or 'Untitled'}",
-        "Untitled",
-        max_bytes=72,
-    )
+    values = {
+        "author": str(author_name),
+        "year": year,
+        "title": str(paper.get("title") or "Untitled"),
+        "separator": separator,
+    }
+    return _safe_component(template.format(**values), "Untitled", max_bytes=72)
 
 
 @dataclass(slots=True)
@@ -151,16 +158,34 @@ class SyncService:
     schema_version = 1
 
     def __init__(
-        self, output_root: Path, *, namespace: str | None = None, backup: bool = True
+        self,
+        output_root: Path,
+        *,
+        namespace: str | None = None,
+        backup: bool = True,
+        literature_directory: str = "Literatures",
+        filename_template: str = "{author}{separator}{year}{separator}{title}",
+        filename_separator: str = "-",
     ) -> None:
         self.root = output_root.resolve()
         self.namespace = namespace or f"vault-{stable_hash(str(self.root))[:16]}"
         self.backup = backup
+        self.literature_directory = literature_directory.strip("/\\")
+        self.filename_template = filename_template
+        self.filename_separator = filename_separator
         self.state_root = self.root / ".omnischolar"
         self.manifest_path = self.state_root / "manifest.json"
         self.transaction_root = self.state_root / "transactions"
         self.backup_root = self.state_root / "backups"
         self.conflict_root = self.root / ".conflicts"
+
+    def _publication_relative_path(self, paper: dict[str, Any]) -> str:
+        stem = paper_stem(
+            paper,
+            template=self.filename_template,
+            separator=self.filename_separator,
+        )
+        return "/".join(part for part in (self.literature_directory, stem) if part)
 
     def _empty_manifest(self) -> dict[str, Any]:
         return {
@@ -401,8 +426,12 @@ class SyncService:
             )
         if plan.status == "missing" and not force:
             raise OmniScholarError("restore_required", plan.reason, category="authorization")
-        stem = paper_stem(paper)
-        relative = plan.relative_path or f"Literatures/{stem}"
+        stem = paper_stem(
+            paper,
+            template=self.filename_template,
+            separator=self.filename_separator,
+        )
+        relative = plan.relative_path or self._publication_relative_path(paper)
         destination = confined_path(self.root, relative)
         staging = confined_path(self.state_root, f"staging/{uuid.uuid4()}")
         journal = confined_path(self.transaction_root, f"{uuid.uuid4()}.json")

@@ -232,6 +232,9 @@
   },
   "output": {
     "rootDirectory": "omnischolar-output",
+    "literatureDirectory": "Literatures",
+    "filenameTemplate": "{author}{separator}{year}{separator}{title}",
+    "filenameSeparator": "-",
     "conflictDirectory": ".conflicts",
     "safeWrites": true
   }
