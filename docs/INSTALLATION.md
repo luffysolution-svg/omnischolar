@@ -12,6 +12,13 @@ pipx install luffysolution-omnischolar
 python -m pip install luffysolution-omnischolar
 ```
 
+更新或卸载 Python 命令：
+
+```sh
+uv tool upgrade luffysolution-omnischolar
+uv tool uninstall luffysolution-omnischolar
+```
+
 如需从源码开发安装，请将包名替换为 `.`。
 
 验证命令是否可用：
@@ -21,7 +28,7 @@ omnischolar --version
 omnischolar doctor --json
 ```
 
-如果采用下面的 Codex 插件安装方式，则无需预先安装上述 Python 命令；插件会通过 `uvx` 运行固定版本的 PyPI 包。
+如果采用下面的 Codex 插件安装方式，则无需预先安装上述 Python 命令；插件会通过 `uvx` 运行 PyPI 最新包。
 
 ## 安装到 Codex App 或 Codex CLI
 
@@ -44,13 +51,20 @@ codex plugin add omnischolar@omnischolar
 安装后的插件包含 `plugin.json`、`skills/` 和 `mcp.json`。其 MCP 配置执行：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
-`uvx` 会创建隔离环境并缓存该精确版本，因此无需另行运行 `pip install`。第一次启动需要能够访问 Python 包索引。若要更新 Git Marketplace：
+`uvx` 会创建隔离环境并运行 `@latest` 指定的最新包，无需另行运行 `pip install`。若需强制刷新包缓存，可运行：
+
+```sh
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
+```
+
+若要更新 Codex Git Marketplace 和插件：
 
 ```sh
 codex plugin marketplace upgrade omnischolar
+codex plugin add omnischolar@omnischolar
 ```
 
 卸载插件或移除 Marketplace 来源：
@@ -80,10 +94,10 @@ claude plugin install omnischolar@omnischolar --scope user
 
 使用 `--scope project` 可通过仓库设置与协作者共享启用状态；使用 `--scope local` 则只在当前仓库为自己启用。如果 Claude 提示 `Run /reload-plugins to activate`，请先运行该命令。
 
-Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 8 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令固定为：
+Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 8 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令使用 PyPI 最新包：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 第一次启动 MCP 需要能够访问 Python 包索引。Skills 使用 `omnischolar` 命名空间，例如 `/omnischolar:scholar-search` 和 `/omnischolar:zotero-research`。
@@ -92,6 +106,7 @@ uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
 
 ```sh
 claude plugin marketplace update omnischolar
+claude plugin update omnischolar@omnischolar --scope user
 claude plugin uninstall omnischolar@omnischolar --scope user
 claude plugin marketplace remove omnischolar
 ```
@@ -121,7 +136,13 @@ omnischolar install cursor --scope project
 | Pi | npm Extension | npm Extension | 支持 |
 | WorkBuddy/CodeBuddy | `~/.codebuddy/.mcp.json` | `.mcp.json` | 无官方可移植目录 |
 
-对 Pi，`omnischolar install pi` 会通过 Pi 包管理器安装 `npm:@luffysolution/omnischolar-pi`，并把 Skills 复制到所选作用域。Extension 会通过 `uvx` 启动与当前版本匹配的 PyPI MCP，因此只需保证 `uv` 位于 `PATH`，无需另行安装全局 Python 命令。
+对 Pi，`omnischolar install pi` 会通过 Pi 包管理器安装最新的 `npm:@luffysolution/omnischolar-pi`，并把 Skills 复制到所选作用域。Extension 会通过 `uvx` 启动 PyPI 最新 MCP，因此只需保证 `uv` 位于 `PATH`，无需另行安装全局 Python 命令。直接管理 Pi Extension 时使用：
+
+```sh
+pi install npm:@luffysolution/omnischolar-pi
+pi update npm:@luffysolution/omnischolar-pi
+pi remove npm:@luffysolution/omnischolar-pi
+```
 
 WorkBuddy/CodeBuddy 支持本地 stdio MCP。其官方文档没有定义可移植的 Skills 目录，因此安装器只自动配置 MCP。
 
@@ -162,11 +183,18 @@ omnischolar npx-skills cursor
 例如：
 
 ```sh
-npx skills add luffysolution-svg/omnischolar --skill '*' -a cursor -y
+# 用户级安装：将 codex 替换为 claude-code、pi、cursor 或其他受支持 Agent
+npx skills add luffysolution-svg/omnischolar --skill '*' -a codex -g -y
+npx skills update -g -y
+npx skills remove --skill '*' -a codex -g -y
+
+# 项目级安装：省略 -g；更新和卸载也使用项目作用域
+npx skills add luffysolution-svg/omnischolar --skill '*' -a codex -y
 npx skills update -p -y
+npx skills remove --skill '*' -a codex -y
 ```
 
-这组命令只安装 Skills，不会安装 `omnischolar` Python 命令。
+这组命令只安装 Skills，不会安装 `omnischolar` Python 命令。通过 Codex/Claude plugin 或 Pi Extension 安装时，插件/安装器已经处理了对应 Skills，不需要重复执行。
 
 ## MCP 连接失败
 
@@ -179,5 +207,5 @@ npx skills update -p -y
 OmniScholar 的 MCP 入口只有本地 stdio：
 
 ```sh
-omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```

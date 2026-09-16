@@ -7,6 +7,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from omnischolar.hosts.installer import (
+    CONTRACTS,
+    LATEST_MCP_PROCESS,
     PI_EXTENSION_SOURCE,
     InstallEnvironment,
     manage_host,
@@ -71,6 +73,11 @@ class WorkBuddyInstallerTests(unittest.IsolatedAsyncioTestCase):
             )
         self.assertEqual(result.status, "planned")
         self.assertEqual(Path(result.path or "").name, ".mcp.json")
+
+    def test_latest_mcp_process_is_valid_for_codex_and_stdio_hosts(self) -> None:
+        self.assertNotIn("type", LATEST_MCP_PROCESS)
+        self.assertEqual(CONTRACTS["codex"].server_value, LATEST_MCP_PROCESS)
+        self.assertEqual(CONTRACTS["claude"].server_value.get("type"), "stdio")
 
 
 if __name__ == "__main__":

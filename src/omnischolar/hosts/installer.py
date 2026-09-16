@@ -63,6 +63,13 @@ class HostContract:
     manual_reason: str | None = None
 
 
+LATEST_MCP_PROCESS: dict[str, Any] = {
+    "command": "uvx",
+    "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
+}
+LATEST_MCP_STDIO: dict[str, Any] = {"type": "stdio", **LATEST_MCP_PROCESS}
+
+
 CONTRACTS: dict[HostId, HostContract] = {
     "codex": HostContract(
         "codex",
@@ -70,7 +77,7 @@ CONTRACTS: dict[HostId, HostContract] = {
         ".codex/config.toml",
         ".codex/config.toml",
         "mcp_servers",
-        {"command": "omnischolar", "args": ["mcp"]},
+        LATEST_MCP_PROCESS,
         ".codex/skills",
         ".agents/skills",
         "codex",
@@ -81,7 +88,7 @@ CONTRACTS: dict[HostId, HostContract] = {
         ".claude.json",
         ".mcp.json",
         "mcpServers",
-        {"type": "stdio", "command": "omnischolar", "args": ["mcp"]},
+        LATEST_MCP_STDIO,
         ".claude/skills",
         ".claude/skills",
         "claude-code",
@@ -92,7 +99,7 @@ CONTRACTS: dict[HostId, HostContract] = {
         ".cursor/mcp.json",
         ".cursor/mcp.json",
         "mcpServers",
-        {"type": "stdio", "command": "omnischolar", "args": ["mcp"]},
+        LATEST_MCP_STDIO,
         ".cursor/skills",
         ".agents/skills",
         "cursor",
@@ -105,7 +112,13 @@ CONTRACTS: dict[HostId, HostContract] = {
         "mcp",
         {
             "type": "local",
-            "command": ["omnischolar", "mcp"],
+            "command": [
+                "uvx",
+                "--from",
+                "luffysolution-omnischolar@latest",
+                "omnischolar",
+                "mcp",
+            ],
             "enabled": True,
             "timeout": 10000,
         },
@@ -119,12 +132,7 @@ CONTRACTS: dict[HostId, HostContract] = {
         ".codebuddy/.mcp.json",
         ".mcp.json",
         "mcpServers",
-        {
-            "type": "stdio",
-            "command": "omnischolar",
-            "args": ["mcp"],
-            "description": "OmniScholar research tools",
-        },
+        {**LATEST_MCP_STDIO, "description": "OmniScholar research tools"},
         None,
         None,
         None,
@@ -136,7 +144,7 @@ CONTRACTS: dict[HostId, HostContract] = {
         ".hermes/config.yaml",
         None,
         "mcp_servers",
-        {"command": "omnischolar", "args": ["mcp"]},
+        LATEST_MCP_PROCESS,
         ".hermes/skills",
         ".hermes/skills",
         "hermes-agent",
@@ -357,10 +365,19 @@ def _is_owned_server(value: object) -> bool:
         return False
     command = value.get("command")
     args = value.get("args")
-    return (command == "omnischolar" and list(args or []) == ["mcp"]) or command == [
-        "omnischolar",
-        "mcp",
-    ]
+    normalized_args = list(args or [])
+    uvx_owned = (
+        command == "uvx"
+        and len(normalized_args) == 4
+        and normalized_args[0] == "--from"
+        and normalized_args[2:] == ["omnischolar", "mcp"]
+        and normalized_args[1].startswith("luffysolution-omnischolar")
+    )
+    return (
+        (command == "omnischolar" and normalized_args == ["mcp"])
+        or command == ["omnischolar", "mcp"]
+        or uvx_owned
+    )
 
 
 def _restore_file(path: Path, backup: Path | None, existed: bool) -> None:

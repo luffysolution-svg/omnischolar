@@ -2,8 +2,8 @@
   "mcpServers": {
     "omnischolar": {
       "type": "stdio",
-      "command": "omnischolar",
-      "args": ["mcp"],
+      "command": "uvx",
+      "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
       "description": "OmniScholar research tools"
     }
   }

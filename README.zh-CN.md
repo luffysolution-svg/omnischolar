@@ -42,6 +42,13 @@ omnischolar --version
 omnischolar doctor --json
 ```
 
+更新或卸载 Python 命令：
+
+```sh
+uv tool upgrade luffysolution-omnischolar
+uv tool uninstall luffysolution-omnischolar
+```
+
 ## 连接 Agent
 
 ### Codex App 与 Codex CLI 插件安装
@@ -55,13 +62,13 @@ codex plugin add omnischolar@omnischolar
 
 在 ChatGPT 桌面应用中重启应用，打开 **Plugins**，选择 **OmniScholar** Marketplace，然后安装或启用 **OmniScholar**。在 Codex CLI 中可运行 `/plugins` 浏览同一 Marketplace。
 
-插件会同时安装 8 个 Skills，并使用固定的 PyPI 版本启动本地 MCP：
+插件会同时安装 8 个 Skills，并从 PyPI 最新版本启动本地 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
-采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
+采用插件安装方式时无需另外执行 `pip install`。`@latest` 会让 `uvx` 解析最新包，不把插件锁死在某个版本号。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
 
 ### Claude Code 插件安装
 
@@ -77,9 +84,10 @@ uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
 ```sh
 claude plugin marketplace add luffysolution-svg/omnischolar
 claude plugin install omnischolar@omnischolar --scope user
+claude plugin update omnischolar@omnischolar --scope user
 ```
 
-如果安装结果提示需要重新加载，请运行 `/reload-plugins`，然后新建会话。插件会自动启动同一个固定版本的 `uvx` MCP，并提供 `/omnischolar:scholar-search` 等带命名空间的 Skills，无需另行安装 Python 包。
+如果安装结果提示需要重新加载，请运行 `/reload-plugins`，然后新建会话。插件会自动启动最新的 `uvx` MCP，并提供 `/omnischolar:scholar-search` 等带命名空间的 Skills，无需另行安装 Python 包。
 
 ### Agent 配置安装器
 
@@ -102,19 +110,32 @@ omnischolar uninstall cursor --scope project
 
 ```sh
 pi install npm:@luffysolution/omnischolar-pi
+pi update npm:@luffysolution/omnischolar-pi
+pi remove npm:@luffysolution/omnischolar-pi
 ```
 
 WorkBuddy/CodeBuddy 的用户级配置位于 `~/.codebuddy/.mcp.json`，项目级配置位于 `.mcp.json`。其官方文档没有给出可移植的 Skills 目录，因此安装器会配置 MCP，并将 Skills 状态报告为 `manual_required`。
 
-本地 MCP 命令为：
+直接运行最新 MCP 的命令为：
 
 ```sh
-omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 通常无需手动运行，Agent 会根据 MCP 配置启动该进程。安装器写入受支持的配置后，会检查 `initialize`、`tools/list` 和 `omnischolar_status`。
 
 各 Agent 的路径、更新和卸载方法见[安装说明](docs/INSTALLATION.md)。
+
+### 独立安装 Skills
+
+插件已经包含其声明的 Skills。如果需要把仓库 Skills 独立安装到 Agent，可使用官方 Skills CLI：
+
+```sh
+# 用户级安装；将 codex 换成 claude-code、pi、cursor 或其他受支持 Agent
+npx skills add luffysolution-svg/omnischolar --skill '*' --agent codex --global --yes
+npx skills update --global --yes
+npx skills remove --skill '*' --agent codex --global --yes
+```
 
 ## 使用示例
 

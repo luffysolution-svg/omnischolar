@@ -44,6 +44,13 @@ omnischolar --version
 omnischolar doctor --json
 ```
 
+Update or uninstall the Python command:
+
+```sh
+uv tool upgrade luffysolution-omnischolar
+uv tool uninstall luffysolution-omnischolar
+```
+
 ## Connect an agent
 
 ### Codex app and Codex CLI plugin
@@ -57,13 +64,13 @@ codex plugin add omnischolar@omnischolar
 
 In the ChatGPT desktop app, restart the app, open **Plugins**, select the **OmniScholar** marketplace, and install or enable **OmniScholar**. In Codex CLI, run `/plugins` to browse the same marketplace.
 
-The plugin bundles all eight Skills and starts its local MCP server with the pinned PyPI release:
+The plugin bundles all eight Skills and starts its local MCP server from the latest PyPI release:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.10 omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
-No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
+No separate `pip install` is required for this plugin path. `@latest` asks `uvx` to resolve the latest package instead of pinning this plugin to a release number. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
 
 ### Claude Code plugin
 
@@ -79,9 +86,10 @@ For scripts or a regular terminal, use the non-interactive shell commands:
 ```sh
 claude plugin marketplace add luffysolution-svg/omnischolar
 claude plugin install omnischolar@omnischolar --scope user
+claude plugin update omnischolar@omnischolar --scope user
 ```
 
-Run `/reload-plugins` if the install summary asks for it, then start a new session. The plugin automatically starts the same pinned `uvx` MCP server and exposes namespaced Skills such as `/omnischolar:scholar-search`. No separate Python installation is required.
+Run `/reload-plugins` if the install summary asks for it, then start a new session. The plugin automatically starts the latest `uvx` MCP server and exposes namespaced Skills such as `/omnischolar:scholar-search`. No separate Python installation is required.
 
 ### Host configuration installer
 
@@ -104,19 +112,32 @@ For Pi, the full installer runs `pi install npm:@luffysolution/omnischolar-pi` a
 
 ```sh
 pi install npm:@luffysolution/omnischolar-pi
+pi update npm:@luffysolution/omnischolar-pi
+pi remove npm:@luffysolution/omnischolar-pi
 ```
 
 WorkBuddy/CodeBuddy uses `~/.codebuddy/.mcp.json` for user scope and `.mcp.json` for project scope. It does not publish a portable Skills path, so its installer configures MCP and reports Skills as `manual_required`.
 
-The MCP command is:
+The direct latest MCP command is:
 
 ```sh
-omnischolar mcp
+uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 Normally the agent starts this process from its MCP configuration. The installer checks `initialize`, `tools/list`, and `omnischolar_status` after writing a supported configuration.
 
 Full host and update instructions are in [Installation](docs/INSTALLATION.en.md).
+
+### Standalone Skills CLI
+
+Plugins already bundle their declared Skills. Use the official Skills CLI separately when you want to install the repository's Skills directly into an agent:
+
+```sh
+# User scope; replace codex with claude-code, pi, cursor, or another supported agent
+npx skills add luffysolution-svg/omnischolar --skill '*' --agent codex --global --yes
+npx skills update --global --yes
+npx skills remove --skill '*' --agent codex --global --yes
+```
 
 ## Try it
 

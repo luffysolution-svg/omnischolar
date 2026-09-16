@@ -45,7 +45,7 @@ class CodexPluginPackageTests(unittest.TestCase):
         self.assertEqual(providers["dashscope"]["options"]["workspace"], "your-workspace")
         self.assertEqual(providers["qwen-cloud"]["options"]["workspace"], "your-workspace")
 
-    def test_portable_mcp_uses_pinned_pypi_release(self) -> None:
+    def test_portable_mcp_uses_latest_pypi_release(self) -> None:
         document = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))
         server = document["mcpServers"]["omnischolar"]
         self.assertEqual(server["type"], "stdio")
@@ -54,7 +54,7 @@ class CodexPluginPackageTests(unittest.TestCase):
             server["args"],
             [
                 "--from",
-                f"luffysolution-omnischolar=={EXPECTED_VERSION}",
+                "luffysolution-omnischolar@latest",
                 "omnischolar",
                 "mcp",
             ],
@@ -92,10 +92,10 @@ class CodexPluginPackageTests(unittest.TestCase):
             portable["mcpServers"]["omnischolar"],
         )
 
-    def test_pi_bridge_uses_pinned_pypi_release(self) -> None:
+    def test_pi_bridge_uses_latest_pypi_release(self) -> None:
         source = (ROOT / "pi-extension/src/index.ts").read_text(encoding="utf-8")
         self.assertIn(f'version: "{EXPECTED_VERSION}"', source)
-        self.assertIn(f"luffysolution-omnischolar=={EXPECTED_VERSION}", source)
+        self.assertIn("luffysolution-omnischolar@latest", source)
 
     def test_default_tool_groups_are_all_enabled(self) -> None:
         document = json.loads(

@@ -43,21 +43,11 @@ def main() -> int:
         ".claude-plugin/plugin.json",
         ".cursor-plugin/plugin.json",
         "server.json",
-        "mcp.json",
-        ".mcp.json",
         "pi-extension/src/index.ts",
         "uv.lock",
     ]
     for relative in exact_files:
         _replace(ROOT / relative, old, args.version)
-
-    for path in [
-        ROOT / "README.md",
-        ROOT / "README.zh-CN.md",
-        ROOT / "docs/INSTALLATION.md",
-        ROOT / "docs/INSTALLATION.en.md",
-    ]:
-        _replace(path, f"luffysolution-omnischolar=={old}", f"luffysolution-omnischolar=={args.version}")
 
     # Validate JSON after the mechanical update so a malformed edit cannot be released.
     for relative in [

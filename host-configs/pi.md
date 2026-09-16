@@ -6,6 +6,7 @@ OmniScholar uses the npm-published `@luffysolution/omnischolar-pi` Extension to 
 omnischolar install pi
 # or install only the Extension with Pi's package manager
 pi install npm:@luffysolution/omnischolar-pi
+pi update npm:@luffysolution/omnischolar-pi
 ```
 
 The Extension starts the matching PyPI MCP through `uvx`, discovers the server's tools, forwards calls and cancellation signals, and closes the MCP client when the Pi session ends. A separate global `omnischolar` command is not required; `uv` must be on `PATH`.

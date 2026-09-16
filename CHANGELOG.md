@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11] - 2026-09-16
+
+- Switched MCP launchers from fixed PyPI versions to `@latest`.
+- Added explicit refresh commands for forcing uv cache updates.
+- Added complete install, update, and uninstall guidance for MCP, Skills, Codex, Claude Code, and Pi.
+- Updated the host installer to write the latest uvx MCP command with host-correct config shapes.
+
 ## [0.1.10] - 2026-09-16
 
 - Added `_` as a supported shared filename separator alongside `-` and `+`.

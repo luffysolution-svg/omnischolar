@@ -39,12 +39,12 @@ def main() -> int:
     for relative in ["mcp.json", ".mcp.json"]:
         document = json.loads((ROOT / relative).read_text(encoding="utf-8"))
         args = document["mcpServers"]["omnischolar"]["args"]
-        expected = f"luffysolution-omnischolar=={version}"
+        expected = "luffysolution-omnischolar@latest"
         if expected not in args:
             raise SystemExit(f"{relative} launches a different PyPI version")
 
     bridge = (ROOT / "pi-extension/src/index.ts").read_text(encoding="utf-8")
-    if f'version: "{version}"' not in bridge or f"luffysolution-omnischolar=={version}" not in bridge:
+    if f'version: "{version}"' not in bridge or "luffysolution-omnischolar@latest" not in bridge:
         raise SystemExit("Pi bridge does not match the release version")
     print(version)
     return 0

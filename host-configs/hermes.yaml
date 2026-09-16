@@ -1,6 +1,6 @@
 mcp_servers:
   omnischolar:
-    command: "omnischolar"
-    args: ["mcp"]
+    command: "uvx"
+    args: ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"]
     # Optional: restrict exposure with tools.include or tools.exclude.
     # Inherit OMNISCHOLAR_* and provider environment variables from Hermes.
