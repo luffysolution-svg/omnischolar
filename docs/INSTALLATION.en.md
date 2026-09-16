@@ -12,6 +12,18 @@ pipx install luffysolution-omnischolar
 python -m pip install luffysolution-omnischolar
 ```
 
+If the tool is already installed, `uv tool install` keeps the existing version instead of upgrading it. Use this command to get the latest PyPI release:
+
+```sh
+uv tool upgrade luffysolution-omnischolar
+```
+
+To force a cache refresh and reinstall the latest compatible release:
+
+```sh
+uv tool install --reinstall luffysolution-omnischolar
+```
+
 Update or uninstall the Python command:
 
 ```sh
