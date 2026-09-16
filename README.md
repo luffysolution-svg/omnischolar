@@ -60,7 +60,7 @@ In the ChatGPT desktop app, restart the app, open **Plugins**, select the **Omni
 The plugin bundles all eight Skills and starts its local MCP server with the pinned PyPI release:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
@@ -100,7 +100,7 @@ omnischolar update cursor --scope project
 omnischolar uninstall cursor --scope project
 ```
 
-For Pi, the full installer runs `pi install npm:@luffysolution/omnischolar-pi` and installs the bundled Skills separately. The npm Extension starts `omnischolar mcp`, discovers its tools, and registers them with Pi. You can also install the Extension directly:
+For Pi, the full installer runs `pi install npm:@luffysolution/omnischolar-pi` and installs the bundled Skills separately. The npm Extension starts the matching PyPI MCP through `uvx`, discovers its tools, and registers them with Pi; a separate global Python CLI installation is not required. You can also install the Extension directly:
 
 ```sh
 pi install npm:@luffysolution/omnischolar-pi
@@ -134,7 +134,7 @@ Create a labelled illustration of this mechanism. Treat it as a draft, not exper
 
 ## Configuration
 
-Copy [`omnischolar.config.example.json`](omnischolar.config.example.json) to `omnischolar.config.json`. Keep API keys in environment variables and refer to their names with `apiKeyEnv`.
+On the first MCP start or installer run, if no discoverable config exists, OmniScholar creates one user-level `omnischolar.config.json`. You can also create it explicitly with `omnischolar config init`. Keep API keys in environment variables and refer to their names with `apiKeyEnv`.
 
 A small local configuration can start with Zotero and the output directory:
 

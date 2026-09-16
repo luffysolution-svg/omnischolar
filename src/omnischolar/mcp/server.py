@@ -96,8 +96,9 @@ def create_server(runtime: OmniScholarRuntime) -> Server[Any, Any]:
 
 
 async def run_stdio(config_path: str | Path | None = None) -> None:
-    from omnischolar.config import load_config
+    from omnischolar.config import ensure_user_config, load_config
 
+    ensure_user_config(config_path)
     async with OmniScholarRuntime(load_config(config_path)) as runtime:
         server = create_server(runtime)
         async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):

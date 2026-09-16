@@ -8,6 +8,6 @@ omnischolar install pi
 pi install npm:@luffysolution/omnischolar-pi
 ```
 
-The Extension starts `omnischolar mcp`, discovers the server's tools, forwards calls and cancellation signals, and closes the MCP client when the Pi session ends.
+The Extension starts the matching PyPI MCP through `uvx`, discovers the server's tools, forwards calls and cancellation signals, and closes the MCP client when the Pi session ends. A separate global `omnischolar` command is not required; `uv` must be on `PATH`.
 
 `omnischolar mcp install pi` remains `manual_required` because Pi uses an Extension instead of a native MCP settings file. Use the full `omnischolar install pi` command.

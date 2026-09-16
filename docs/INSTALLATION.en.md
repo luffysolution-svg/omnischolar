@@ -44,7 +44,7 @@ Restart the ChatGPT desktop app after adding the marketplace. Open **Plugins**, 
 The installed plugin contains `plugin.json`, `skills/`, and `mcp.json`. Its MCP entry executes:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 `uvx` creates an isolated environment and caches the exact release, so this route does not require a separate `pip install`. The first start requires package-index access. To fetch updates to the Git marketplace, run:
@@ -83,7 +83,7 @@ Choose `--scope project` to share the enabled plugin through repository settings
 Claude Code copies the repository-root plugin into its versioned cache, discovers the eight folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command is pinned to:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 The first MCP start needs package-index access. Skills are namespaced with `omnischolar`, for example `/omnischolar:scholar-search` and `/omnischolar:zotero-research`.
@@ -121,7 +121,7 @@ omnischolar install cursor --scope project
 | Pi | npm Extension | npm Extension | supported |
 | WorkBuddy/CodeBuddy | `~/.codebuddy/.mcp.json` | `.mcp.json` | no documented portable path |
 
-For Pi, `omnischolar install pi` installs `npm:@luffysolution/omnischolar-pi` with Pi's package manager and copies the Skills to the selected scope. The Extension starts the local `omnischolar mcp` process. The `pi` command and the Python `omnischolar` command must both be on `PATH`.
+For Pi, `omnischolar install pi` installs `npm:@luffysolution/omnischolar-pi` with Pi's package manager and copies the Skills to the selected scope. The Extension starts the matching PyPI MCP through `uvx`, so only `uv` must be on `PATH`; a separate global Python CLI installation is not required.
 
 WorkBuddy/CodeBuddy supports local stdio MCP servers. Its official documentation does not define a portable Skills directory, so only the MCP component is installed automatically.
 

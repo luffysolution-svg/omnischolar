@@ -44,7 +44,7 @@ codex plugin add omnischolar@omnischolar
 安装后的插件包含 `plugin.json`、`skills/` 和 `mcp.json`。其 MCP 配置执行：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 `uvx` 会创建隔离环境并缓存该精确版本，因此无需另行运行 `pip install`。第一次启动需要能够访问 Python 包索引。若要更新 Git Marketplace：
@@ -83,7 +83,7 @@ claude plugin install omnischolar@omnischolar --scope user
 Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 8 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令固定为：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 第一次启动 MCP 需要能够访问 Python 包索引。Skills 使用 `omnischolar` 命名空间，例如 `/omnischolar:scholar-search` 和 `/omnischolar:zotero-research`。
@@ -121,7 +121,7 @@ omnischolar install cursor --scope project
 | Pi | npm Extension | npm Extension | 支持 |
 | WorkBuddy/CodeBuddy | `~/.codebuddy/.mcp.json` | `.mcp.json` | 无官方可移植目录 |
 
-对 Pi，`omnischolar install pi` 会通过 Pi 包管理器安装 `npm:@luffysolution/omnischolar-pi`，并把 Skills 复制到所选作用域。Extension 会启动本地 `omnischolar mcp` 进程，因此 `pi` 与 Python 的 `omnischolar` 命令都必须位于 `PATH`。
+对 Pi，`omnischolar install pi` 会通过 Pi 包管理器安装 `npm:@luffysolution/omnischolar-pi`，并把 Skills 复制到所选作用域。Extension 会通过 `uvx` 启动与当前版本匹配的 PyPI MCP，因此只需保证 `uv` 位于 `PATH`，无需另行安装全局 Python 命令。
 
 WorkBuddy/CodeBuddy 支持本地 stdio MCP。其官方文档没有定义可移植的 Skills 目录，因此安装器只自动配置 MCP。
 

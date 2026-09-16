@@ -11,7 +11,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from omnischolar.config import config_json_schema, load_config
+from omnischolar.config import config_json_schema, ensure_user_config, load_config
 from omnischolar.core import OmniScholarError, atomic_write, redact
 from omnischolar.hosts.installer import (
     HOSTS,
@@ -60,6 +60,7 @@ def _parser() -> argparse.ArgumentParser:
     doctor.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     config = commands.add_parser("config", help="Inspect configuration")
     config_commands = config.add_subparsers(dest="config_command", required=True)
+    config_commands.add_parser("init", help="Create the user-level configuration if missing")
     config_commands.add_parser("path", help="Print selected configuration path")
     config_commands.add_parser("schema", help="Print schemaVersion 1 JSON Schema")
     return parser
@@ -124,6 +125,8 @@ async def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int
         if args.mcp_action is not None:
             if args.mcp_host is None:
                 parser.error("omnischolar mcp install/status/uninstall requires a host")
+            if args.mcp_action == "install" and not args.dry_run:
+                ensure_user_config(args.config)
             environment = None
             if args.project_dir is not None:
                 from omnischolar.hosts.installer import InstallEnvironment
@@ -151,6 +154,8 @@ async def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int
         if args.target != "skills" and args.host is not None:
             parser.error("Unexpected second host argument")
         assert selected_host is not None
+        if args.command in {"install", "update"} and not args.dry_run:
+            ensure_user_config(args.config)
         environment = None
         if args.project_dir is not None:
             from omnischolar.hosts.installer import InstallEnvironment
@@ -185,6 +190,9 @@ async def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int
         return await _status(args.config)
     if args.command == "doctor":
         return await _doctor(args.config, args.json)
+    if args.command == "config" and args.config_command == "init":
+        sys.stdout.write(str(ensure_user_config(args.config)) + "\n")
+        return 0
     if args.command == "config" and args.config_command == "path":
         loaded = load_config(args.config)
         sys.stdout.write((str(loaded.source.path) if loaded.source.path else "defaults") + "\n")

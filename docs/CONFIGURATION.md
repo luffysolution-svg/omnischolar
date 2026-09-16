@@ -16,6 +16,8 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 相对路径以配置文件所在目录为基准。拼错字段名或填写不合法的值时，程序会直接报错。
 
+如果前四项都不存在，第一次启动 MCP 或执行安装命令时会自动创建用户级配置文件。Windows 通常位于 `%LOCALAPPDATA%\omnischolar\omnischolar.config.json`，其他平台由 `platformdirs` 决定。也可以运行 `omnischolar config init` 主动创建；程序不会覆盖已有配置。
+
 ## 最小配置
 
 ```json

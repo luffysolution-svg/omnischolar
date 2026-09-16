@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.3] - 2026-09-16
+
+- Fixed release-version drift between Python, MCP launchers, Pi, and plugin manifests.
+- Added automatic creation of one user-level configuration file when no config is discoverable.
+- Made the Pi Extension launch the matching PyPI MCP through `uvx` instead of requiring a separate global CLI.
 
 ## [0.1.2] - 2026-09-16
 

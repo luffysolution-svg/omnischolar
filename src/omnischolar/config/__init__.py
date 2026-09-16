@@ -1,7 +1,15 @@
 """Schema-versioned OmniScholar configuration."""
 
 from .credentials import ResolvedCredential, resolve_credential, validate_env_name
-from .loader import ConfigSource, LoadedConfig, config_json_schema, discover_config, load_config
+from .loader import (
+    ConfigSource,
+    LoadedConfig,
+    config_json_schema,
+    discover_config,
+    ensure_user_config,
+    load_config,
+    user_config_file,
+)
 from .models import (
     Ai4ScholarConfig,
     CasConfig,
@@ -47,7 +55,9 @@ __all__ = [
     "ZoteroConfig",
     "config_json_schema",
     "discover_config",
+    "ensure_user_config",
     "load_config",
+    "user_config_file",
     "resolve_credential",
     "validate_env_name",
 ]

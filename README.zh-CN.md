@@ -58,7 +58,7 @@ codex plugin add omnischolar@omnischolar
 插件会同时安装 8 个 Skills，并使用固定的 PyPI 版本启动本地 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.2 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.3 omnischolar mcp
 ```
 
 采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
@@ -98,7 +98,7 @@ omnischolar update cursor --scope project
 omnischolar uninstall cursor --scope project
 ```
 
-对 Pi，完整安装器会运行 `pi install npm:@luffysolution/omnischolar-pi`，并单独安装随包提供的 Skills。npm Extension 会启动 `omnischolar mcp`、发现工具并注册到 Pi。也可以直接安装 Extension：
+对 Pi，完整安装器会运行 `pi install npm:@luffysolution/omnischolar-pi`，并单独安装随包提供的 Skills。npm Extension 会通过 `uvx` 启动与当前版本匹配的 PyPI MCP、发现工具并注册到 Pi，因此无需另行安装全局 Python 命令。也可以直接安装 Extension：
 
 ```sh
 pi install npm:@luffysolution/omnischolar-pi
@@ -132,7 +132,7 @@ omnischolar mcp
 
 ## 配置
 
-将 [`omnischolar.config.example.json`](omnischolar.config.example.json) 复制为 `omnischolar.config.json`。API key 建议放在环境变量中，配置文件只填写变量名 `apiKeyEnv`。
+首次启动 MCP 或执行安装命令时，如果没有可发现的配置，程序会在用户配置目录自动创建唯一的 `omnischolar.config.json`。也可以用 `omnischolar config init` 主动创建。API key 建议放在环境变量中，配置文件只填写变量名 `apiKeyEnv`。
 
 最小的本地配置可以只写 Zotero 和输出目录：
 

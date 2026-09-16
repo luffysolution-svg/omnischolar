@@ -39,6 +39,45 @@ class LoadedConfig:
     source: ConfigSource
 
 
+def user_config_file(user_directory: Path | None = None) -> Path:
+    """Return the single user-level configuration file path."""
+
+    return (user_directory or user_config_path("omnischolar")) / _CONFIG_NAME
+
+
+def ensure_user_config(
+    explicit: str | Path | None = None,
+    *,
+    environ: Mapping[str, str] | None = None,
+    cwd: Path | None = None,
+    user_directory: Path | None = None,
+) -> Path:
+    """Create a safe default user config only when no config is discoverable."""
+
+    source = discover_config(
+        explicit,
+        environ=environ,
+        cwd=cwd,
+        user_directory=user_directory,
+    )
+    if source.kind != "defaults":
+        assert source.path is not None
+        return source.path
+
+    path = user_config_file(user_directory)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = OmniScholarConfig().model_dump(mode="json", by_alias=True, exclude_none=True)
+    content = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+    try:
+        with path.open("xb") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError:
+        pass
+    return path
+
+
 def discover_config(
     explicit: str | Path | None = None,
     *,

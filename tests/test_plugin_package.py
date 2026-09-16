@@ -8,7 +8,7 @@ from pathlib import Path
 from omnischolar.version import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_VERSION = "0.1.2"
+EXPECTED_VERSION = __version__
 
 
 class CodexPluginPackageTests(unittest.TestCase):
@@ -54,7 +54,7 @@ class CodexPluginPackageTests(unittest.TestCase):
             server["args"],
             [
                 "--from",
-                "luffysolution-omnischolar==0.1.2",
+                f"luffysolution-omnischolar=={EXPECTED_VERSION}",
                 "omnischolar",
                 "mcp",
             ],
@@ -91,6 +91,17 @@ class CodexPluginPackageTests(unittest.TestCase):
             claude["mcpServers"]["omnischolar"],
             portable["mcpServers"]["omnischolar"],
         )
+
+    def test_pi_bridge_uses_pinned_pypi_release(self) -> None:
+        source = (ROOT / "pi-extension/src/index.ts").read_text(encoding="utf-8")
+        self.assertIn(f'version: "{EXPECTED_VERSION}"', source)
+        self.assertIn(f"luffysolution-omnischolar=={EXPECTED_VERSION}", source)
+
+    def test_default_tool_groups_are_all_enabled(self) -> None:
+        document = json.loads(
+            (ROOT / "omnischolar.config.example.json").read_text(encoding="utf-8")
+        )
+        self.assertTrue(all(document["tools"]["groups"].values()))
 
 
 if __name__ == "__main__":

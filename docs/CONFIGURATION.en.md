@@ -16,6 +16,8 @@ The first matching file is used; files are not merged:
 
 Relative paths resolve from the config file. Misspelled fields and invalid values are rejected.
 
+If none of the first four sources exists, the first MCP start or installer run creates one user-level configuration file. On Windows this is normally `%LOCALAPPDATA%\\omnischolar\\omnischolar.config.json`; other platforms follow `platformdirs`. You can also run `omnischolar config init`. Existing configuration is never overwritten.
+
 ## Minimal config
 
 ```json
