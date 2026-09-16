@@ -2,90 +2,82 @@
 
 <!-- mcp-name: io.github.luffysolution-svg/omnischolar -->
 
-English | [简体中文](README.zh-CN.md)
+[![PyPI](https://img.shields.io/pypi/v/luffysolution-omnischolar?logo=pypi&label=PyPI)](https://pypi.org/project/luffysolution-omnischolar/)
+[![npm](https://img.shields.io/npm/v/%40luffysolution%2Fomnischolar-pi?logo=npm&label=npm)](https://www.npmjs.com/package/@luffysolution/omnischolar-pi)
+[![npx Skills](https://img.shields.io/badge/npx%20Skills-supported-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/package/skills)
+[![Release](https://img.shields.io/github/v/release/luffysolution-svg/omnischolar?logo=github)](https://github.com/luffysolution-svg/omnischolar/releases)
 
-OmniScholar adds literature search, local Zotero reading, PDF parsing, citation tools, materials data, and scientific image generation to coding agents through a local Python MCP server.
+简体中文 | [English](README.en.md)
 
-It can search public indexes, combine online records with your Zotero notes, send an approved PDF to MinerU, and publish Markdown into a regular folder or an Obsidian vault. Zotero access is read-only.
+OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、OpenCode、Hermes 和 Pi 提供文献检索、Zotero 读取、PDF 解析、引用处理、材料数据和科研绘图工具。
 
-## Features
+它可以把在线文献记录与 Zotero 笔记放在一起处理，将经你确认的 PDF 交给 MinerU 解析，再把 Markdown 保存到普通文件夹或 Obsidian Vault。Zotero 全程只读。
 
-- Search Semantic Scholar, OpenAlex, PubMed/PMC, arXiv, Crossref, Unpaywall, easyScholar, Google Scholar, and Google Patents
-- Retrieve paper details, authors, citations, references, recommendations, snippets, datasets, and journal metrics
-- Read Zotero collections, items, notes, annotations, attachments, indexed text, and local PDF paths without changing the library
-- Parse selected PDFs with MinerU and keep text, formulas, tables, and figures together
-- Find citation candidates, check bibliographic identity, and format accepted references
-- Query Materials Project and export JSON, CSV, Markdown, or CIF
-- Generate or edit scientific illustrations with configured image services
-- Preserve local Markdown edits and place incoming conflict versions in `.conflicts/`
+## 功能
 
-OmniScholar exposes 38 tools. See the [tool list](docs/TOOLS.en.md).
+- 检索 Semantic Scholar、OpenAlex、PubMed/PMC、arXiv、Crossref、Unpaywall、easyScholar、Google Scholar 和 Google Patents
+- 查询论文详情、作者、参考文献、施引文献、推荐、全文片段、数据集和期刊指标
+- 读取 Zotero 收藏夹、条目、笔记、批注、附件、索引文本和本地 PDF 路径，不修改文献库
+- 使用 MinerU 提取指定 PDF 的正文、公式、表格和图片
+- 查找引用候选，核对书目信息，再按要求生成参考文献
+- 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF
+- 调用已配置的图片服务生成或编辑科研示意图
+- 保留手工修改过的 Markdown，把待合并版本放入 `.conflicts/`
 
-## Install
+OmniScholar 共提供 38 个工具，完整列表见[工具目录](docs/TOOLS.md)。
 
-Python 3.11 or newer is required:
+<details>
+<summary>安装与部署</summary>
+
+需要 Python 3.11 或更高版本。普通 Python 命令任选一种方式安装：
 
 ```sh
 uv tool install luffysolution-omnischolar
-# or
+# 或
 pipx install luffysolution-omnischolar
-# or
+# 或
 python -m pip install luffysolution-omnischolar
 ```
 
-For development from a source checkout, replace the package name with `.`.
-
-The distribution name is `luffysolution-omnischolar`; the command and Python package are `omnischolar`.
-
-Check the installation:
+检查、更新和卸载：
 
 ```sh
 omnischolar --version
 omnischolar doctor --json
-```
-
-Update or uninstall the Python command:
-
-```sh
 uv tool upgrade luffysolution-omnischolar
 uv tool uninstall luffysolution-omnischolar
-pipx upgrade luffysolution-omnischolar
-pipx uninstall luffysolution-omnischolar
-python -m pip install --upgrade luffysolution-omnischolar
-python -m pip uninstall luffysolution-omnischolar
 ```
 
-## Connect an agent
+如果希望用一条命令强制刷新并重装最新版：
 
-### Codex app and Codex CLI plugin
+```sh
+uv tool install --reinstall luffysolution-omnischolar
+```
 
-Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) first, then add the OmniScholar Git marketplace and install the plugin:
+### Codex 插件
 
 ```sh
 codex plugin marketplace add luffysolution-svg/omnischolar --ref main
 codex plugin add omnischolar@omnischolar
+codex plugin marketplace upgrade omnischolar
 ```
 
-In the ChatGPT desktop app, restart the app, open **Plugins**, select the **OmniScholar** marketplace, and install or enable **OmniScholar**. In Codex CLI, run `/plugins` to browse the same marketplace.
-
-The plugin bundles all eight Skills and starts its local MCP server from the latest PyPI release:
+ChatGPT 桌面应用中重启应用后打开 **Plugins**，选择 **OmniScholar** 并安装或启用；Codex CLI 可运行 `/plugins` 浏览插件。插件已经包含 Skills，并通过下面的命令启动 PyPI 最新 MCP：
 
 ```sh
 uvx --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
-No separate `pip install` is required for this plugin path. `@latest` asks `uvx` to resolve the latest package instead of pinning this plugin to a release number. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
+### Claude Code 插件
 
-### Claude Code plugin
-
-Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/) first. In Claude Code, add the GitHub marketplace and install the plugin:
+在 Claude Code 会话中运行：
 
 ```text
 /plugin marketplace add luffysolution-svg/omnischolar
 /plugin install omnischolar@omnischolar
 ```
 
-For scripts or a regular terminal, use the non-interactive shell commands:
+普通终端也可以运行：
 
 ```sh
 claude plugin marketplace add luffysolution-svg/omnischolar
@@ -93,26 +85,7 @@ claude plugin install omnischolar@omnischolar --scope user
 claude plugin update omnischolar@omnischolar --scope user
 ```
 
-Run `/reload-plugins` if the install summary asks for it, then start a new session. The plugin automatically starts the latest `uvx` MCP server and exposes namespaced Skills such as `/omnischolar:scholar-search`. No separate Python installation is required.
-
-### Host configuration installer
-
-Preview the files that will change, then install the local MCP entry and Skills:
-
-```sh
-omnischolar install --dry-run claude
-omnischolar install claude
-```
-
-Replace `claude` with `codex`, `cursor`, `opencode`, `hermes`, `pi`, or `workbuddy`. Codex, Claude Code, Cursor, OpenCode, Pi, and WorkBuddy/CodeBuddy support both user and project scopes. Hermes supports user-level MCP configuration; project-level installation adds Skills and reports that MCP setup is manual.
-
-```sh
-omnischolar install cursor --scope project
-omnischolar update cursor --scope project
-omnischolar uninstall cursor --scope project
-```
-
-For Pi, the full installer runs `pi install npm:@luffysolution/omnischolar-pi` and installs the bundled Skills separately. The npm Extension starts the matching PyPI MCP through `uvx`, discovers its tools, and registers them with Pi; a separate global Python CLI installation is not required. You can also install the Extension directly:
+### Pi Extension
 
 ```sh
 pi install npm:@luffysolution/omnischolar-pi
@@ -120,100 +93,80 @@ pi update npm:@luffysolution/omnischolar-pi
 pi remove npm:@luffysolution/omnischolar-pi
 ```
 
-WorkBuddy/CodeBuddy uses `~/.codebuddy/.mcp.json` for user scope and `.mcp.json` for project scope. It does not publish a portable Skills path, so its installer configures MCP and reports Skills as `manual_required`.
-
-The direct latest MCP command is:
+### 通用安装器与独立 Skills
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+omnischolar install --dry-run claude
+omnischolar install claude
+omnischolar update claude
+omnischolar uninstall claude
 ```
 
-Normally the agent starts this process from its MCP configuration. The installer checks `initialize`, `tools/list`, and `omnischolar_status` after writing a supported configuration.
-
-Full host and update instructions are in [Installation](docs/INSTALLATION.en.md).
-
-### Standalone Skills CLI
-
-Plugins already bundle their declared Skills. Use the official Skills CLI separately when you want to install the repository's Skills directly into an agent:
+也可以使用官方 Skills CLI 单独安装 Skills；插件已经包含这些 Skills，通常不需要重复安装：
 
 ```sh
-# User scope; replace codex with claude-code, pi, cursor, or another supported agent
 npx skills add luffysolution-svg/omnischolar --skill '*' --agent codex --global --yes
 npx skills update --global --yes
 npx skills remove --skill '*' --agent codex --global --yes
 ```
 
-## Try it
+完整的各 Agent 路径、项目级安装和故障排查见[安装说明](docs/INSTALLATION.md)。
+
+</details>
+
+## Agent 配置提示词
+
+可以将下面的提示词作为 Agent 的项目级指令或系统提示词基础：
 
 ```text
-Find five recent reviews about solid-state battery interfaces. Deduplicate by DOI and show open-access copies.
-
-Find this DOI in my Zotero library and summarize my notes and annotations without changing Zotero.
-
-After I approve the upload, parse this PDF with MinerU and save a reading note in my Obsidian vault.
-
-Query stable Li-Fe-P-O materials in Materials Project and export the selected records as CSV and CIF.
-
-Create a labelled illustration of this mechanism. Treat it as a draft, not experimental data.
+你是我的科研助理，使用 OmniScholar 完成文献检索、Zotero 阅读、PDF 解析、引用核对和科研资料整理。检索时优先使用可靠的学术来源，核对 DOI 与书目信息，并明确区分原文证据、推断和不确定内容。Zotero 只允许读取，禁止修改。上传 PDF、参考图或发起可能收费的请求前必须先征得我的确认；MinerU 只有在我确认后才能上传文件。将确认后的文献笔记和生成文件保存到配置的输出目录，保留已有手工修改，并报告最终文件路径。生成的科研图片只能作为示意图，不能当作实验数据或科研证据。
 ```
 
-## Configuration
+## 配置与 MCP 示例
 
-On the first MCP start or installer run, if no discoverable config exists, OmniScholar creates a complete user-level `omnischolar.config.json` template with all service sections and credential fields. You can also create it explicitly with `omnischolar config init`. API keys may be entered directly as `apiKey`; `apiKeyEnv` is an optional alternative when you prefer environment variables.
+首次启动 MCP 或运行安装器时，如果没有可发现的配置，OmniScholar 会创建用户级 `omnischolar.config.json` 模板。API key 可以直接填写到 `apiKey`，也可以用 `apiKeyEnv` 指定环境变量。
 
-Customize the Obsidian output location, paper folders, Markdown files, and parsed image assets with `output.rootDirectory`, `output.literatureDirectory`, `output.folderNameTemplate`, `output.filenameTemplate`, `output.filenameSeparator`, and `output.assetFilenameTemplate`; see [literature and output configuration](docs/RESEARCH.en.md).
-
-A small local configuration can start with Zotero and the output directory:
+根目录的 [`mcp.json`](mcp.json) 是可直接复制到支持 MCP 的 Agent 中的 stdio 示例，内容如下：
 
 ```json
 {
-  "schemaVersion": 1,
-  "runtime": { "workspaceRoots": ["./research-inputs"] },
-  "zotero": {
-    "enabled": true,
-    "baseUrl": "http://127.0.0.1:23119/api"
-  },
-  "output": { "rootDirectory": "./research-output" }
+  "mcpServers": {
+    "omnischolar": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"]
+    }
+  }
 }
 ```
 
-OpenAlex, PubMed, arXiv, and Crossref work without API keys. Other services are enabled separately. Configuration fields and provider examples are in [Configuration](docs/CONFIGURATION.en.md).
+`mcp.json` 只负责启动 MCP，不保存 API key；服务凭据和 Obsidian 输出位置填写在 [`omnischolar.config.example.json`](omnischolar.config.example.json) 对应字段中，可执行 `omnischolar config init` 创建实际配置。插件内部使用的配置文件是 [`.mcp.json`](.mcp.json)。文件夹、Markdown 文件和图片附件命名可通过 `output` 区块自定义，详见[文献与输出配置](docs/RESEARCH.md)。
 
-## Files, uploads, and charges
+## 使用示例
 
-- Zotero requests go only to the local API on port `23119` and use GET.
-- MinerU receives a PDF only when `allowExternalUpload` is enabled in the config and confirmed again in that tool call.
-- Image services receive prompts and any reference images selected for upload. Generation may use account credit.
-- Ai4Scholar calls may use account credit. A stored key does not by itself approve a paid call.
-- A failed paid request is not retried automatically when the provider may already have accepted it.
-- Generated images are illustrations. They are not measurements, experimental evidence, or scientific results.
+```text
+查找 5 篇关于固态电池界面的近期综述，按 DOI 去重，并给出开放获取版本。
 
-See [`PRIVACY.md`](PRIVACY.md) and [Configuration](docs/CONFIGURATION.en.md) before enabling uploads or paid services.
+在我的 Zotero 中找到这个 DOI，汇总笔记和批注，不要修改 Zotero。
 
-## Included Skills
+我确认上传后，用 MinerU 解析这份 PDF，并把阅读笔记保存到 Obsidian Vault。
 
-| Skill | Use |
-|---|---|
-| `omnischolar` | Choose and combine tools for a research request |
-| `scholar-search` | Literature, patents, authors, citation graphs, journals, and datasets |
-| `zotero-research` | Local Zotero matching, notes, annotations, and attachments |
-| `paper-reading` | MinerU parsing and close reading of text, formulas, tables, and figures |
-| `academic-citation` | Evidence checks, citation candidates, formatting, and bibliographies |
-| `scientific-figure` | Image generation, editing, review, and scientific labelling |
-| `materials-project` | Materials screening, properties, provenance, phase data, and export |
-| `chemical-data` | CAS Common Chemistry records when an official interface description is configured |
+查询 Materials Project 中稳定的 Li-Fe-P-O 材料，将选中的记录导出为 CSV 和 CIF。
 
-## Documentation
+为这个机理绘制带标签的示意图。图片只是草稿，不得写成实验数据。
+```
 
-- [Installation and agent setup](docs/INSTALLATION.en.md)
-- [Configuration and service credentials](docs/CONFIGURATION.en.md)
-- [Literature, Zotero, MinerU, citations, and output](docs/RESEARCH.en.md)
-- [Materials and chemistry](docs/MATERIALS.en.md)
-- [Scientific image providers](docs/IMAGE_PROVIDERS.en.md)
-- [Tool list](docs/TOOLS.en.md)
+## 文档
 
-## Support and license
+- [安装与 Agent 配置](docs/INSTALLATION.md)
+- [配置与服务凭据](docs/CONFIGURATION.md)
+- [文献、Zotero、MinerU、引用与输出](docs/RESEARCH.md)
+- [材料与化学](docs/MATERIALS.md)
+- [科研绘图服务](docs/IMAGE_PROVIDERS.md)
+- [工具目录](docs/TOOLS.md)
 
-OmniScholar is open source under the [MIT License](LICENSE). Open a [GitHub issue](https://github.com/luffysolution-svg/omnischolar/issues) or email `LuffySolution@gmail.com`. Remove keys, signed URLs, private paper content, and personal Zotero data before sending a report.
+## 支持与许可证
 
-Third-party services and datasets keep their own terms and licenses. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+OmniScholar 使用 [MIT License](LICENSE) 开源。可以在 [GitHub Issues](https://github.com/luffysolution-svg/omnischolar/issues) 提交问题，或发送邮件到 `LuffySolution@gmail.com`。报告问题前，请删除 API key、签名 URL、私人论文内容和个人 Zotero 数据。
+
+第三方服务和数据遵循各自的条款与许可证，详见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。

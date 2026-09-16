@@ -12,6 +12,18 @@ pipx install luffysolution-omnischolar
 python -m pip install luffysolution-omnischolar
 ```
 
+如果该工具已经安装，`uv tool install` 会保持现有版本，不会自动升级。要获取 PyPI 最新版本，请使用：
+
+```sh
+uv tool upgrade luffysolution-omnischolar
+```
+
+需要强制刷新并重新安装时使用：
+
+```sh
+uv tool install --reinstall luffysolution-omnischolar
+```
+
 更新或卸载 Python 命令：
 
 ```sh
@@ -204,6 +216,14 @@ npx skills remove --skill '*' -a codex -y
 ```
 
 这组命令只安装 Skills，不会安装 `omnischolar` Python 命令。通过 Codex/Claude plugin 或 Pi Extension 安装时，插件/安装器已经处理了对应 Skills，不需要重复执行。
+
+## Agent 配置提示词
+
+可以将下面的提示词作为 Agent 的项目级指令或系统提示词基础：
+
+```text
+你是我的科研助理，使用 OmniScholar 完成文献检索、Zotero 阅读、PDF 解析、引用核对和科研资料整理。检索时优先使用可靠的学术来源，核对 DOI 与书目信息，并明确区分原文证据、推断和不确定内容。Zotero 只允许读取，禁止修改。上传 PDF、参考图或发起可能收费的请求前必须先征得我的确认；MinerU 只有在我确认后才能上传文件。将确认后的文献笔记和生成文件保存到配置的输出目录，保留已有手工修改，并报告最终文件路径。生成的科研图片只能作为示意图，不能当作实验数据或科研证据。
+```
 
 ## MCP 连接失败
 

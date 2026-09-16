@@ -47,12 +47,28 @@ jobs:
       - name: Publish npm package if the version is missing
         shell: bash
         run: |
+          set -euo pipefail
           version="$(node -p "require('./package.json').version")"
           package="@luffysolution/omnischolar-pi"
-          if npm view "${package}@${version}" version --prefer-online >/dev/null 2>&1; then
+          if view_output="$(npm view "${package}@${version}" version --prefer-online 2>&1)"; then
             echo "${package}@${version} is already published"
           else
-            npm publish --access public --provenance
+            view_status=$?
+            if grep -Eiq 'E404|404 Not Found|No match found' <<<"${view_output}"; then
+              publish_output="$(npm publish --access public --provenance 2>&1)" || publish_status=$?
+              if [[ "${publish_status:-0}" -eq 0 ]]; then
+                printf '%s\n' "${publish_output}"
+              elif grep -Eiq 'E409|cannot publish over|previously published version' <<<"${publish_output}"; then
+                echo "${package}@${version} was published concurrently; treating it as complete"
+              else
+                printf '%s\n' "${publish_output}"
+                exit "${publish_status}"
+              fi
+            else
+              printf '%s\n' "${view_output}"
+              echo "Unable to determine whether ${package}@${version} exists; refusing to publish blindly" >&2
+              exit "${view_status}"
+            fi
           fi
 
   github-release:

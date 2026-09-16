@@ -7,12 +7,12 @@
     "url": "https://github.com/luffysolution-svg/omnischolar",
     "source": "github"
   },
-  "version": "0.1.12",
+  "version": "0.1.13",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "luffysolution-omnischolar",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "runtimeHint": "uvx",
       "packageArguments": [
         {

@@ -1,6 +1,6 @@
 # OmniScholar
 
-[English](README.md) | 简体中文
+[English](README.en.md) | 简体中文
 
 OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、OpenCode、Hermes 和 Pi 等 Agent 提供文献检索、Zotero 读取、PDF 解析、引用处理、材料数据和科研绘图工具。
 
