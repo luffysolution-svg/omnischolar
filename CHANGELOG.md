@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.5] - 2026-09-16
+
+- Documented and tested direct `apiKey` entries in the user configuration.
+- Kept `apiKeyEnv` as an optional environment-variable alternative.
+
 ## [0.1.4] - 2026-09-16
 
 - Fixed the user configuration directory to use one cross-platform app directory level.

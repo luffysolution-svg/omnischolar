@@ -41,26 +41,37 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 ## API key
 
-建议把 key 存入环境变量，配置中只写变量名：
+API key 可以直接写入对应服务的 `apiKey`。例如：
 
 ```json
 {
   "schemaVersion": 1,
   "ai4scholar": {
     "enabled": true,
-    "apiKeyEnv": "OMNISCHOLAR_AI4SCHOLAR_API_KEY",
+    "apiKey": "在这里填写 Ai4Scholar API key",
     "allowPaid": false
   },
   "data": {
     "materialsProject": {
       "enabled": true,
-      "apiKeyEnv": "OMNISCHOLAR_MATERIALS_PROJECT_API_KEY"
+      "apiKey": "在这里填写 Materials Project API key"
     }
   }
 }
 ```
 
-读取顺序为 `apiKey`、`apiKeyEnv` 指向的环境变量、该服务的默认环境变量。不要把明文 key 写入 Agent 的 MCP 配置、Skills、命令行或版本库。
+也可以只填写变量名，让程序从环境变量读取：
+
+```json
+{
+  "mineru": {
+    "enabled": true,
+    "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY"
+  }
+}
+```
+
+读取顺序为 `apiKey`、`apiKeyEnv` 指向的环境变量、该服务的默认环境变量。直接写入配置文件最简单，但该文件包含敏感信息，请限制文件权限，不要提交到版本库或复制到 Agent 的 MCP 配置中。
 
 | 服务 | 是否需要 key 或其他信息 |
 |---|---|

@@ -41,26 +41,37 @@ If none of the first four sources exists, the first MCP start or installer run c
 
 ## API keys
 
-Keep keys in environment variables and place only the variable name in the config:
+API keys may be entered directly in the provider's `apiKey` field:
 
 ```json
 {
   "schemaVersion": 1,
   "ai4scholar": {
     "enabled": true,
-    "apiKeyEnv": "OMNISCHOLAR_AI4SCHOLAR_API_KEY",
+    "apiKey": "paste Ai4Scholar API key here",
     "allowPaid": false
   },
   "data": {
     "materialsProject": {
       "enabled": true,
-      "apiKeyEnv": "OMNISCHOLAR_MATERIALS_PROJECT_API_KEY"
+      "apiKey": "paste Materials Project API key here"
     }
   }
 }
 ```
 
-Credential order is `apiKey`, the variable named by `apiKeyEnv`, then the service's default environment variable. Do not place plaintext keys in agent MCP files, Skills, command lines, or source control.
+Alternatively, set `apiKeyEnv` to read the key from an environment variable:
+
+```json
+{
+  "mineru": {
+    "enabled": true,
+    "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY"
+  }
+}
+```
+
+Credential order is `apiKey`, the variable named by `apiKeyEnv`, then the service's default environment variable. Direct config entry is the simplest local setup, but the file then contains a secret: restrict its permissions and never commit it or copy it into agent MCP configuration.
 
 | Service | Key or account requirement |
 |---|---|

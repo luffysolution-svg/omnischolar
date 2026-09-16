@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from omnischolar.config import ensure_user_config, load_config, user_config_file
+from omnischolar.config import ensure_user_config, load_config, resolve_credential, user_config_file
 
 
 class ConfigBootstrapTests(unittest.TestCase):
@@ -43,6 +43,18 @@ class ConfigBootstrapTests(unittest.TestCase):
 
             self.assertEqual(path, project_config)
             self.assertFalse((user_directory / "omnischolar.config.json").exists())
+
+    def test_inline_api_key_takes_precedence_over_environment(self) -> None:
+        credential = resolve_credential(
+            "mineru",
+            api_key="inline-key",
+            api_key_env="MINERU_TEST_KEY",
+            environ={"MINERU_TEST_KEY": "environment-key"},
+        )
+
+        self.assertTrue(credential.configured)
+        self.assertEqual(credential.source, "config.apiKey")
+        self.assertEqual(credential.reveal(), "inline-key")
 
 
 if __name__ == "__main__":
