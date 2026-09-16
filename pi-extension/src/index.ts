@@ -4,7 +4,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
 import { Type } from "typebox";
 
-const CLIENT_INFO = { name: "omnischolar-pi", version: "0.1.6" };
+const CLIENT_INFO = { name: "omnischolar-pi", version: "0.1.7" };
 
 export function resultText(result: CallToolResult): string {
   return result.content
@@ -47,7 +47,7 @@ export default function omnischolarExtension(pi: ExtensionAPI): void {
     connection = (async () => {
       transport = new StdioClientTransport({
         command: "uvx",
-        args: ["--from", "luffysolution-omnischolar==0.1.6", "omnischolar", "mcp"],
+        args: ["--from", "luffysolution-omnischolar==0.1.7", "omnischolar", "mcp"],
         stderr: "pipe",
       });
       client = new Client(CLIENT_INFO);

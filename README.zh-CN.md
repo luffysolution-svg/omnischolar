@@ -58,7 +58,7 @@ codex plugin add omnischolar@omnischolar
 插件会同时安装 8 个 Skills，并使用固定的 PyPI 版本启动本地 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.6 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.7 omnischolar mcp
 ```
 
 采用插件安装方式时无需另外执行 `pip install`。第一次启动 MCP 需要联网，以便 `uvx` 下载并缓存包。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。

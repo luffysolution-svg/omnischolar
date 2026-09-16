@@ -6,6 +6,7 @@ import json
 import os
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Literal
 
@@ -17,6 +18,7 @@ from omnischolar.core.errors import OmniScholarError
 from .models import OmniScholarConfig
 
 _CONFIG_NAME = "omnischolar.config.json"
+_EXAMPLE_CONFIG_NAME = "omnischolar.config.example.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +39,25 @@ class ConfigSource:
 class LoadedConfig:
     config: OmniScholarConfig
     source: ConfigSource
+
+
+def _bootstrap_payload() -> dict[str, Any]:
+    """Load the complete editable configuration template shipped with the package."""
+
+    try:
+        raw = files("omnischolar").joinpath("share", _EXAMPLE_CONFIG_NAME).read_text(
+            encoding="utf-8"
+        )
+    except FileNotFoundError:
+        source_path = Path(__file__).resolve().parents[3] / _EXAMPLE_CONFIG_NAME
+        raw = source_path.read_text(encoding="utf-8")
+    payload = json.loads(raw)
+    if not isinstance(payload, dict):
+        raise OmniScholarError(
+            "invalid_config_template", "Configuration template root must be an object", category="config"
+        )
+    OmniScholarConfig.model_validate(payload)
+    return payload
 
 
 def user_config_file(user_directory: Path | None = None) -> Path:
@@ -66,7 +87,7 @@ def ensure_user_config(
 
     path = user_config_file(user_directory)
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = OmniScholarConfig().model_dump(mode="json", by_alias=True, exclude_none=True)
+    payload = _bootstrap_payload()
     content = (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
     try:
         with path.open("xb") as handle:

@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.7] - 2026-09-16
+
+- Included the complete configuration-template loader in the published Python package.
+- Ensured first-run initialization uses the full editable template on installed releases.
+
 ## [0.1.6] - 2026-09-16
 
 - Generate the complete editable configuration template on first initialization.
