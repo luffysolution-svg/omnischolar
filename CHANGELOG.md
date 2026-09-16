@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.12] - 2026-09-16
+
+- Switched all documented and installer-generated MCP launchers to the latest PyPI package form.
+- Added complete latest-version update and uninstall commands for Python, MCP, Skills, Codex, Claude Code, and Pi.
+- Kept Codex TOML and stdio-host MCP configuration shapes separate and valid.
+
 ## [0.1.11] - 2026-09-16
 
 - Switched MCP launchers from fixed PyPI versions to `@latest`.

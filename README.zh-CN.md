@@ -47,6 +47,10 @@ omnischolar doctor --json
 ```sh
 uv tool upgrade luffysolution-omnischolar
 uv tool uninstall luffysolution-omnischolar
+pipx upgrade luffysolution-omnischolar
+pipx uninstall luffysolution-omnischolar
+python -m pip install --upgrade luffysolution-omnischolar
+python -m pip uninstall luffysolution-omnischolar
 ```
 
 ## 连接 Agent

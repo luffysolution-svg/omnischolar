@@ -19,6 +19,15 @@ uv tool upgrade luffysolution-omnischolar
 uv tool uninstall luffysolution-omnischolar
 ```
 
+若最初使用 `pipx` 或 `pip`，对应的更新和卸载命令是：
+
+```sh
+pipx upgrade luffysolution-omnischolar
+pipx uninstall luffysolution-omnischolar
+python -m pip install --upgrade luffysolution-omnischolar
+python -m pip uninstall luffysolution-omnischolar
+```
+
 如需从源码开发安装，请将包名替换为 `.`。
 
 验证命令是否可用：

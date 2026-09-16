@@ -19,6 +19,15 @@ uv tool upgrade luffysolution-omnischolar
 uv tool uninstall luffysolution-omnischolar
 ```
 
+If you originally installed with `pipx` or `pip`, use the matching update and uninstall commands:
+
+```sh
+pipx upgrade luffysolution-omnischolar
+pipx uninstall luffysolution-omnischolar
+python -m pip install --upgrade luffysolution-omnischolar
+python -m pip uninstall luffysolution-omnischolar
+```
+
 For development from a source checkout, replace the package name with `.`.
 
 Check the command:
