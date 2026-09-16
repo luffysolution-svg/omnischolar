@@ -16,7 +16,7 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 相对路径以配置文件所在目录为基准。拼错字段名或填写不合法的值时，程序会直接报错。
 
-如果前四项都不存在，第一次启动 MCP 或执行安装命令时会自动创建用户级配置文件。Windows 通常位于 `%LOCALAPPDATA%\omnischolar\omnischolar.config.json`，Linux 通常位于 `~/.config/omnischolar/omnischolar.config.json`，macOS 通常位于 `~/Library/Application Support/omnischolar/omnischolar.config.json`。也可以运行 `omnischolar config init` 主动创建；程序不会覆盖已有配置。旧版本生成的嵌套目录文件不会自动迁移或读取，请按需手动复制设置。
+如果前四项都不存在，第一次启动 MCP 或执行安装命令时会自动创建用户级完整配置模板。模板包含所有服务区块、`apiKey`、`apiKeyEnv` 以及 Vertex 的 `project`、`location` 等字段；Windows 通常位于 `%LOCALAPPDATA%\omnischolar\omnischolar.config.json`，Linux 通常位于 `~/.config/omnischolar/omnischolar.config.json`，macOS 通常位于 `~/Library/Application Support/omnischolar/omnischolar.config.json`。也可以运行 `omnischolar config init` 主动创建；程序不会覆盖已有配置。旧版本生成的嵌套目录文件不会自动迁移或读取，请按需手动复制设置。
 
 ## 最小配置
 

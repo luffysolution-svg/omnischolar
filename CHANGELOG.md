@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.6] - 2026-09-16
+
+- Generate the complete editable configuration template on first initialization.
+- Reserve direct `apiKey` and optional `apiKeyEnv` fields for every credentialed service.
+- Include Vertex project, location, and access-token fields plus all image-provider sections.
+
 ## [0.1.5] - 2026-09-16
 
 - Documented and tested direct `apiKey` entries in the user configuration.

@@ -28,6 +28,14 @@ class ConfigBootstrapTests(unittest.TestCase):
             self.assertEqual(path, user_directory / "omnischolar.config.json")
             document = json.loads(path.read_text(encoding="utf-8"))
             self.assertTrue(all(document["tools"]["groups"].values()))
+            self.assertIn("apiKey", document["mineru"])
+            self.assertIn("apiKey", document["ai4scholar"])
+            self.assertIn("apiKey", document["data"]["materialsProject"])
+            self.assertIn("apiKey", document["research"]["providers"]["semantic-scholar"])
+            self.assertIn("vertex", document["media"]["providers"])
+            self.assertIn("apiKey", document["media"]["providers"]["vertex"])
+            self.assertIn("project", document["media"]["providers"]["vertex"])
+            self.assertIn("location", document["media"]["providers"]["vertex"])
             self.assertEqual(load_config(user_directory=user_directory).source.kind, "user")
 
     def test_does_not_replace_project_config(self) -> None:

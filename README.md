@@ -60,7 +60,7 @@ In the ChatGPT desktop app, restart the app, open **Plugins**, select the **Omni
 The plugin bundles all eight Skills and starts its local MCP server with the pinned PyPI release:
 
 ```sh
-uvx --from luffysolution-omnischolar==0.1.5 omnischolar mcp
+uvx --from luffysolution-omnischolar==0.1.6 omnischolar mcp
 ```
 
 No separate `pip install` is required for this plugin path. The first MCP start needs network access so `uvx` can download and cache the package. Provider credentials and optional service settings remain in your OmniScholar configuration; plugin installation does not collect them.
@@ -134,7 +134,7 @@ Create a labelled illustration of this mechanism. Treat it as a draft, not exper
 
 ## Configuration
 
-On the first MCP start or installer run, if no discoverable config exists, OmniScholar creates one user-level `omnischolar.config.json`. You can also create it explicitly with `omnischolar config init`. API keys may be entered directly as `apiKey`; `apiKeyEnv` is an optional alternative when you prefer environment variables.
+On the first MCP start or installer run, if no discoverable config exists, OmniScholar creates a complete user-level `omnischolar.config.json` template with all service sections and credential fields. You can also create it explicitly with `omnischolar config init`. API keys may be entered directly as `apiKey`; `apiKeyEnv` is an optional alternative when you prefer environment variables.
 
 A small local configuration can start with Zotero and the output directory:
 
