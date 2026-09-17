@@ -12,6 +12,7 @@ from omnischolar.config import (
     resolve_credential,
     user_config_file,
 )
+from omnischolar.core.errors import OmniScholarError
 
 
 class ConfigBootstrapTests(unittest.TestCase):
@@ -46,6 +47,7 @@ class ConfigBootstrapTests(unittest.TestCase):
             self.assertIn("apiKey", document["research"]["providers"]["semantic-scholar"])
             self.assertIn("vertex", document["media"]["providers"])
             self.assertIn("apiKey", document["media"]["providers"]["vertex"])
+            self.assertIsNone(document["research"]["providers"]["semantic-scholar"]["apiKeyEnv"])
             self.assertIn("project", document["media"]["providers"]["vertex"])
             self.assertIn("location", document["media"]["providers"]["vertex"])
             self.assertEqual(document["output"]["literatureDirectory"], "Literatures")
@@ -91,6 +93,10 @@ class ConfigBootstrapTests(unittest.TestCase):
         self.assertTrue(credential.configured)
         self.assertEqual(credential.source, "config.apiKey")
         self.assertEqual(credential.reveal(), "inline-key")
+
+    def test_invalid_api_key_env_explains_direct_key_field(self) -> None:
+        with self.assertRaisesRegex(OmniScholarError, "put a direct API key in apiKey"):
+            resolve_credential("semantic-scholar", api_key_env="secret-value")
 
     def test_underscore_is_a_valid_shared_separator(self) -> None:
         config = OmniScholarConfig.model_validate(

@@ -43,7 +43,8 @@ def validate_env_name(name: str) -> str:
     if not _ENV_NAME.fullmatch(name):
         raise OmniScholarError(
             "invalid_env_name",
-            "apiKeyEnv is not a valid environment variable name",
+            "apiKeyEnv must be an environment variable name such as "
+            "OMNISCHOLAR_MINERU_API_KEY; put a direct API key in apiKey",
             category="config",
         )
     return name

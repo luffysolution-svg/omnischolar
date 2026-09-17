@@ -38,7 +38,7 @@
       "semantic-scholar": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_SEMANTIC_SCHOLAR_API_KEY",
+        "apiKeyEnv": null,
         "maxPages": 10
       },
       "openalex": {
@@ -50,7 +50,7 @@
       "pubmed": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_NCBI_API_KEY",
+        "apiKeyEnv": null,
         "email": "researcher@example.edu",
         "tool": "omnischolar",
         "maxPages": 10
@@ -75,7 +75,7 @@
       "easyscholar": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_EASYSCHOLAR_API_KEY",
+        "apiKeyEnv": null,
         "maxPages": 5
       }
     }
@@ -84,7 +84,7 @@
     "enabled": true,
     "baseUrl": "https://ai4scholar.net",
     "apiKey": "",
-    "apiKeyEnv": "OMNISCHOLAR_AI4SCHOLAR_API_KEY",
+    "apiKeyEnv": null,
     "timeoutSeconds": 60,
     "maxResponseBytes": 16777216
   },
@@ -98,7 +98,7 @@
     "baseUrl": "https://mineru.net/api/v4",
     "lightweightBaseUrl": "https://mineru.net/api/v1/agent",
     "apiKey": "",
-    "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY",
+    "apiKeyEnv": null,
     "model": "pipeline",
     "cacheDirectory": ".omnischolar/mineru",
     "pollIntervalSeconds": 2,
@@ -111,13 +111,13 @@
       "enabled": true,
       "baseUrl": "https://api.materialsproject.org",
       "apiKey": "",
-      "apiKeyEnv": "OMNISCHOLAR_MATERIALS_PROJECT_API_KEY",
+      "apiKeyEnv": null,
       "maxPages": 10
     },
     "casCommonChemistry": {
       "enabled": true,
       "apiKey": "",
-      "apiKeyEnv": "OMNISCHOLAR_CAS_API_KEY",
+      "apiKeyEnv": null,
       "baseUrl": null,
       "contractFile": null
     }
@@ -129,7 +129,7 @@
       "openai": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_OPENAI_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://api.openai.com/v1",
         "models": {
           "gpt-image-1": {
@@ -142,7 +142,7 @@
       "google": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_GEMINI_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
         "models": {},
         "options": {}
@@ -150,7 +150,7 @@
       "vertex": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_VERTEX_ACCESS_TOKEN",
+        "apiKeyEnv": null,
         "project": "your-project",
         "location": "us-central1",
         "models": {},
@@ -159,7 +159,7 @@
       "xai": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_XAI_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://api.x.ai/v1",
         "models": {},
         "options": {}
@@ -167,7 +167,7 @@
       "fal": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_FAL_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://fal.run",
         "models": {},
         "options": {}
@@ -175,7 +175,7 @@
       "dashscope": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
@@ -185,7 +185,7 @@
       "qwen-cloud": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
@@ -195,7 +195,7 @@
       "atlas": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_ATLAS_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://your-atlas-provider.example/v1",
         "models": {},
         "options": {}
@@ -203,7 +203,7 @@
       "custom": {
         "enabled": true,
         "apiKey": "",
-        "apiKeyEnv": "OMNISCHOLAR_CUSTOM_IMAGE_API_KEY",
+        "apiKeyEnv": null,
         "baseUrl": "https://images.example.edu/v1",
         "models": {
           "explicit-model-id": {
