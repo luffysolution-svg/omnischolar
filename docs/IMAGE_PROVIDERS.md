@@ -96,7 +96,7 @@ Vertex AI 可使用 service-account JSON：
 
 Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不同。Atlas、fal、Vertex、DashScope/Qwen 已提供少量基于官方文档核对的内置模型；自定义服务在未配置 `modelCatalogEndpoint` 时会尽力尝试 `baseUrl/models`。如果下游没有模型目录接口，或返回的模型没有明确能力字段，工具会回退到 `models` 中的显式模型合同，不会仅凭模型名推断图片能力。
 
-OpenAI 示例配置预设 `gpt-image-2`、`gpt-image-2.5-sunburst` 和 `gpt-image-2.5-flare`；Google/Vertex 示例配置预设 `gemini-3.1-flash-image`、`gemini-3.1-flash-lite-image` 和 `gemini-3-pro-image`。这些是模型 ID 与能力预设，不代表账号已经开通对应模型。
+官方 OpenAI、Google 和 Vertex 配置默认使用模型目录或内置官方目录发现，不需要在 `models` 中重复预设。custom 示例配置预设 `gpt-image-2`、`gpt-image-2.5-sunburst`、`gpt-image-2.5-flare`、`gemini-3.1-flash-image`、`gemini-3.1-flash-lite-image` 和 `gemini-3-pro-image`，供没有模型目录接口的 OpenAI/Gemini 兼容服务使用；这些预设不代表下游账号已经开通对应模型。
 
 ## 生成与编辑
 

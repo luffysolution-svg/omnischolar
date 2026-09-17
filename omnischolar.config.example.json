@@ -131,20 +131,7 @@
         "apiKey": "",
         "apiKeyEnv": null,
         "baseUrl": "https://api.openai.com/v1",
-        "models": {
-          "gpt-image-2": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gpt-image-2.5-sunburst": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gpt-image-2.5-flare": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          }
-        },
+        "models": {},
         "options": {}
       },
       "google": {
@@ -152,20 +139,7 @@
         "apiKey": "",
         "apiKeyEnv": null,
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
-        "models": {
-          "gemini-3.1-flash-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gemini-3.1-flash-lite-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gemini-3-pro-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          }
-        },
+        "models": {},
         "options": {}
       },
       "vertex": {
@@ -175,20 +149,7 @@
         "credentialsFile": null,
         "project": null,
         "location": "global",
-        "models": {
-          "gemini-3.1-flash-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gemini-3.1-flash-lite-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          },
-          "gemini-3-pro-image": {
-            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
-            "paid": true
-          }
-        },
+        "models": {},
         "options": {}
       },
       "xai": {
@@ -248,7 +209,27 @@
         "apiKeyEnv": null,
         "baseUrl": "https://images.example.edu/v1",
         "models": {
-          "explicit-model-id": {
+          "gpt-image-2": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          },
+          "gpt-image-2.5-sunburst": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          },
+          "gpt-image-2.5-flare": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          },
+          "gemini-3.1-flash-image": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          },
+          "gemini-3.1-flash-lite-image": {
+            "capabilities": ["text-to-image"],
+            "paid": true
+          },
+          "gemini-3-pro-image": {
             "capabilities": ["text-to-image"],
             "paid": true
           }

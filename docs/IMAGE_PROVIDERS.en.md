@@ -96,7 +96,7 @@ The service-account file is used locally to obtain an OAuth token and is never w
 
 Atlas, fal, Vertex, and DashScope/Qwen expose different catalog capabilities. Atlas, fal, Vertex, and DashScope/Qwen have small built-in model sets checked against official documentation; when `modelCatalogEndpoint` is not configured, custom services make a best-effort request to `baseUrl/models`. If a downstream service has no catalog endpoint, or its models lack explicit capability fields, the tool falls back to the explicit model contracts in `models` and never infers image capabilities from a model name.
 
-The OpenAI example configuration presets `gpt-image-2`, `gpt-image-2.5-sunburst`, and `gpt-image-2.5-flare`; the Google/Vertex examples preset `gemini-3.1-flash-image`, `gemini-3.1-flash-lite-image`, and `gemini-3-pro-image`. These are model and capability presets, not entitlement guarantees.
+The official OpenAI, Google, and Vertex configurations rely on their model catalogs or built-in official catalogs and do not duplicate model pins. The custom example configuration presets `gpt-image-2`, `gpt-image-2.5-sunburst`, `gpt-image-2.5-flare`, `gemini-3.1-flash-image`, `gemini-3.1-flash-lite-image`, and `gemini-3-pro-image` for OpenAI/Gemini-compatible services without a model catalog. These presets are not entitlement guarantees.
 
 ## Generate and edit
 

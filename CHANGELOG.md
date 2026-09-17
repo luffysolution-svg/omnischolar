@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.22] - 2026-09-17
+
+- Move current GPT Image and Gemini image model presets to the custom provider example; official providers continue to use their own model discovery or curated catalogs.
+
 ## [0.1.21] - 2026-09-17
 
 - Auto-probe custom OpenAI-compatible providers at `baseUrl/models` when no catalog endpoint is configured, with safe fallback to explicit model contracts.

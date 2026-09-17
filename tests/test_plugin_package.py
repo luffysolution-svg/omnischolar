@@ -46,22 +46,23 @@ class CodexPluginPackageTests(unittest.TestCase):
         self.assertEqual(providers["dashscope"]["options"]["workspace"], "your-workspace")
         self.assertNotIn("workspace", providers["qwen-cloud"]["options"])
 
-    def test_example_presets_current_openai_and_gemini_image_models(self) -> None:
+    def test_example_uses_custom_presets_and_official_catalog_discovery(self) -> None:
         document = json.loads(
             (ROOT / "omnischolar.config.example.json").read_text(encoding="utf-8")
         )
         providers = document["media"]["providers"]
-        self.assertEqual(
-            set(providers["openai"]["models"]),
-            {"gpt-image-2", "gpt-image-2.5-sunburst", "gpt-image-2.5-flare"},
-        )
-        expected_gemini = {
+        self.assertEqual(providers["openai"]["models"], {})
+        self.assertEqual(providers["google"]["models"], {})
+        self.assertEqual(providers["vertex"]["models"], {})
+        expected_custom = {
+            "gpt-image-2",
+            "gpt-image-2.5-sunburst",
+            "gpt-image-2.5-flare",
             "gemini-3.1-flash-image",
             "gemini-3.1-flash-lite-image",
             "gemini-3-pro-image",
         }
-        self.assertEqual(set(providers["google"]["models"]), expected_gemini)
-        self.assertEqual(set(providers["vertex"]["models"]), expected_gemini)
+        self.assertEqual(set(providers["custom"]["models"]), expected_custom)
 
     def test_portable_mcp_uses_latest_pypi_release(self) -> None:
         document = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))
