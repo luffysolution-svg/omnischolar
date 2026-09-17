@@ -30,7 +30,7 @@ class CodexPluginPackageTests(unittest.TestCase):
         self.assertEqual(server["version"], EXPECTED_VERSION)
         self.assertEqual(server["packages"][0]["version"], EXPECTED_VERSION)
 
-    def test_example_uses_workspace_scoped_dashscope_endpoints(self) -> None:
+    def test_example_distinguishes_bailian_and_qwen_platform_endpoints(self) -> None:
         document = json.loads(
             (ROOT / "omnischolar.config.example.json").read_text(encoding="utf-8")
         )
@@ -41,10 +41,10 @@ class CodexPluginPackageTests(unittest.TestCase):
         )
         self.assertEqual(
             providers["qwen-cloud"]["baseUrl"],
-            "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+            "https://dashscope.aliyuncs.com/api/v1",
         )
         self.assertEqual(providers["dashscope"]["options"]["workspace"], "your-workspace")
-        self.assertEqual(providers["qwen-cloud"]["options"]["workspace"], "your-workspace")
+        self.assertNotIn("workspace", providers["qwen-cloud"]["options"])
 
     def test_portable_mcp_uses_latest_pypi_release(self) -> None:
         document = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))

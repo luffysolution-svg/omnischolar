@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import json
 import mimetypes
 import re
 import time
@@ -147,6 +148,35 @@ class ModelDescriptor:
     usable: bool
     unavailable_reason: str | None = None
     created: int | None = None
+    supported_parameters: tuple[str, ...] = ()
+
+
+# Provider parameter contracts are based on the current official API schemas.
+# These are separate from modality capabilities: a model can support editing
+# while its provider still rejects a particular output control.
+PROVIDER_PARAMETER_SUPPORT: dict[str, tuple[str, ...]] = {
+    "openai": ("size", "resolution", "background", "outputFormat", "quality", "n"),
+    "google": ("aspectRatio", "resolution", "outputFormat"),
+    "gemini": ("aspectRatio", "resolution", "outputFormat"),
+    "vertex": ("aspectRatio", "resolution", "outputFormat", "n"),
+    "fal": ("size", "aspectRatio", "resolution", "background", "outputFormat", "quality", "n", "seed"),
+    "atlas": ("size", "resolution", "quality", "outputFormat", "n"),
+    "dashscope": ("size", "resolution", "n", "negativePrompt", "seed"),
+    "qwen": ("size", "resolution", "n", "negativePrompt", "seed"),
+    "qwen-cloud": ("size", "resolution", "n", "negativePrompt", "seed"),
+}
+
+
+def supported_parameters(provider_id: str, model_id: str) -> tuple[str, ...]:
+    if provider_id == "fal" and model_id == "fal-ai/nano-banana-2":
+        return ("aspectRatio", "resolution", "outputFormat", "n", "seed")
+    if provider_id == "fal" and model_id.startswith("openai/gpt-image"):
+        return ("size", "resolution", "background", "outputFormat", "quality", "n")
+    if provider_id in {"dashscope", "qwen", "qwen-cloud"} and not model_id.startswith(
+        "qwen-image"
+    ):
+        return ("size", "resolution", "n")
+    return PROVIDER_PARAMETER_SUPPORT.get(provider_id, ())
 
 
 class MediaService:
@@ -215,6 +245,7 @@ class MediaService:
                         "config_pin",
                         usable,
                         unavailable_reason,
+                        supported_parameters=supported_parameters(provider.id, model_id),
                     )
                 )
             for model_id, (capabilities, created) in catalog_models.items():
@@ -237,6 +268,7 @@ class MediaService:
                             None if known_capabilities else "model_capabilities_unpinned"
                         ),
                         created,
+                        supported_parameters(provider.id, model_id),
                     )
                 )
             for model_id, capabilities in CURATED_MODELS.get(provider.id, {}).items():
@@ -250,6 +282,7 @@ class MediaService:
                         "curated_fallback",
                         usable,
                         unavailable_reason,
+                        supported_parameters=supported_parameters(provider.id, model_id),
                     )
                 )
         return descriptors
@@ -259,6 +292,8 @@ class MediaService:
         if provider.id in {"atlas", "custom"} and not provider.base_url:
             return "provider_base_url_required"
         if provider.id not in {"dashscope", "qwen", "qwen-cloud"}:
+            return None
+        if provider.id == "qwen-cloud":
             return None
         configured_base = provider.base_url.rstrip("/") if provider.base_url else None
         if configured_base and "your-workspace" not in configured_base and (
@@ -552,7 +587,48 @@ class MediaService:
         if provider.id == "atlas" and "n" in mapped:
             mapped["num_images"] = mapped.pop("n")
         if provider.id in {"dashscope", "qwen", "qwen-cloud"}:
-            unsupported = {"background", "output_format", "quality", "aspect_ratio", "resolution"} & mapped.keys()
+            if "resolution" in mapped:
+                if "size" in mapped:
+                    raise OmniScholarError(
+                        "parameter_conflict",
+                        "Specify only one of size and resolution",
+                        category="validation",
+                    )
+                resolution = mapped.pop("resolution")
+                if not isinstance(resolution, str) or "x" not in resolution.lower():
+                    raise OmniScholarError(
+                        "parameter_unsupported",
+                        "Qwen resolution must be a WIDTHxHEIGHT value and is mapped to size",
+                        category="capability",
+                    )
+                mapped["size"] = resolution
+            if "aspect_ratio" in mapped:
+                if "size" in mapped:
+                    raise OmniScholarError(
+                        "parameter_conflict",
+                        "Specify only one of aspectRatio and size for DashScope/Qwen",
+                        category="validation",
+                    )
+                aspect_sizes = {
+                    "1:1": "2048*2048",
+                    "2:3": "1365*2048",
+                    "3:2": "2048*1365",
+                    "3:4": "1536*2048",
+                    "4:3": "2048*1536",
+                    "4:5": "1638*2048",
+                    "5:4": "2048*1638",
+                    "9:16": "1152*2048",
+                    "16:9": "2048*1152",
+                }
+                aspect_ratio = mapped.pop("aspect_ratio")
+                if aspect_ratio not in aspect_sizes:
+                    raise OmniScholarError(
+                        "parameter_unsupported",
+                        "Qwen aspectRatio must be a supported standard ratio",
+                        category="capability",
+                    )
+                mapped["size"] = aspect_sizes[aspect_ratio]
+            unsupported = {"background", "output_format", "quality"} & mapped.keys()
             if unsupported:
                 raise OmniScholarError(
                     "parameter_unsupported",
@@ -571,6 +647,23 @@ class MediaService:
         return mapped
 
     @staticmethod
+    def _vertex_project(provider: MediaProviderSettings) -> str | None:
+        configured = provider.options.get("project")
+        if isinstance(configured, str) and configured.strip() and configured != "your-project":
+            return configured.strip()
+        path = provider.credentials_file
+        if path is None:
+            return None
+        try:
+            if path.stat().st_size > 4 * 1024 * 1024:
+                return None
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            return None
+        project = payload.get("project_id") if isinstance(payload, dict) else None
+        return project.strip() if isinstance(project, str) and project.strip() else None
+
+    @staticmethod
     def _vertex_authorization(provider: MediaProviderSettings) -> str:
         if provider.credentials_file:
             try:
@@ -579,7 +672,7 @@ class MediaService:
             except ImportError as exc:
                 raise OmniScholarError(
                     "credential_dependency_required",
-                    "Vertex JSON credentials require the optional google-auth dependency",
+                    "Vertex JSON credentials require the google-auth and requests dependencies",
                     category="configuration",
                     cause=exc,
                 ) from exc
@@ -637,6 +730,16 @@ class MediaService:
         )
         workspace_valid = isinstance(workspace, str) and _DASHSCOPE_WORKSPACE.fullmatch(workspace)
         protocol = provider.options.get("protocol", "native")
+        if provider.id == "qwen-cloud":
+            if configured and "your-workspace" not in configured:
+                if protocol != "openai-compatible":
+                    return configured.replace("/compatible-mode/v1", "/api/v1")
+                return configured
+            return (
+                "https://dashscope.aliyuncs.com/compatible-mode/v1"
+                if protocol == "openai-compatible"
+                else "https://dashscope.aliyuncs.com/api/v1"
+            )
         if workspace_valid and (
             not configured or "your-workspace" in configured
         ):
@@ -773,7 +876,7 @@ class MediaService:
             )
         if provider.id == "vertex":
             project, location = (
-                provider.options.get("project"),
+                self._vertex_project(provider),
                 provider.options.get("location", "global"),
             )
             if not project:
@@ -814,6 +917,8 @@ class MediaService:
                         "contents": [{"role": "user", "parts": parts}],
                         "generationConfig": generation_config,
                     },
+                    timeout_seconds=180,
+                    max_response_bytes=self.max_artifact_bytes,
                 )
             endpoint = self._relative_endpoint(base, f"{quote(model, safe='')}:predict")
             instance: dict[str, Any] = {"prompt": prompt}
@@ -841,6 +946,8 @@ class MediaService:
                     "instances": [instance],
                     "parameters": options,
                 },
+                timeout_seconds=180,
+                max_response_bytes=self.max_artifact_bytes,
             )
         if provider.id == "fal":
             return await self._call_fal(provider, model, prompt, references, options)
@@ -1303,7 +1410,10 @@ class MediaService:
             return {
                 "provider": provider.id,
                 "enabled": provider.enabled,
-                "credentialConfigured": bool(provider.api_key),
+                "credentialConfigured": bool(
+                    provider.api_key
+                    or (provider.credentials_file is not None and provider.credentials_file.is_file())
+                ),
                 "models": [asdict(item) for item in await self.models(provider_id)],
             }
         endpoint = provider.options.get("statusEndpoint")

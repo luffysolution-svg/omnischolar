@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -140,6 +141,72 @@ class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
             MediaService._dashscope_base(workspace),
             "https://abc123.cn-beijing.maas.aliyuncs.com/api/v1",
         )
+
+    def test_qwen_cloud_uses_public_platform_endpoint_without_workspace(self) -> None:
+        provider = MediaProviderSettings(
+            "qwen-cloud",
+            True,
+            "key",
+            "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+            options={"protocol": "native", "workspace": "your-workspace"},
+        )
+
+        self.assertIsNone(MediaService._provider_contract_error(provider))
+        self.assertEqual(
+            MediaService._dashscope_base(provider),
+            "https://dashscope.aliyuncs.com/api/v1",
+        )
+
+    async def test_qwen_common_resolution_and_aspect_ratio_map_to_native_size(self) -> None:
+        class Transport:
+            async def json(self, method, url, **kwargs):
+                self.call = (method, url, kwargs)
+                return {}
+
+        transport = Transport()
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                transport,
+                [MediaProviderSettings("qwen-cloud", True, "key")],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            await service._call_provider(
+                service.providers["qwen-cloud"],
+                "qwen-image-3.0-pro",
+                "text-to-image",
+                "draw",
+                [],
+                {"resolution": "1024x1024", "n": 1, "seed": 7},
+            )
+
+        self.assertEqual(transport.call[2]["body"]["parameters"]["size"], "1024*1024")
+        self.assertEqual(transport.call[2]["body"]["parameters"]["n"], 1)
+        self.assertEqual(transport.call[2]["body"]["parameters"]["seed"], 7)
+
+    def test_vertex_project_is_inferred_from_service_account_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            credentials = Path(temporary) / "service-account.json"
+            credentials.write_text(json.dumps({"project_id": "inferred-project"}), encoding="utf-8")
+            provider = MediaProviderSettings(
+                "vertex", True, None, credentials_file=credentials, options={"project": "your-project"}
+            )
+
+            self.assertEqual(MediaService._vertex_project(provider), "inferred-project")
+
+    async def test_model_descriptors_expose_official_parameter_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                None,  # type: ignore[arg-type]
+                [MediaProviderSettings("qwen-cloud", True, "key")],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            models = await service.models("qwen-cloud")
+
+        self.assertIn("size", models[0].supported_parameters)
+        self.assertIn("n", models[0].supported_parameters)
+        self.assertNotIn("background", models[0].supported_parameters)
 
     async def test_xai_image_catalog_is_discovered(self) -> None:
         class CatalogTransport:

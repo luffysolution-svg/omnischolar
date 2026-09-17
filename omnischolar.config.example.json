@@ -152,7 +152,7 @@
         "apiKey": "",
         "apiKeyEnv": null,
         "credentialsFile": null,
-        "project": "your-project",
+        "project": null,
         "location": "global",
         "models": {},
         "options": {}
@@ -189,11 +189,9 @@
         "enabled": true,
         "apiKey": "",
         "apiKeyEnv": null,
-        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace",
-          "region": "ap-southeast-1",
           "protocol": "native"
         }
       },

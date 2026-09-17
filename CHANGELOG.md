@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.19] - 2026-09-17
+
+- Distinguished Qwen AI Platform public DashScope endpoints from Bailian workspace endpoints.
+- Inferred the Vertex project from `credentialsFile.project_id`, included Vertex auth dependencies by default, and added a long image-generation timeout.
+- Exposed verified provider parameter contracts through `omnischolar_image_models` and documented provider-specific image controls.
+- Mapped Qwen `resolution`/`aspectRatio` to the native `size` parameter and added regression coverage.
+
 ## [0.1.18] - 2026-09-17
 
 - Added Semantic Scholar author search/detail/papers operations, recommendation enrichment, bounded retries, and `Retry-After` handling.

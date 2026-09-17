@@ -16,7 +16,19 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
 
 模型选择顺序是：用户显式指定的模型、当前服务商目录中已确认能力的模型、经过官方文档核对的内置模型、显式配置的模型合同。省略模型时，工具会发现并选择最新的可用模型；没有模型目录的服务商使用内置的已核对模型，同时仍允许在 `models` 中显式覆盖或补充模型和能力。
 
-常用工具参数包括 `size`、`aspectRatio`、`resolution`、`background`、`outputFormat`、`quality`、`n`、`negativePrompt` 和 `seed`。工具会按服务商协议转换参数；不支持的参数组合会在提交请求前返回 `parameter_unsupported`。
+常用工具参数包括 `size`、`aspectRatio`、`resolution`、`background`、`outputFormat`、`quality`、`n`、`negativePrompt` 和 `seed`。调用前先读取模型描述中的 `supported_parameters`；工具会按服务商协议转换参数，不支持的参数组合会在提交请求前返回 `parameter_unsupported`，不会静默丢弃参数。
+
+### 官方参数能力矩阵
+
+| 服务商/API | 已核对的参数 | 明确不应默认传入 |
+|---|---|---|
+| OpenAI GPT Image | `size`/`resolution`、`background`、`outputFormat`、`quality`、`n` | 独立 `aspectRatio` |
+| Google Gemini API Interactions | `aspectRatio`、`resolution`（`1K`/`2K`）、`outputFormat` | `size`、`background`、`quality`、`n`、`seed` |
+| Vertex Gemini image | `aspectRatio`、`resolution`（`1K`/`2K`/`4K`）、`outputFormat`、`n` | 透明背景、任意像素尺寸 |
+| Fal Nano Banana 2 | `aspectRatio`、`resolution`、`outputFormat`、`n`、`seed` | `background`、`quality` |
+| Fal GPT Image 变体 | `size`/`resolution`、`background`、`outputFormat`、`quality`、`n` | Nano Banana 专属参数 |
+| DashScope/Qwen 原生图像 | `size`/`resolution`、`n`、`negativePrompt`、`seed` | `background`、`quality`、透明背景 |
+| Atlas | 按模型合同；GPT Image 常见为 `size`、`quality`、`outputFormat` | 不要使用服务商级统一假设 |
 
 ## 配置示例
 
@@ -49,11 +61,9 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
       "qwen-cloud": {
         "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
-        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace",
-          "region": "ap-southeast-1",
           "protocol": "native"
         }
       }
@@ -62,7 +72,7 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
 }
 ```
 
-千问 AI 平台图片模型使用 DashScope 原生接口。华北 2（北京）可填写 `region: "cn-beijing"`，新加坡可填写 `region: "ap-southeast-1"`；也可以直接填写对应的 `baseUrl`。`protocol` 默认是 `native`，只有明确配置为 `openai-compatible` 时才使用兼容端点。内置模型包括 `qwen-image-3.0-pro`、`qwen-image-3.0`、`wan2.7-image-pro`、`wan2.7-image` 和 `z-image-turbo`；其中当前 Qwen Image 3.0 推荐模型为 `qwen-image-3.0-pro`，具体生成权限仍以账号和地域为准。
+千问 AI 平台图片模型使用公共 DashScope 原生接口 `https://dashscope.aliyuncs.com/api/v1`，不需要 workspace 或 region。只有百炼的地域 workspace 实例才需要填写 `workspace`、`region`，并使用对应的 workspace Base URL。`protocol` 默认是 `native`，只有明确配置为 `openai-compatible` 时才使用兼容端点。内置模型包括 `qwen-image-3.0-pro`、`qwen-image-3.0`、`wan2.7-image-pro`、`wan2.7-image` 和 `z-image-turbo`；其中当前 Qwen Image 3.0 推荐模型为 `qwen-image-3.0-pro`，具体生成权限仍以账号和地域为准。
 
 Vertex AI 可使用 service-account JSON：
 
@@ -71,7 +81,7 @@ Vertex AI 可使用 service-account JSON：
   "vertex": {
     "enabled": true,
     "credentialsFile": "F:/path/to/service-account.json",
-    "project": "your-project",
+    "project": null,
     "location": "global",
     "models": {
       "imagen-3.0-capability-001": {
@@ -82,7 +92,7 @@ Vertex AI 可使用 service-account JSON：
 }
 ```
 
-服务账号文件只用于本地换取 OAuth token，不会写入输出结果。模型是否可用取决于项目授权、区域和模型发布状态。
+服务账号文件只用于本地换取 OAuth token，不会写入输出结果。若省略 `project`，工具会从 JSON 的 `project_id` 自动读取；默认 `location` 为 `global`。模型是否可用仍取决于项目授权、区域和模型发布状态。
 
 Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不同。Atlas、fal、Vertex、DashScope/Qwen 已提供少量基于官方文档核对的内置模型；自定义服务仍需要准确的 `baseUrl`、模型 ID、功能列表，以及生成或编辑接口。不要只凭模型名填写功能，也不要把内置模型视为账号已开通的保证。
 

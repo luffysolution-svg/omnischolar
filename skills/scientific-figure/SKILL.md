@@ -21,7 +21,19 @@ Confirm the scientific message, audience, figure type, required entities and lab
 5. Use `ai4scholar_figure` only for its declared actions and configured credentials.
 6. Use `omnischolar_image_service` with `action=status` for local configuration status or `action=job` only when a configured provider exposes that job contract.
 
-Pass common image controls using the tool's normalized names when supported: `size`, `aspectRatio`, `resolution`, `background`, `outputFormat`, `quality`, `n`, `negativePrompt`, and `seed`. Provider adapters translate these to their native contracts. Text-to-image, image-to-image, edit, transparency, aspect ratio, resolution, and batch count are separate capability checks; never infer one from another. Providers without a model-list endpoint must expose only versioned, provider-verified fallback models. `Atlas` and other custom endpoints need an explicit model contract and are never populated by guesses.
+Pass common image controls using the tool's normalized names only when the selected model descriptor lists them in `supported_parameters`. The current official parameter matrix is:
+
+| Provider/API | Supported normalized parameters | Do not assume |
+|---|---|---|
+| OpenAI GPT Image | `size`/`resolution`, `background`, `outputFormat`, `quality`, `n` | `aspectRatio` is not a separate native control; use `size` |
+| Google Gemini API Interactions | `aspectRatio`, `resolution` (`1K`/`2K`), `outputFormat` | `size`, `background`, `quality`, `n`, `seed` |
+| Vertex Gemini image | `aspectRatio`, `resolution` (`1K`/`2K`/`4K`), `outputFormat`, `n` | transparent background and arbitrary pixel `size` |
+| Fal Nano Banana 2 | `aspectRatio`, `resolution`, `outputFormat`, `n`, `seed` | `background` and `quality` unless the selected Fal model declares them |
+| Fal GPT Image variants | `size`/`resolution`, `background`, `outputFormat`, `quality`, `n` | Nano Banana-specific controls |
+| DashScope/Qwen native image | `size`/`resolution`, `n`, `negativePrompt`, `seed` | `background`, `quality`, transparent output |
+| Atlas model endpoints | follow the selected model's descriptor; GPT Image commonly exposes `size`, `quality`, `outputFormat` | a provider-wide parameter contract |
+
+Adapters translate supported controls to native names. Unsupported controls must be omitted or reported as `parameter_unsupported`; do not silently drop them. Text-to-image, image-to-image, edit, transparency, aspect ratio, resolution, and batch count are separate capability checks; never infer one from another. Providers without a model-list endpoint must expose only versioned, provider-verified fallback models. `Atlas` and other custom endpoints need an explicit model contract and are never populated by guesses.
 
 If the chosen provider is absent, disabled, lacks credentials, lacks entitlement, or has no usable capability pin/curated descriptor, stop and report the exact blocker. Offer another configured provider only after confirming the same capability and informing the user. Atlas and custom providers require explicit endpoint/model contracts. Do not treat a successful model listing as generation entitlement.
 

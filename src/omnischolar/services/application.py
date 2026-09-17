@@ -172,6 +172,15 @@ class OmniScholarApplication:
                 options["project"] = section.project
             if section.location:
                 options["location"] = section.location
+            if (
+                name == "vertex"
+                and section.credentials_file is not None
+                and section.credentials_file.is_file()
+            ):
+                self.credential_status[name] = {
+                    "configured": True,
+                    "source": "config.credentialsFile",
+                }
             media_settings.append(
                 MediaProviderSettings(
                     name,

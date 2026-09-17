@@ -16,7 +16,19 @@ OmniScholar can connect to OpenAI, xAI, Gemini, Vertex AI, fal.ai, DashScope/Qwe
 
 Model selection uses the user's explicit model first, then catalog models with confirmed capabilities, then official-documentation-verified built-in models, then explicitly configured model contracts. If the model is omitted, the tool discovers and selects the newest usable model. Providers without a model catalog use a small verified built-in set and still allow `models` to override or extend the declarations.
 
-Common tool parameters include `size`, `aspectRatio`, `resolution`, `background`, `outputFormat`, `quality`, `n`, `negativePrompt`, and `seed`. The tool maps them to each provider's protocol and returns `parameter_unsupported` before submission when a combination is not supported.
+Common tool parameters include `size`, `aspectRatio`, `resolution`, `background`, `outputFormat`, `quality`, `n`, `negativePrompt`, and `seed`. Read `supported_parameters` from the selected model before calling the tool; adapters map supported controls to native names and return `parameter_unsupported` before submission instead of silently dropping controls.
+
+### Official parameter matrix
+
+| Provider/API | Verified parameters | Do not assume |
+|---|---|---|
+| OpenAI GPT Image | `size`/`resolution`, `background`, `outputFormat`, `quality`, `n` | A separate native `aspectRatio` control |
+| Google Gemini API Interactions | `aspectRatio`, `resolution` (`1K`/`2K`), `outputFormat` | `size`, `background`, `quality`, `n`, `seed` |
+| Vertex Gemini image | `aspectRatio`, `resolution` (`1K`/`2K`/`4K`), `outputFormat`, `n` | Transparency or arbitrary pixel `size` |
+| Fal Nano Banana 2 | `aspectRatio`, `resolution`, `outputFormat`, `n`, `seed` | `background` or `quality` |
+| Fal GPT Image variants | `size`/`resolution`, `background`, `outputFormat`, `quality`, `n` | Nano Banana-specific controls |
+| DashScope/Qwen native image | `size`/`resolution`, `n`, `negativePrompt`, `seed` | `background`, `quality`, or transparent output |
+| Atlas | Follow the selected model contract; GPT Image commonly exposes `size`, `quality`, `outputFormat` | A provider-wide parameter contract |
 
 ## Example config
 
@@ -49,11 +61,9 @@ Common tool parameters include `size`, `aspectRatio`, `resolution`, `background`
       "qwen-cloud": {
         "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
-        "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
+        "baseUrl": "https://dashscope.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace",
-          "region": "ap-southeast-1",
           "protocol": "native"
         }
       }
@@ -62,7 +72,7 @@ Common tool parameters include `size`, `aspectRatio`, `resolution`, `background`
 }
 ```
 
-Qwen AI Platform image models use the native DashScope API. Set `region` to `cn-beijing` for China (Beijing) or `ap-southeast-1` for Singapore, or provide the matching `baseUrl` directly. `protocol` defaults to `native`; set it to `openai-compatible` only when that protocol is explicitly supported. The built-in set includes `qwen-image-3.0-pro`, `qwen-image-3.0`, `wan2.7-image-pro`, `wan2.7-image`, and `z-image-turbo`; the current Qwen Image 3.0 recommendation is `qwen-image-3.0-pro`, while actual entitlement remains account- and region-dependent.
+Qwen AI Platform image models use the public native DashScope endpoint `https://dashscope.aliyuncs.com/api/v1` and do not require a workspace or region. Only Bailian regional workspace deployments need `workspace`, `region`, and a matching workspace Base URL. `protocol` defaults to `native`; set it to `openai-compatible` only when that protocol is explicitly supported. The built-in set includes `qwen-image-3.0-pro`, `qwen-image-3.0`, `wan2.7-image-pro`, `wan2.7-image`, and `z-image-turbo`; the current Qwen Image 3.0 recommendation is `qwen-image-3.0-pro`, while actual entitlement remains account- and region-dependent.
 
 Vertex AI can use a service-account JSON file:
 
@@ -71,7 +81,7 @@ Vertex AI can use a service-account JSON file:
   "vertex": {
     "enabled": true,
     "credentialsFile": "F:/path/to/service-account.json",
-    "project": "your-project",
+    "project": null,
     "location": "global",
     "models": {
       "imagen-3.0-capability-001": {
@@ -82,7 +92,7 @@ Vertex AI can use a service-account JSON file:
 }
 ```
 
-The service-account file is used locally to obtain an OAuth token and is never written to output artifacts. Model availability depends on project permissions, location, and model publication status.
+The service-account file is used locally to obtain an OAuth token and is never written to output artifacts. If `project` is omitted, OmniScholar reads `project_id` from the JSON; `location` defaults to `global`. Model availability still depends on project permissions, location, and model publication status.
 
 Atlas, fal, Vertex, and DashScope/Qwen expose different catalog capabilities. Atlas, fal, Vertex, and DashScope/Qwen have small built-in model sets checked against official documentation; custom services still need an exact `baseUrl`, model ID, capability list, and generation or edit endpoint. Do not infer capabilities from the model name or treat a built-in model as an entitlement guarantee.
 

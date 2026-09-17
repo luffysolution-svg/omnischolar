@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luffysolution-omnischolar"
-version = "0.1.18"
+version = "0.1.19"
 description = "Literature, Zotero, PDF, citation, materials, and scientific image tools for local MCP agents"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,11 +23,13 @@ classifiers = [
 dependencies = [
   "anyio>=4.8,<5",
   "defusedxml>=0.7,<1",
+  "google-auth>=2.38,<3",
   "httpx>=0.28,<1",
   "jsonschema>=4.23,<5",
   "mcp>=1.12.4,<2",
   "platformdirs>=4.3,<5",
   "pydantic>=2.11,<3",
+  "requests>=2.32,<3",
   "tomlkit>=0.13,<1",
   "PyYAML>=6,<7",
 ]

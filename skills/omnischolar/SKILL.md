@@ -35,6 +35,8 @@ The generated configuration enables provider sections by default. Use providers 
 
 For Semantic Scholar, keep paper and author operations separate: use `literature_search`/`literature_get` for papers, `literature_graph` for recommendations and citation relations, and `literature_author` for author search, author detail, or an author's papers. Respect provider throttling and `Retry-After`; do not treat a transient 429 or 5xx as evidence that the API is unsupported.
 
+For image calls, read each selected model's `supported_parameters` from `omnischolar_image_models` before calling `omnischolar_image_generate` or `omnischolar_image_edit`. Provider parameter support is not interchangeable: OpenAI GPT Image uses `size`, Google Gemini uses `aspectRatio`/`resolution`/`outputFormat`, Vertex Gemini uses `aspectRatio`/`resolution`/`outputFormat`/`n`, Fal varies by model, and native DashScope/Qwen uses `size`/`n`/`negativePrompt`/`seed` without background or quality controls. Qwen AI Platform uses the public DashScope endpoint and does not require a workspace; Bailian workspace endpoints are a separate regional configuration.
+
 ## Boundaries
 
 - Zotero is GET-only and local-only. Never expose port 23119 or request a write operation.
