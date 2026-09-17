@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.23] - 2026-09-17
+
+- Extend OpenAI-compatible image request timeouts to 180 seconds by default, with a bounded custom-provider override.
+
 ## [0.1.22] - 2026-09-17
 
 - Move current GPT Image and Gemini image model presets to the custom provider example; official providers continue to use their own model discovery or curated catalogs.

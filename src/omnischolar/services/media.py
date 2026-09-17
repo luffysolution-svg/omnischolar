@@ -800,7 +800,12 @@ class MediaService:
                     **{key: str(value) for key, value in options.items()},
                 }
                 return await self.transport.multipart(
-                    "POST", endpoint, headers=headers, data=data, files=files
+                    "POST",
+                    endpoint,
+                    headers=headers,
+                    data=data,
+                    files=files,
+                    timeout_seconds=self._image_request_timeout(provider),
                 )
             endpoint = self._relative_endpoint(
                 base, provider.options.get("generationEndpoint", "images/generations")
@@ -810,6 +815,7 @@ class MediaService:
                 endpoint,
                 headers=headers,
                 body={**options, "model": model, "prompt": prompt},
+                timeout_seconds=self._image_request_timeout(provider),
             )
         if provider.id == "xai":
             base = provider.base_url or "https://api.x.ai/v1"
@@ -1349,6 +1355,13 @@ class MediaService:
                 category="config",
             )
         return float(value)
+
+    @staticmethod
+    def _image_request_timeout(provider: MediaProviderSettings) -> float:
+        value = provider.options.get("imageTimeoutSeconds", 180)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return 180.0
+        return max(1.0, min(float(value), 1_800.0))
 
     @staticmethod
     def _payload_options(options: dict[str, Any]) -> dict[str, Any]:

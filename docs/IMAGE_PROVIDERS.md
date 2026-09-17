@@ -111,6 +111,6 @@ Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不
 - DashScope/Qwen 支持千问 AI 平台的通用原生地址 `https://dashscope.aliyuncs.com/api/v1`，也支持百炼按地域的 workspace 地址，例如 `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`。当填写 `workspace` 和 `region` 时，工具可以自动拼接地域地址。
 - Gemini 配置中的 `apiKeyEnv` 必须指向已存在的环境变量。
 - Atlas Cloud 使用 `https://api.atlascloud.ai/api/v1`、`model/generateImage` 提交和 `model/prediction/{id}` 轮询；默认内置 Nano Banana 2、GPT Image 2、GPT Image 2.5 Flare/Sunburst 的官方模型 ID。Atlas 的图片任务是异步的，结果中的 `outputs` 会保存到本地。
-- 自定义服务会自动探测标准 OpenAI 兼容的 `/models`；也可以用 `options.modelCatalogEndpoint` 指定非标准目录地址。目录结果缺少明确 `capabilities`/`supportedCapabilities` 时只展示为未绑定能力，必须在 `models` 中声明 `text-to-image`、`image-to-image` 或 `edit` 后才能调用。
+- 自定义服务会自动探测标准 OpenAI 兼容的 `/models`；也可以用 `options.modelCatalogEndpoint` 指定非标准目录地址。目录结果缺少明确 `capabilities`/`supportedCapabilities` 时只展示为未绑定能力，必须在 `models` 中声明 `text-to-image`、`image-to-image` 或 `edit` 后才能调用。custom 图片请求默认超时为 180 秒，可用 `options.imageTimeoutSeconds` 调整（上限 1800 秒）。
 
 生成后仍需人工检查文字、结构、机制、比例和定量描述。**AI 图片是示意草稿，不是实验数据、真实测量或科研结论。**

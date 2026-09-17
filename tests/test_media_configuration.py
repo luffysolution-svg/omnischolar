@@ -416,6 +416,41 @@ class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(body["output_format"], "png")
         self.assertEqual(body["n"], 2)
         self.assertNotIn("response_format", body)
+        self.assertEqual(transport.call[2]["timeout_seconds"], 180.0)
+
+    async def test_custom_generation_uses_extended_configurable_timeout(self) -> None:
+        class Transport:
+            async def json(self, method, url, **kwargs):
+                self.call = (method, url, kwargs)
+                return {}
+
+        transport = Transport()
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                transport,
+                [
+                    MediaProviderSettings(
+                        "custom",
+                        True,
+                        "key",
+                        "https://proxy.example/v1",
+                        {"gpt-image-2": {"text-to-image"}},
+                        {"imageTimeoutSeconds": 240},
+                    )
+                ],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            await service._call_provider(
+                service.providers["custom"],
+                "gpt-image-2",
+                "text-to-image",
+                "draw",
+                [],
+                {},
+            )
+
+        self.assertEqual(transport.call[2]["timeout_seconds"], 240.0)
 
     async def test_qwen_compatible_mode_uses_shared_generation_endpoint(self) -> None:
         class Transport:

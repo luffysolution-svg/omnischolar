@@ -237,7 +237,8 @@
         "options": {
           "modelCatalogEndpoint": null,
           "generationEndpoint": "images/generations",
-          "editEndpoint": "images/edits"
+          "editEndpoint": "images/edits",
+          "imageTimeoutSeconds": 180
         }
       }
     }
