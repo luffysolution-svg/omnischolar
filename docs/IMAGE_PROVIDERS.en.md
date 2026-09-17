@@ -8,13 +8,15 @@ OmniScholar can connect to OpenAI, xAI, Gemini, Vertex AI, fal.ai, DashScope/Qwe
 
 | Tool | Use |
 |---|---|
-| `omnischolar_image_models` | Show configured models and their usable operations |
+| `omnischolar_image_models` | Discover and show models available with the current credentials |
 | `omnischolar_image_generate` | Text-to-image, image-to-image, or multi-reference generation |
 | `omnischolar_image_edit` | Edit an existing image |
 | `omnischolar_image_service` | Run supported provider status, model, or task operations |
 | `ai4scholar_figure` | Generate, edit, or vectorize through Ai4Scholar |
 
-Each model must explicitly declare the operation it supports. A model name appearing in a provider catalog does not by itself prove that it can generate or edit images; the corresponding operation must show `usable: true` in `omnischolar_image_models`.
+Model selection uses the user's explicit model first, then catalog models with confirmed capabilities, then official-documentation-verified built-in models, then explicitly configured model contracts. If the model is omitted, the tool discovers and selects the newest usable model. Providers without a model catalog use a small verified built-in set and still allow `models` to override or extend the declarations.
+
+Common tool parameters include `size`, `aspectRatio`, `resolution`, `background`, `outputFormat`, `quality`, `n`, `negativePrompt`, and `seed`. The tool maps them to each provider's protocol and returns `parameter_unsupported` before submission when a combination is not supported.
 
 ## Example config
 
@@ -29,7 +31,7 @@ Each model must explicitly declare the operation it supports. A model name appea
       "fal": {
         "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_FAL_API_KEY",
-        "baseUrl": "https://fal.run",
+        "baseUrl": "https://queue.fal.run",
         "models": {},
         "options": {}
       },
@@ -39,7 +41,9 @@ Each model must explicitly declare the operation it supports. A model name appea
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace"
+          "workspace": "your-workspace",
+          "region": "cn-beijing",
+          "protocol": "native"
         }
       },
       "qwen-cloud": {
@@ -48,7 +52,9 @@ Each model must explicitly declare the operation it supports. A model name appea
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace"
+          "workspace": "your-workspace",
+          "region": "ap-southeast-1",
+          "protocol": "native"
         }
       }
     }
@@ -56,7 +62,29 @@ Each model must explicitly declare the operation it supports. A model name appea
 }
 ```
 
-A custom service needs an exact `baseUrl`, model ID, capability list, and generation or edit endpoint. Do not infer capabilities from the model name.
+Qwen AI Platform image models use the native DashScope API. Set `region` to `cn-beijing` for China (Beijing) or `ap-southeast-1` for Singapore, or provide the matching `baseUrl` directly. `protocol` defaults to `native`; set it to `openai-compatible` only when that protocol is explicitly supported. The built-in set includes `qwen-image-3.0-pro`, `qwen-image-3.0`, `wan2.7-image-pro`, `wan2.7-image`, and `z-image-turbo`; the current Qwen Image 3.0 recommendation is `qwen-image-3.0-pro`, while actual entitlement remains account- and region-dependent.
+
+Vertex AI can use a service-account JSON file:
+
+```json
+{
+  "vertex": {
+    "enabled": true,
+    "credentialsFile": "F:/path/to/service-account.json",
+    "project": "your-project",
+    "location": "global",
+    "models": {
+      "imagen-3.0-capability-001": {
+        "capabilities": ["text-to-image", "image-to-image", "edit"]
+      }
+    }
+  }
+}
+```
+
+The service-account file is used locally to obtain an OAuth token and is never written to output artifacts. Model availability depends on project permissions, location, and model publication status.
+
+Atlas, fal, Vertex, and DashScope/Qwen expose different catalog capabilities. Atlas, fal, Vertex, and DashScope/Qwen have small built-in model sets checked against official documentation; custom services still need an exact `baseUrl`, model ID, capability list, and generation or edit endpoint. Do not infer capabilities from the model name or treat a built-in model as an entitlement guarantee.
 
 ## Generate and edit
 
@@ -67,8 +95,9 @@ Upload only images you may share with the selected service. After files are save
 ## Current provider notes
 
 - fal has been tested for queue submission, polling, data-URI results, text-to-image, and two-reference editing. If the local machine cannot resolve the fal CDN, a data-URI result can still be saved.
-- DashScope/Qwen currently needs a workspace-scoped endpoint or an explicit `baseUrl` supplied by the provider. China workspaces use an address such as `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`; international workspaces use `https://<workspace>.ap-southeast-1.maas.aliyuncs.com/api/v1`. A retired generic endpoint returns `dashscope_workspace_required`.
+- DashScope/Qwen supports the Qwen AI Platform native endpoint `https://dashscope.aliyuncs.com/api/v1` and regional Bailian workspace endpoints such as `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`. When `workspace` and `region` are supplied, the tool can derive the regional endpoint.
 - Gemini's `apiKeyEnv` must name an environment variable that exists.
-- Atlas and custom services need a working endpoint and model description.
+- Atlas Cloud uses `https://api.atlascloud.ai/api/v1`, submits to `model/generateImage`, and polls `model/prediction/{id}`. The built-in set includes official Nano Banana 2, GPT Image 2, and GPT Image 2.5 Flare/Sunburst IDs. Atlas image tasks are asynchronous and their `outputs` are saved locally.
+- Custom services need a working endpoint and model description.
 
 Review text, structures, mechanisms, scale, and quantitative labels after generation. **AI images are illustrative drafts, not experimental data, real measurements, or scientific conclusions.**

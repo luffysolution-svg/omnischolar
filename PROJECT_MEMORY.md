@@ -9,7 +9,7 @@
 - npm 包：`@luffysolution/omnischolar-pi`
 - 默认分支：`main`
 - 发布工作流：`.github/workflows/publish-npm.yml`
-- 当前已验证版本：`0.1.17`
+- 当前已验证版本：`0.1.18`
 
 ## 发布前检查
 

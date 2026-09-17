@@ -2,7 +2,6 @@
 name: omnischolar
 description: Orchestrate multi-step scholarly work with OmniScholar across literature discovery, read-only Zotero, PDF parsing, citations, materials and chemical data, scientific images, and local publication. Use when a request spans several research workflows or the correct specialist workflow is unclear.
 license: MIT
-compatibility: Requires OmniScholar and an agent connected to its MCP tools. Network features require the corresponding configured services.
 ---
 
 # OmniScholar
@@ -19,7 +18,7 @@ Choose the smallest workflow that answers the request. Follow the user's languag
 - Materials Project records and exports: follow `materials-project`.
 - CAS substance records and contract status: follow `chemical-data`.
 
-For an unfamiliar environment, call `omnischolar_status`, `omnischolar_capabilities`, and the relevant source-status tool before selecting a provider. If no provider supports the requested capability, report the missing configuration or capability and offer an available non-equivalent workflow only with a clear label.
+For an unfamiliar environment, call `omnischolar_status`, `omnischolar_capabilities`, and the relevant source-status tool before selecting a provider. For image work, call `omnischolar_image_models` with discovery enabled first: show usable models and their declared capabilities, ask the user to choose when multiple valid models materially differ, and otherwise select the newest usable model appropriate to the requested task. If no provider supports the requested capability, report the missing configuration or capability and offer an available non-equivalent workflow only with a clear label.
 
 The generated configuration enables provider sections by default. Use providers with configured credentials and report `credential_required` when a selected provider is not configured.
 
@@ -33,6 +32,8 @@ The generated configuration enables provider sections by default. Use providers 
 6. Read generated content progressively and verify claims against retrieved evidence.
 7. Format citations only after identity and relevance checks.
 8. Route image work by declared capability, then inspect the result for scientific errors.
+
+For Semantic Scholar, keep paper and author operations separate: use `literature_search`/`literature_get` for papers, `literature_graph` for recommendations and citation relations, and `literature_author` for author search, author detail, or an author's papers. Respect provider throttling and `Retry-After`; do not treat a transient 429 or 5xx as evidence that the API is unsupported.
 
 ## Boundaries
 

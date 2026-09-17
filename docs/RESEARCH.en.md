@@ -9,6 +9,7 @@
 | `research_sources` | Show enabled sources and available operations |
 | `literature_search` | Search papers by year, type, or open-access status |
 | `literature_get` | Retrieve details by DOI, PMID/PMCID, arXiv ID, or source ID |
+| `literature_author` | Search Semantic Scholar authors, author details, or an author's papers |
 | `literature_graph` | Find references, citations, or recommendations |
 | `journal_metrics` | Retrieve supported journal metrics |
 | `literature_fulltext` | Find lawful full-text locations or save an accessible file under the output directory |
@@ -25,7 +26,7 @@ The sources serve different purposes:
 
 Start with a small `limit`. Deduplicate by DOI when possible; otherwise compare normalized title, year, and first author. Title similarity can shortlist a paper but cannot establish that it supports a claim.
 
-On HTTP 429, OmniScholar returns a rate-limit result. Wait for the provider's backoff period or choose another source that supports the same operation. Do not submit the same request in a tight loop.
+On HTTP 429, OmniScholar reads `Retry-After` when provided and applies bounded backoff plus optional `rateLimitPerSecond` throttling for Semantic Scholar. Do not submit the same request in a tight loop.
 
 ## Zotero
 

@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Self
 
 from omnischolar.config import LoadedConfig, resolve_credential
-from omnischolar.core import BoundedHttpClient
+from omnischolar.core import BoundedHttpClient, OmniScholarError
 from omnischolar.providers.literature import (
     ArxivProvider,
     CoreLiteratureTransport,
@@ -89,6 +89,7 @@ class OmniScholarApplication:
                     literature_transport,
                     api_key=research_keys.get("semantic-scholar"),
                     enabled=rp["semantic-scholar"].enabled,
+                    rate_limit_per_second=rp["semantic-scholar"].rate_limit_per_second,
                 ),
                 OpenAlexProvider(
                     literature_transport,
@@ -179,6 +180,7 @@ class OmniScholarApplication:
                     section.base_url,
                     {model: set(pin.capabilities) for model, pin in section.models.items()},
                     options,
+                    section.credentials_file,
                 )
             )
         media = MediaService(
@@ -229,8 +231,13 @@ class OmniScholarApplication:
         services = self.require_services()
         config = self.loaded.config
         providers = [asdict(status) for status in services.literature.statuses()]
-        media_models = [asdict(item) for item in await services.media.models()]
-        return {
+        media_models: list[dict[str, Any]] = []
+        media_model_error: dict[str, Any] | None = None
+        try:
+            media_models = [asdict(item) for item in await services.media.models(discover=True)]
+        except OmniScholarError as error:
+            media_model_error = error.to_dict()
+        result = {
             "configSource": self.loaded.source.status(),
             "enabledToolGroups": config.tools.groups.model_dump(by_alias=True),
             "disabledTools": sorted(config.tools.disabled),
@@ -265,3 +272,6 @@ class OmniScholarApplication:
                 "requestTimeoutSeconds": config.runtime.request_timeout_seconds,
             },
         }
+        if media_model_error is not None:
+            result["imageModelDiscoveryError"] = media_model_error
+        return result

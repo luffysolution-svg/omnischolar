@@ -65,6 +65,17 @@ class LiteratureRouter:
     async def get(self, provider_id: str, identifier: str) -> LiteratureRecord:
         return await self.provider(provider_id).get(identifier)
 
+    async def author(self, provider_id: str, action: str, **options: Any) -> Any:
+        provider = self.provider(provider_id)
+        author = getattr(provider, "author", None)
+        if author is None:
+            raise OmniScholarError(
+                "unsupported_capability",
+                f"{provider_id} does not support author operations",
+                category="capability",
+            )
+        return await author(action, **options)
+
     async def graph(
         self, provider_id: str, identifier: str, kind: str, **options: Any
     ) -> SearchResult:

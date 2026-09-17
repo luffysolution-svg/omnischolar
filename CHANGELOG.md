@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.18] - 2026-09-17
+
+- Added Semantic Scholar author search/detail/papers operations, recommendation enrichment, bounded retries, and `Retry-After` handling.
+- Added image-provider model discovery, explicit model selection, normalized image options, and verified fallback catalogs for providers without discovery APIs.
+- Added native Qwen/DashScope image routing, workspace/region configuration, Fal queue URL normalization, Vertex service-account JSON authentication, global Gemini image generation, and Vertex image extraction.
+- Updated image-provider documentation, example configuration, scientific-figure routing guidance, and regression tests.
+
 ## [0.1.12] - 2026-09-16
 
 - Switched all documented and installer-generated MCP launchers to the latest PyPI package form.

@@ -10,7 +10,7 @@ import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import quote, urlparse
 
 from omnischolar.core import (
     OmniScholarError,
@@ -25,28 +25,87 @@ from .transport import ServiceTransport
 Capability = Literal["text-to-image", "image-to-image", "edit", "multi-reference"]
 
 # Exact curated descriptors are fallbacks, not model-name heuristics.
-CURATED_MODELS: dict[str, dict[str, set[Capability]]] = {
+ALL_IMAGE_CAPABILITIES: set[Capability] = {
+    "text-to-image",
+    "image-to-image",
+    "edit",
+    "multi-reference",
+}
+
+# These are capability declarations, not availability pins. They are only
+# applied to model IDs returned by the provider's current model catalog.
+CATALOG_CAPABILITIES: dict[str, dict[str, set[Capability]]] = {
     "openai": {
-        "gpt-image-1": {"text-to-image", "image-to-image", "edit", "multi-reference"},
-        "gpt-image-1.5": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "gpt-image-1": ALL_IMAGE_CAPABILITIES,
+        "gpt-image-1-mini": ALL_IMAGE_CAPABILITIES,
+        "gpt-image-1.5": ALL_IMAGE_CAPABILITIES,
+        "gpt-image-2": ALL_IMAGE_CAPABILITIES,
+        "gpt-image-2.5-sunburst": ALL_IMAGE_CAPABILITIES,
+        "gpt-image-2.5-flare": ALL_IMAGE_CAPABILITIES,
     },
     "google": {
-        "gemini-2.5-flash-image": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "gemini-2.5-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-lite-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3-pro-image": ALL_IMAGE_CAPABILITIES,
     },
     "gemini": {
-        "gemini-2.5-flash-image": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "gemini-2.5-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-lite-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3-pro-image": ALL_IMAGE_CAPABILITIES,
     },
+}
+
+# These providers do not expose a reliable universal image-model catalog to
+# this adapter; entries are official model IDs used as capability-safe fallbacks.
+CURATED_MODELS: dict[str, dict[str, set[Capability]]] = {
     "fal": {
-        "fal-ai/flux/schnell": {"text-to-image"},
-        "alibaba/qwen-image-3/edit": {"image-to-image", "edit", "multi-reference"},
+        "fal-ai/nano-banana-2": ALL_IMAGE_CAPABILITIES,
+        "openai/gpt-image-2": {"text-to-image"},
+        "openai/gpt-image-2/edit": {"image-to-image", "edit", "multi-reference"},
+        "openai/gpt-image-2.5/flare/text-to-image": {"text-to-image"},
+        "openai/gpt-image-2.5/flare/edit": {"image-to-image", "edit", "multi-reference"},
+        "openai/gpt-image-2.5/sunburst/text-to-image": {"text-to-image"},
+        "openai/gpt-image-2.5/sunburst/edit": {"image-to-image", "edit", "multi-reference"},
+    },
+    "atlas": {
+        "google/nano-banana-2/text-to-image": {"text-to-image"},
+        "google/nano-banana-2/edit": {"image-to-image", "edit", "multi-reference"},
+        "openai/gpt-image-2/text-to-image": {"text-to-image"},
+        "openai/gpt-image-2/edit": {"image-to-image", "edit", "multi-reference"},
+        "openai/gpt-image-2.5/flare/text-to-image": {"text-to-image"},
+        "openai/gpt-image-2.5/flare/edit": {"image-to-image", "edit", "multi-reference"},
+        "openai/gpt-image-2.5/sunburst/text-to-image": {"text-to-image"},
+        "openai/gpt-image-2.5/sunburst/edit": {"image-to-image", "edit", "multi-reference"},
     },
     "dashscope": {
-        "qwen-image-plus": {"text-to-image"},
-        "qwen-image-2.0": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "qwen-image-3.0-pro": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "qwen-image-3.0": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "wan2.7-image-pro": {"text-to-image"},
+        "wan2.7-image": {"text-to-image"},
+        "z-image-turbo": {"text-to-image"},
+    },
+    "qwen": {
+        "qwen-image-3.0-pro": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "qwen-image-3.0": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "wan2.7-image-pro": {"text-to-image"},
+        "wan2.7-image": {"text-to-image"},
+        "z-image-turbo": {"text-to-image"},
     },
     "qwen-cloud": {
-        "qwen-image-plus": {"text-to-image"},
-        "qwen-image-2.0": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "qwen-image-3.0-pro": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "qwen-image-3.0": {"text-to-image", "image-to-image", "edit", "multi-reference"},
+        "wan2.7-image-pro": {"text-to-image"},
+        "wan2.7-image": {"text-to-image"},
+        "z-image-turbo": {"text-to-image"},
+    },
+    "vertex": {
+        "gemini-2.5-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-2.5-flash-image-preview": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3.1-flash-lite-image": ALL_IMAGE_CAPABILITIES,
+        "gemini-3-pro-image": ALL_IMAGE_CAPABILITIES,
     },
 }
 
@@ -61,6 +120,7 @@ _DEPRECATED_DASHSCOPE_BASES = {
 CATALOG_URLS = {
     "openai": "https://api.openai.com/v1/models",
     "xai": "https://api.x.ai/v1/models",
+    "xai-image": "https://api.x.ai/v1/image-generation-models",
     "google": "https://generativelanguage.googleapis.com/v1beta/models",
 }
 
@@ -73,6 +133,7 @@ class MediaProviderSettings:
     base_url: str | None = None
     models: dict[str, set[Capability]] = field(default_factory=dict)
     options: dict[str, Any] = field(default_factory=dict)
+    credentials_file: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,10 +142,11 @@ class ModelDescriptor:
     id: str
     capabilities: tuple[Capability, ...]
     source: Literal[
-        "config_pin", "official_catalog+curated", "curated_fallback", "official_catalog"
+        "config_pin", "official_catalog", "model_catalog", "curated_fallback"
     ]
     usable: bool
     unavailable_reason: str | None = None
+    created: int | None = None
 
 
 class MediaService:
@@ -141,9 +203,9 @@ class MediaService:
             credential_error = self._provider_credential_error(provider)
             usable = contract_ready and credential_error is None
             unavailable_reason = credential_error or contract_error
-            catalog_ids: set[str] = set()
-            if discover and provider.id in CATALOG_URLS and provider.api_key:
-                catalog_ids = await self._discover_catalog(provider)
+            catalog_models: dict[str, tuple[set[Capability], int | None]] = {}
+            if discover and provider.api_key:
+                catalog_models = await self._discover_catalog(provider)
             for model_id, capabilities in pins.items():
                 descriptors.append(
                     ModelDescriptor(
@@ -155,42 +217,54 @@ class MediaService:
                         unavailable_reason,
                     )
                 )
-            curated = CURATED_MODELS.get(provider.id, {})
-            for model_id, capabilities in curated.items():
+            for model_id, (capabilities, created) in catalog_models.items():
                 if model_id in pins:
                     continue
-                source: Literal["official_catalog+curated", "curated_fallback"] = (
-                    "official_catalog+curated" if model_id in catalog_ids else "curated_fallback"
+                known_capabilities = capabilities or self._catalog_capabilities(
+                    provider.id, model_id
                 )
+                catalog_usable = usable and bool(known_capabilities)
+                descriptors.append(
+                    ModelDescriptor(
+                        provider.id,
+                        model_id,
+                        tuple(sorted(known_capabilities)),
+                        "official_catalog"
+                        if provider.id in {"openai", "xai", "google", "gemini"}
+                        else "model_catalog",
+                        catalog_usable,
+                        unavailable_reason if not usable else (
+                            None if known_capabilities else "model_capabilities_unpinned"
+                        ),
+                        created,
+                    )
+                )
+            for model_id, capabilities in CURATED_MODELS.get(provider.id, {}).items():
+                if model_id in pins or model_id in catalog_models:
+                    continue
                 descriptors.append(
                     ModelDescriptor(
                         provider.id,
                         model_id,
                         tuple(sorted(capabilities)),
-                        source,
+                        "curated_fallback",
                         usable,
                         unavailable_reason,
-                    )
-                )
-            for model_id in sorted(catalog_ids - set(pins) - set(curated)):
-                descriptors.append(
-                    ModelDescriptor(
-                        provider.id,
-                        model_id,
-                        (),
-                        "official_catalog",
-                        False,
-                        "model_capabilities_unpinned",
                     )
                 )
         return descriptors
 
     @staticmethod
     def _provider_contract_error(provider: MediaProviderSettings) -> str | None:
+        if provider.id in {"atlas", "custom"} and not provider.base_url:
+            return "provider_base_url_required"
         if provider.id not in {"dashscope", "qwen", "qwen-cloud"}:
             return None
         configured_base = provider.base_url.rstrip("/") if provider.base_url else None
-        if configured_base and configured_base not in _DEPRECATED_DASHSCOPE_BASES:
+        if configured_base and "your-workspace" not in configured_base and (
+            configured_base not in _DEPRECATED_DASHSCOPE_BASES
+            or provider.options.get("allowLegacyBaseUrl", True)
+        ):
             return None
         workspace = provider.options.get("workspace")
         if isinstance(workspace, str) and _DASHSCOPE_WORKSPACE.fullmatch(workspace) is not None:
@@ -199,7 +273,9 @@ class MediaService:
 
     @staticmethod
     def _provider_credential_error(provider: MediaProviderSettings) -> str | None:
-        if provider.id != "vertex" and not provider.api_key:
+        if provider.id == "vertex" and (provider.api_key or provider.credentials_file):
+            return None
+        if not provider.api_key:
             return "credential_required"
         return None
 
@@ -207,26 +283,64 @@ class MediaService:
     def _provider_contract_ready(cls, provider: MediaProviderSettings) -> bool:
         return cls._provider_contract_error(provider) is None
 
-    async def _discover_catalog(self, provider: MediaProviderSettings) -> set[str]:
-        url = CATALOG_URLS[provider.id]
-        if provider.id == "google":
-            payload = await self.transport.json("GET", url, params={"key": provider.api_key})
-            values = payload.get("models", []) if isinstance(payload, dict) else []
-            return {
-                str(item.get("name", "")).removeprefix("models/")
-                for item in values
-                if isinstance(item, dict) and item.get("name")
-            }
-        payload = await self.transport.json(
-            "GET", url, headers={"Authorization": f"Bearer {provider.api_key}"}
+    @staticmethod
+    def _catalog_capabilities(provider_id: str, model_id: str) -> set[Capability]:
+        if provider_id == "xai":
+            return set(ALL_IMAGE_CAPABILITIES)
+        exact = CATALOG_CAPABILITIES.get(provider_id, {}).get(model_id)
+        if exact:
+            return set(exact)
+        if provider_id == "openai" and model_id.startswith(
+            ("gpt-image-2.5-sunburst", "gpt-image-2.5-flare", "gpt-image-2")
+        ):
+            return set(ALL_IMAGE_CAPABILITIES)
+        return set()
+
+    async def _discover_catalog(
+        self, provider: MediaProviderSettings
+    ) -> dict[str, tuple[set[Capability], int | None]]:
+        catalog_key = (
+            "xai-image"
+            if provider.id == "xai"
+            else "google"
+            if provider.id == "gemini"
+            else provider.id
         )
-        values = payload.get("data", []) if isinstance(payload, dict) else []
-        return {str(item.get("id")) for item in values if isinstance(item, dict) and item.get("id")}
+        url = CATALOG_URLS.get(catalog_key) or provider.options.get("modelCatalogEndpoint")
+        if not isinstance(url, str) or not url:
+            return {}
+        headers = {"Authorization": f"Bearer {provider.api_key}"}
+        params: dict[str, Any] | None = None
+        if provider.id in {"google", "gemini"}:
+            headers = {}
+            params = {"key": provider.api_key}
+        payload = await self.transport.json("GET", url, params=params, headers=headers)
+        values = payload.get("data") if isinstance(payload, dict) else None
+        if not isinstance(values, list):
+            values = payload.get("models", []) if isinstance(payload, dict) else []
+        discovered: dict[str, tuple[set[Capability], int | None]] = {}
+        for item in values:
+            if not isinstance(item, dict):
+                continue
+            model_id = str(
+                item.get("id") or item.get("model_id") or item.get("name") or ""
+            ).removeprefix("models/")
+            if not model_id:
+                continue
+            raw_capabilities = item.get("capabilities") or item.get("supportedCapabilities")
+            capabilities = {
+                str(value)
+                for value in raw_capabilities
+                if str(value) in ALL_IMAGE_CAPABILITIES
+            } if isinstance(raw_capabilities, list) else set()
+            created = item.get("created") if isinstance(item.get("created"), int) else None
+            discovered[model_id] = (capabilities, created)
+        return discovered
 
     async def execute(
         self,
         *,
-        provider_id: str,
+        provider_id: str | None,
         capability: Capability,
         prompt: str,
         context: ToolExecutionContext,
@@ -234,27 +348,57 @@ class MediaService:
         references: list[str] | None = None,
         options: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        provider = self._provider(provider_id)
+        provider = self._provider(provider_id) if provider_id else None
+        if provider is None:
+            candidates = await self.models(discover=True)
+            available = [
+                item
+                for item in candidates
+                if capability in item.capabilities and item.usable
+                and (model is None or item.id == model)
+            ]
+            if not available:
+                raise OmniScholarError(
+                    "model_selection_required",
+                    "No usable image model was discovered; specify a provider/model or configure a model catalog",
+                    category="capability",
+                    details={
+                        "models": [asdict(item) for item in candidates],
+                        "requestedCapability": capability,
+                    },
+                )
+            selected_model = max(
+                available,
+                key=lambda item: (item.created if item.created is not None else -1, item.id),
+            )
+            provider = self._provider(selected_model.provider)
+        else:
+            selected_model = None
         if not self._provider_contract_ready(provider):
             raise OmniScholarError(
                 "dashscope_workspace_required",
                 "DashScope current image API requires a workspace-scoped endpoint",
                 category="config",
             )
-        descriptors = await self.models(provider_id)
-        available = [
-            item for item in descriptors if capability in item.capabilities and item.usable
-        ]
-        selected_model = (
-            next((item for item in available if item.id == model), None)
-            if model
-            else (available[0] if available else None)
-        )
+        if selected_model is None:
+            descriptors = await self.models(provider.id, discover=True)
+            available = [
+                item
+                for item in descriptors
+                if capability in item.capabilities and item.usable
+                and (model is None or item.id == model)
+            ]
+            selected_model = max(
+                available,
+                key=lambda item: (item.created if item.created is not None else -1, item.id),
+                default=None,
+            )
         if selected_model is None:
             raise OmniScholarError(
                 "model_capability_unavailable",
-                f"No pinned/catalogued {provider_id} model supports {capability}",
+                f"No configured/discovered {provider.id} model supports {capability}",
                 category="capability",
+                details={"provider": provider.id, "model": model, "requestedCapability": capability},
             )
         resolved = await self._resolve_references(references or [], context)
         if capability != "text-to-image" and not resolved:
@@ -334,6 +478,180 @@ class MediaService:
                 )
         return dict(options)
 
+    @staticmethod
+    def _map_provider_options(
+        provider: MediaProviderSettings, options: dict[str, Any]
+    ) -> dict[str, Any]:
+        mapped = dict(options)
+        if provider.id in {"openai", "custom"}:
+            if "resolution" in mapped:
+                if "size" in mapped:
+                    raise OmniScholarError(
+                        "parameter_conflict",
+                        "Specify only one of size and resolution",
+                        category="validation",
+                    )
+                mapped["size"] = mapped.pop("resolution")
+            if "aspect_ratio" in mapped:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    "OpenAI Images uses size rather than aspect_ratio",
+                    category="capability",
+                )
+            if mapped.get("background") == "transparent" and mapped.get("output_format") not in {
+                "png", "webp"
+            }:
+                raise OmniScholarError(
+                    "parameter_conflict",
+                    "Transparent OpenAI images require outputFormat png or webp",
+                    category="validation",
+                )
+        if provider.id in {"xai"}:
+            unsupported = {"size", "background", "output_format"} & mapped.keys()
+            if unsupported:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    f"xAI does not support image parameters: {', '.join(sorted(unsupported))}",
+                    category="capability",
+                )
+        if provider.id in {"google", "gemini"}:
+            unsupported = {"size", "background", "quality", "n", "seed"} & mapped.keys()
+            if unsupported:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    f"Gemini image interactions do not support: {', '.join(sorted(unsupported))}",
+                    category="capability",
+                )
+        if provider.id == "vertex":
+            unsupported = {"size", "background", "quality", "seed"} & mapped.keys()
+            if unsupported:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    f"Vertex Imagen does not support: {', '.join(sorted(unsupported))}",
+                    category="capability",
+                )
+            if "n" in mapped:
+                if isinstance(mapped["n"], int) and mapped["n"] > 4:
+                    raise OmniScholarError(
+                        "parameter_out_of_range",
+                        "Vertex Imagen supports at most 4 output images",
+                        category="validation",
+                    )
+                mapped["sampleCount"] = mapped.pop("n")
+            if "aspect_ratio" in mapped:
+                mapped["aspectRatio"] = mapped.pop("aspect_ratio")
+            if "output_format" in mapped:
+                mapped["outputOptions"] = {
+                    "mimeType": f"image/{mapped.pop('output_format')}"
+                }
+        if provider.id == "fal":
+            if "size" in mapped:
+                mapped["image_size"] = mapped.pop("size")
+            if "n" in mapped:
+                mapped["num_images"] = mapped.pop("n")
+        if provider.id == "atlas" and "n" in mapped:
+            mapped["num_images"] = mapped.pop("n")
+        if provider.id in {"dashscope", "qwen", "qwen-cloud"}:
+            unsupported = {"background", "output_format", "quality", "aspect_ratio", "resolution"} & mapped.keys()
+            if unsupported:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    f"DashScope/Qwen does not support: {', '.join(sorted(unsupported))}",
+                    category="capability",
+                )
+            compatible = provider.options.get("protocol") == "openai-compatible"
+            if not compatible and "size" in mapped and isinstance(mapped["size"], str):
+                mapped["size"] = mapped["size"].replace("x", "*")
+            if isinstance(mapped.get("n"), int) and mapped["n"] > 6:
+                raise OmniScholarError(
+                    "parameter_out_of_range",
+                    "Qwen Image supports at most 6 output images",
+                    category="validation",
+                )
+        return mapped
+
+    @staticmethod
+    def _vertex_authorization(provider: MediaProviderSettings) -> str:
+        if provider.credentials_file:
+            try:
+                from google.auth.transport.requests import Request
+                from google.oauth2 import service_account
+            except ImportError as exc:
+                raise OmniScholarError(
+                    "credential_dependency_required",
+                    "Vertex JSON credentials require the optional google-auth dependency",
+                    category="configuration",
+                    cause=exc,
+                ) from exc
+            if not provider.credentials_file.is_file():
+                raise OmniScholarError(
+                    "credentials_file_missing",
+                    "Vertex credentialsFile does not exist",
+                    category="configuration",
+                )
+            try:
+                from requests import Session
+
+                credentials = service_account.Credentials.from_service_account_file(
+                    str(provider.credentials_file),
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
+                session = Session()
+                request_method = session.request
+
+                def request_with_timeout(method: str, url: str, **kwargs: Any) -> Any:
+                    kwargs.setdefault("timeout", 20)
+                    return request_method(method, url, **kwargs)
+
+                session.request = request_with_timeout  # type: ignore[method-assign]
+                credentials.refresh(Request(session))
+            except Exception as exc:
+                raise OmniScholarError(
+                    "vertex_auth_failed",
+                    "Vertex service-account authentication failed",
+                    category="authentication",
+                    retryable=True,
+                    cause=exc,
+                ) from exc
+            if not credentials.token:
+                raise OmniScholarError(
+                    "vertex_token_missing",
+                    "Vertex credentials did not yield an access token",
+                    category="authentication",
+                )
+            return f"Bearer {credentials.token}"
+        if provider.api_key:
+            return f"Bearer {provider.api_key}"
+        raise OmniScholarError(
+            "credential_required",
+            "Vertex requires credentialsFile or an OAuth bearer token",
+            category="authentication",
+        )
+
+    @staticmethod
+    def _dashscope_base(provider: MediaProviderSettings) -> str:
+        configured = provider.base_url.rstrip("/") if provider.base_url else None
+        workspace = provider.options.get("workspace")
+        region = provider.options.get(
+            "region", "ap-southeast-1" if provider.id == "qwen-cloud" else "cn-beijing"
+        )
+        workspace_valid = isinstance(workspace, str) and _DASHSCOPE_WORKSPACE.fullmatch(workspace)
+        protocol = provider.options.get("protocol", "native")
+        if workspace_valid and (
+            not configured or "your-workspace" in configured
+        ):
+            suffix = "compatible-mode/v1" if protocol == "openai-compatible" else "api/v1"
+            return f"https://{workspace}.{region}.maas.aliyuncs.com/{suffix}"
+        if configured and protocol != "openai-compatible":
+            return configured.replace("/compatible-mode/v1", "/api/v1")
+        if configured:
+            return configured
+        raise OmniScholarError(
+            "dashscope_endpoint_required",
+            "DashScope/Qwen requires baseUrl or a valid workspace and region",
+            category="config",
+        )
+
     async def _call_provider(
         self,
         provider: MediaProviderSettings,
@@ -343,6 +661,7 @@ class MediaService:
         references: list[tuple[str, bytes | None, str]],
         options: dict[str, Any],
     ) -> Any:
+        options = self._map_provider_options(provider, options)
         if provider.id in {"openai", "custom"}:
             base = provider.base_url or "https://api.openai.com/v1"
             headers = {"Authorization": f"Bearer {provider.api_key}"}
@@ -350,9 +669,10 @@ class MediaService:
                 endpoint = self._relative_endpoint(
                     base, provider.options.get("editEndpoint", "images/edits")
                 )
+                field_name = "image" if len(references) == 1 else "image[]"
                 files = [
                     (
-                        "image[]",
+                        field_name,
                         (
                             name,
                             content
@@ -379,7 +699,7 @@ class MediaService:
                 "POST",
                 endpoint,
                 headers=headers,
-                body={**options, "model": model, "prompt": prompt, "response_format": "b64_json"},
+                body={**options, "model": model, "prompt": prompt},
             )
         if provider.id == "xai":
             base = provider.base_url or "https://api.x.ai/v1"
@@ -388,15 +708,50 @@ class MediaService:
             )
             body = {**options, "model": model, "prompt": prompt}
             if references:
-                body["images"] = [
-                    self._data_uri(name, content, mime) if content else name
+                images = [
+                    {"type": "image_url", "url": self._data_uri(name, content, mime) if content else name}
                     for name, content, mime in references
                 ]
+                if len(images) == 1:
+                    body["image"] = images[0]
+                else:
+                    body["images"] = images
             return await self.transport.json(
                 "POST", endpoint, headers={"Authorization": f"Bearer {provider.api_key}"}, body=body
             )
         if provider.id in {"google", "gemini"}:
             base = provider.base_url or "https://generativelanguage.googleapis.com/v1beta"
+            if provider.options.get("protocol", "interactions") == "interactions":
+                endpoint = self._relative_endpoint(
+                    base, provider.options.get("generationEndpoint", "interactions")
+                )
+                input_parts: list[dict[str, Any]] = [{"type": "text", "text": prompt}]
+                input_parts.extend(
+                    {"type": "image", "mime_type": mime, "data": base64.b64encode(content).decode()}
+                    if content
+                    else {"type": "image", "uri": name, "mime_type": mime}
+                    for name, content, mime in references
+                )
+                response_format: dict[str, Any] = {"type": "image"}
+                if "aspect_ratio" in options:
+                    response_format["aspect_ratio"] = options.pop("aspect_ratio")
+                if "resolution" in options:
+                    response_format["image_size"] = options.pop("resolution")
+                if "output_format" in options:
+                    response_format["mime_type"] = (
+                        f"image/{options.pop('output_format')}"
+                    )
+                return await self.transport.json(
+                    "POST",
+                    endpoint,
+                    headers={"x-goog-api-key": str(provider.api_key)},
+                    body={
+                        "model": model,
+                        "input": input_parts,
+                        "response_format": response_format,
+                        **options,
+                    },
+                )
             endpoint = self._relative_endpoint(
                 base, f"models/{quote(model, safe='')}:generateContent"
             )
@@ -419,7 +774,7 @@ class MediaService:
         if provider.id == "vertex":
             project, location = (
                 provider.options.get("project"),
-                provider.options.get("location", "us-central1"),
+                provider.options.get("location", "global"),
             )
             if not project:
                 raise OmniScholarError(
@@ -427,25 +782,63 @@ class MediaService:
                     "Vertex provider requires project configuration",
                     category="config",
                 )
-            base = (
-                provider.base_url
-                or f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/google/models"
+            base = provider.base_url or (
+                f"https://aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/google/models"
+                if location == "global"
+                else f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/google/models"
             )
+            if model.startswith("gemini-") or provider.options.get("protocol") == "gemini":
+                endpoint = self._relative_endpoint(base, f"{quote(model, safe='')}:generateContent")
+                parts: list[dict[str, Any]] = [{"text": prompt}]
+                parts.extend(
+                    {"inlineData": {"mimeType": mime, "data": base64.b64encode(content).decode()}}
+                    if content
+                    else {"fileData": {"mimeType": mime, "fileUri": name}}
+                    for name, content, mime in references
+                )
+                generation_config: dict[str, Any] = {**options, "responseModalities": ["TEXT", "IMAGE"]}
+                if "sampleCount" in generation_config:
+                    generation_config["candidateCount"] = generation_config.pop("sampleCount")
+                image_config: dict[str, Any] = {}
+                if "aspectRatio" in generation_config:
+                    image_config["aspectRatio"] = generation_config.pop("aspectRatio")
+                if "outputOptions" in generation_config:
+                    image_config["imageOutputOptions"] = generation_config.pop("outputOptions")
+                if image_config:
+                    generation_config["imageConfig"] = image_config
+                return await self.transport.json(
+                    "POST",
+                    endpoint,
+                    headers={"Authorization": self._vertex_authorization(provider)},
+                    body={
+                        "contents": [{"role": "user", "parts": parts}],
+                        "generationConfig": generation_config,
+                    },
+                )
             endpoint = self._relative_endpoint(base, f"{quote(model, safe='')}:predict")
+            instance: dict[str, Any] = {"prompt": prompt}
+            if references:
+                if "capability" in model:
+                    instance["referenceImages"] = [
+                        {
+                            "referenceType": "REFERENCE_TYPE_RAW",
+                            "referenceId": index,
+                            "referenceImage": {
+                                "bytesBase64Encoded": base64.b64encode(content or b"").decode()
+                            },
+                        }
+                        for index, (_name, content, _mime) in enumerate(references, 1)
+                    ]
+                else:
+                    instance["image"] = {
+                        "bytesBase64Encoded": base64.b64encode(references[0][1] or b"").decode()
+                    }
             return await self.transport.json(
                 "POST",
                 endpoint,
-                headers={"Authorization": f"Bearer {provider.api_key}"},
+                headers={"Authorization": self._vertex_authorization(provider)},
                 body={
-                    "instances": [
-                        {
-                            "prompt": prompt,
-                            "references": [
-                                self._data_uri(name, content, mime) if content else name
-                                for name, content, mime in references
-                            ],
-                        }
-                    ],
+                    "instances": [instance],
                     "parameters": options,
                 },
             )
@@ -454,27 +847,7 @@ class MediaService:
         if provider.id in {"dashscope", "qwen", "qwen-cloud"}:
             return await self._call_dashscope(provider, model, prompt, references, options)
         if provider.id == "atlas":
-            if not provider.base_url:
-                raise OmniScholarError(
-                    "provider_base_url_required", "Atlas baseUrl is required", category="config"
-                )
-            endpoint = self._relative_endpoint(
-                provider.base_url, provider.options.get("generationEndpoint", "images/generations")
-            )
-            return await self.transport.json(
-                "POST",
-                endpoint,
-                headers={"Authorization": f"Bearer {provider.api_key}"},
-                body={
-                    "model": model,
-                    "prompt": prompt,
-                    "images": [
-                        self._data_uri(name, content, mime) if content else name
-                        for name, content, mime in references
-                    ],
-                    **options,
-                },
-            )
+            return await self._call_atlas(provider, model, prompt, references, options)
         raise OmniScholarError(
             "unsupported_provider",
             f"No adapter is implemented for {provider.id}",
@@ -502,6 +875,8 @@ class MediaService:
                 category="validation",
             )
         base = provider.base_url or "https://queue.fal.run"
+        if base.rstrip("/") == "https://fal.run":
+            base = "https://queue.fal.run"
         endpoint = self._relative_endpoint(base, model)
         headers = {"Authorization": f"Key {provider.api_key}"}
         body = self._payload_options(options)
@@ -538,6 +913,102 @@ class MediaService:
         return await self._poll_fal(
             provider, status_url=status_url, response_url=response_url, headers=headers
         )
+
+    async def _call_atlas(
+        self,
+        provider: MediaProviderSettings,
+        model: str,
+        prompt: str,
+        references: list[tuple[str, bytes | None, str]],
+        options: dict[str, Any],
+    ) -> Any:
+        base = provider.base_url or "https://api.atlascloud.ai/api/v1"
+        endpoint = self._relative_endpoint(
+            base, str(provider.options.get("generationEndpoint", "model/generateImage"))
+        )
+        body = {"model": model, "prompt": prompt, **self._payload_options(options)}
+        if references:
+            body["images"] = [
+                self._data_uri(name, content, mime) if content else name
+                for name, content, mime in references
+            ]
+        submitted = await self.transport.json(
+            "POST",
+            endpoint,
+            headers={"Authorization": f"Bearer {provider.api_key}"},
+            body=body,
+            timeout_seconds=60,
+            max_response_bytes=1024 * 1024,
+        )
+        self._raise_atlas_payload_error(submitted)
+        data = submitted.get("data") if isinstance(submitted, dict) else None
+        if not isinstance(data, dict):
+            data = submitted if isinstance(submitted, dict) else {}
+        prediction_id = data.get("id") or data.get("prediction_id") or data.get("request_id")
+        if not isinstance(prediction_id, str) or not prediction_id:
+            return submitted
+        poll_endpoint = self._relative_endpoint(
+            base,
+            f"{provider.options.get('pollEndpoint', 'model/prediction')}/{quote(prediction_id, safe='')}",
+        )
+        return await self._poll_atlas(provider, poll_endpoint)
+
+    async def _poll_atlas(
+        self, provider: MediaProviderSettings, poll_endpoint: str
+    ) -> Any:
+        deadline = time.monotonic() + self._poll_setting(
+            provider, "pollTimeoutSeconds", default=600, maximum=1800
+        )
+        interval = self._poll_setting(provider, "pollIntervalSeconds", default=2, maximum=60)
+        headers = {"Authorization": f"Bearer {provider.api_key}"}
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise OmniScholarError(
+                    "provider_job_timeout",
+                    "Atlas image generation did not complete before the configured deadline",
+                    category="timeout",
+                    retryable=False,
+                )
+            payload = await self.transport.json(
+                "GET",
+                poll_endpoint,
+                headers=headers,
+                timeout_seconds=min(30, remaining),
+                max_response_bytes=self.max_artifact_bytes,
+            )
+            self._raise_atlas_payload_error(payload)
+            data = payload.get("data") if isinstance(payload, dict) else None
+            if not isinstance(data, dict):
+                data = payload if isinstance(payload, dict) else {}
+            state = str(data.get("status", "")).lower()
+            if state in {"completed", "succeeded", "success"}:
+                return payload
+            if state in {"failed", "canceled", "cancelled", "error"}:
+                raise OmniScholarError(
+                    "provider_job_failed", "Atlas image generation failed", category="provider"
+                )
+            if state not in {"processing", "pending", "queued", "in_progress", "in-queue"}:
+                raise OmniScholarError(
+                    "unknown_job_status", "Atlas returned an unknown job status", category="provider"
+                )
+            await asyncio.sleep(min(interval, max(0, deadline - time.monotonic())))
+
+    @staticmethod
+    def _raise_atlas_payload_error(payload: Any) -> None:
+        if not isinstance(payload, dict):
+            raise OmniScholarError(
+                "invalid_provider_response", "Atlas returned an invalid response", category="provider"
+            )
+        data = payload.get("data")
+        if isinstance(data, dict) and (data.get("error") or data.get("error_code")):
+            raise OmniScholarError(
+                "provider_operation_failed", "Atlas rejected the image operation", category="provider"
+            )
+        if payload.get("error") or payload.get("code") not in {None, 0, 200}:
+            raise OmniScholarError(
+                "provider_operation_failed", "Atlas rejected the image operation", category="provider"
+            )
 
     async def _poll_fal(
         self,
@@ -605,30 +1076,43 @@ class MediaService:
         options: dict[str, Any],
     ) -> Any:
         async_mode = options.get("async") is True
-        if async_mode and (model not in {"qwen-image", "qwen-image-plus"} or references):
+        compatible = provider.options.get("protocol") == "openai-compatible"
+        if compatible:
+            if async_mode:
+                raise OmniScholarError(
+                    "parameter_unsupported",
+                    "Qwen OpenAI-compatible image generation is synchronous only",
+                    category="capability",
+                )
+            base = self._dashscope_base(provider)
+            endpoint = self._relative_endpoint(
+                base, str(provider.options.get("generationEndpoint", "images/generations"))
+            )
+            body: dict[str, Any] = {"model": model, "prompt": prompt, **options}
+            if references:
+                images = [
+                    self._data_uri(name, data, mime) if data is not None else name
+                    for name, data, mime in references
+                ]
+                body["image"] = images[0] if len(images) == 1 else images
+            return await self.transport.json(
+                "POST",
+                endpoint,
+                headers={"Authorization": f"Bearer {provider.api_key}"},
+                body=body,
+                timeout_seconds=180,
+                max_response_bytes=4 * 1024 * 1024,
+            )
+        if async_mode and (model not in {"qwen-image-3.0-pro", "qwen-image-3.0"} or references):
             raise OmniScholarError(
                 "model_capability_unavailable",
-                "DashScope async image synthesis supports text-only qwen-image or qwen-image-plus",
+                "DashScope async image synthesis supports text-only qwen-image-3.0 models",
                 category="capability",
             )
         workspace = provider.options.get("workspace")
-        workspace_valid = (
-            isinstance(workspace, str) and _DASHSCOPE_WORKSPACE.fullmatch(workspace) is not None
-        )
-        configured_base = provider.base_url.rstrip("/") if provider.base_url else None
-        if configured_base and configured_base not in _DEPRECATED_DASHSCOPE_BASES:
-            base = configured_base
-        elif workspace_valid:
-            region = "ap-southeast-1" if provider.id == "qwen-cloud" else "cn-beijing"
-            base = f"https://{workspace}.{region}.maas.aliyuncs.com/api/v1"
-        else:
-            raise OmniScholarError(
-                "dashscope_workspace_required",
-                "DashScope current image API requires a workspace-scoped endpoint",
-                category="config",
-            )
+        base = self._dashscope_base(provider)
         default_endpoint = (
-            "services/aigc/text2image/image-synthesis"
+            "services/aigc/image-generation/generation"
             if async_mode
             else "services/aigc/multimodal-generation/generation"
         )
@@ -636,30 +1120,21 @@ class MediaService:
             base, str(provider.options.get("generationEndpoint", default_endpoint))
         )
         headers = {"Authorization": f"Bearer {provider.api_key}"}
-        if isinstance(workspace, str) and workspace:
+        if isinstance(workspace, str) and workspace and provider.options.get("sendWorkspaceHeader"):
             headers["X-DashScope-WorkSpace"] = workspace
         if async_mode:
             headers["X-DashScope-Async"] = "enable"
         native_options = self._payload_options(options)
-        if async_mode:
-            body = {
-                "model": model,
-                "input": {"prompt": prompt},
-                "parameters": native_options,
-            }
-        else:
-            content = [
-                {
-                    "image": self._data_uri(name, data, mime) if data is not None else name,
-                }
-                for name, data, mime in references
-            ]
-            content.append({"text": prompt})
-            body = {
-                "model": model,
-                "input": {"messages": [{"role": "user", "content": content}]},
-                "parameters": native_options,
-            }
+        content = [
+            {"image": self._data_uri(name, data, mime) if data is not None else name}
+            for name, data, mime in references
+        ]
+        content.append({"text": prompt})
+        body = {
+            "model": model,
+            "input": {"messages": [{"role": "user", "content": content}]},
+            "parameters": native_options,
+        }
         submitted = await self.transport.json(
             "POST",
             endpoint,
@@ -790,13 +1265,13 @@ class MediaService:
             raise OmniScholarError(
                 "unsafe_provider_url", "Provider baseUrl must use HTTPS", category="config"
             )
-        if parsed_endpoint.scheme or parsed_endpoint.netloc:
+        if parsed_endpoint.netloc or "://" in endpoint:
             raise OmniScholarError(
                 "cross_origin_endpoint",
                 "Provider endpoints must be relative to baseUrl",
                 category="authorization",
             )
-        return urljoin(base.rstrip("/") + "/", endpoint.lstrip("/"))
+        return f"{base.rstrip('/')}/{endpoint.lstrip('/')}"
 
     @staticmethod
     def _data_uri(name: str, content: bytes | None, mime: str) -> str:

@@ -11,6 +11,7 @@ Tool and capability names match the values returned to agents.
 | `research_sources` | literature | `literature.sources` | none | no | none | free |
 | `literature_search` | literature | `literature.search` | none | yes | none | free |
 | `literature_get` | literature | `literature.lookup` | none | yes | none | free |
+| `literature_author` | literature | `literature.lookup` | none | yes | none | free |
 | `literature_graph` | literature | `literature.references`, `literature.citations`, `literature.recommendations` | none | yes | none | free |
 | `journal_metrics` | literature | `journal.metrics` | none | yes | none | free |
 | `literature_fulltext` | literature | `fulltext.resolve`, `fulltext.fetch` | filesystem | yes | none | free |

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncIterator, Mapping, Sequence
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from typing import Any, Self
 
 import httpx
@@ -125,10 +127,26 @@ class BoundedHttpClient:
         status = response.status_code
         retryable = status in {408, 409, 425, 429} or status >= 500
         category = "authentication" if status in {401, 403} else "provider"
+        details: dict[str, Any] = {}
+        retry_after = response.headers.get("retry-after")
+        if retry_after:
+            try:
+                seconds = float(retry_after)
+            except ValueError:
+                try:
+                    seconds = (
+                        parsedate_to_datetime(retry_after).astimezone(UTC)
+                        - datetime.now(UTC)
+                    ).total_seconds()
+                except (TypeError, ValueError, OverflowError):
+                    seconds = 0.0
+            if seconds > 0:
+                details["retryAfterSeconds"] = min(seconds, 60.0)
         return OmniScholarError(
             "provider_http_error",
             f"Provider request failed with HTTP {status}",
             category=category,
             retryable=retryable,
             http_status=status,
+            details=details,
         )

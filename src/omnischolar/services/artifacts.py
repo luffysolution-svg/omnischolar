@@ -123,6 +123,22 @@ def _extract(payload: Any, max_bytes: int) -> tuple[list[_Candidate], dict[str, 
 
     def visit(value: Any) -> None:
         if isinstance(value, dict):
+            if value.get("type") == "image" and isinstance(value.get("data"), str):
+                image_data = value["data"]
+                append(
+                    image_data,
+                    _decode_base64(image_data, max_bytes),
+                    value.get("mime_type") or value.get("mimeType") or "image/png",
+                    "[saved to local artifact]",
+                )
+            encoded_bytes = value.get("bytesBase64Encoded")
+            if isinstance(encoded_bytes, str):
+                append(
+                    encoded_bytes,
+                    _decode_base64(encoded_bytes, max_bytes),
+                    value.get("mimeType") or value.get("mime_type") or "image/png",
+                    "[saved to local artifact]",
+                )
             encoded = value.get("b64_json")
             if isinstance(encoded, str):
                 append(
@@ -140,6 +156,21 @@ def _extract(payload: Any, max_bytes: int) -> tuple[list[_Candidate], dict[str, 
                     inline.get("mimeType") or inline.get("mime_type") or "image/png",
                     "[saved to local artifact]",
                 )
+            outputs = value.get("outputs")
+            if isinstance(outputs, list):
+                for output in outputs:
+                    if isinstance(output, str) and output.startswith("https://"):
+                        append(output, None, "image/png", "[downloaded to local artifact]")
+                    elif isinstance(output, str) and output.startswith("data:image/"):
+                        metadata, separator, encoded_data = output.partition(",")
+                        if not separator or not metadata.endswith(";base64"):
+                            raise ValueError("invalid image data URI")
+                        append(
+                            output,
+                            _decode_base64(encoded_data, max_bytes),
+                            metadata[5:].removesuffix(";base64"),
+                            "[saved to local artifact]",
+                        )
             mime = value.get("content_type") or value.get("mimeType") or value.get("mime_type")
             for child_key, item in value.items():
                 normalized = child_key.lower().replace("-", "").replace("_", "")

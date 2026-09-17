@@ -148,6 +148,7 @@ class SemanticScholarProvider(BaseProvider):
     capabilities = (
         "literature.search",
         "literature.lookup",
+        "literature.authors",
         "literature.references",
         "literature.citations",
         "literature.recommendations",
@@ -158,15 +159,84 @@ class SemanticScholarProvider(BaseProvider):
         "paperId,title,abstract,authors,year,venue,citationCount,referenceCount,"
         "influentialCitationCount,externalIds,openAccessPdf,url,publicationDate,publicationTypes"
     )
+    paper_fields = frozenset(
+        {
+            "paperId", "title", "abstract", "authors", "year", "venue", "citationCount",
+            "referenceCount", "influentialCitationCount", "externalIds", "openAccessPdf", "url",
+            "publicationDate", "publicationTypes", "fieldsOfStudy", "s2FieldsOfStudy",
+        }
+    )
+    author_fields = frozenset(
+        {
+            "authorId", "name", "url", "affiliations", "homepage", "paperCount",
+            "citationCount", "hIndex", "papers", "papers.title", "papers.year",
+            "papers.authors", "papers.abstract", "papers.externalIds", "papers.url",
+        }
+    )
 
     def __init__(
-        self, transport: LiteratureTransport, *, api_key: str | None = None, enabled: bool = True
+        self,
+        transport: LiteratureTransport,
+        *,
+        api_key: str | None = None,
+        enabled: bool = True,
+        rate_limit_per_second: float | None = None,
     ) -> None:
         super().__init__(transport, enabled=enabled)
         self.api_key = api_key
+        self.rate_limit_per_second = rate_limit_per_second
+        self._next_request_at = 0.0
+        self._rate_lock = asyncio.Lock()
 
     def _headers(self) -> dict[str, str]:
         return {"x-api-key": self.api_key} if self.api_key else {}
+
+    async def _throttle(self) -> None:
+        if not self.rate_limit_per_second:
+            return
+        async with self._rate_lock:
+            now = time.monotonic()
+            delay = max(0.0, self._next_request_at - now)
+            self._next_request_at = max(now, self._next_request_at) + 1 / self.rate_limit_per_second
+        if delay:
+            await asyncio.sleep(delay)
+
+    async def _request_json(self, method: str, url: str, **kwargs: Any) -> Any:
+        for attempt in range(3):
+            await self._throttle()
+            try:
+                return await self.transport.json(method, url, **kwargs)
+            except OmniScholarError as error:
+                if not error.retryable or attempt == 2:
+                    raise
+                retry_after = error.details.get("retryAfterSeconds")
+                delay = (
+                    float(retry_after)
+                    if isinstance(retry_after, int | float) and retry_after > 0
+                    else min(8.0, 0.5 * (2**attempt))
+                )
+                await asyncio.sleep(delay)
+
+    @classmethod
+    def _normalise_fields(cls, values: tuple[str, ...], *, author: bool = False) -> str:
+        allowed = cls.author_fields if author else cls.paper_fields
+        aliases = {"doi": "externalIds", "paper_id": "paperId"}
+        result: list[str] = []
+        invalid: list[str] = []
+        for value in values:
+            candidate = aliases.get(value, value)
+            if candidate not in allowed:
+                invalid.append(value)
+            elif candidate not in result:
+                result.append(candidate)
+        if invalid:
+            raise OmniScholarError(
+                "invalid_provider_fields",
+                "Semantic Scholar fields contain unsupported names",
+                category="validation",
+                details={"invalid": invalid, "supported": sorted(allowed)},
+            )
+        return ",".join(result)
 
     @property
     def status(self) -> ProviderStatus:
@@ -212,14 +282,14 @@ class SemanticScholarProvider(BaseProvider):
             "query": request.query,
             "limit": min(max(request.limit, 1), 100),
             "offset": int(request.cursor or "0") if (request.cursor or "0").isdigit() else 0,
-            "fields": ",".join(request.fields) if request.fields else self.fields,
+            "fields": self._normalise_fields(request.fields) if request.fields else self.fields,
         }
         if request.year_from or request.year_to:
             params["year"] = f"{request.year_from or ''}-{request.year_to or ''}"
         if request.open_access_only:
             params["openAccessPdf"] = ""  # Presence is the API's boolean filter.
         payload = _object(
-            await self.transport.json(
+            await self._request_json(
                 "GET", f"{self.base_url}/paper/search", params=params, headers=self._headers()
             ),
             self.id,
@@ -235,7 +305,7 @@ class SemanticScholarProvider(BaseProvider):
 
     async def get(self, identifier: str) -> LiteratureRecord:
         self.ensure_enabled()
-        payload = await self.transport.json(
+        payload = await self._request_json(
             "GET",
             f"{self.base_url}/paper/{quote(identifier, safe='')}",
             params={"fields": self.fields},
@@ -250,17 +320,32 @@ class SemanticScholarProvider(BaseProvider):
         if kind == "recommendations":
             url = f"https://api.semanticscholar.org/recommendations/v1/papers/forpaper/{quote(identifier, safe='')}"
             payload = _object(
-                await self.transport.json(
+                await self._request_json(
                     "GET", url, params={"limit": min(limit, 500)}, headers=self._headers()
                 ),
                 self.id,
             )
             values = _list(payload.get("recommendedPapers", []), self.id, "recommendedPapers")
-            return SearchResult(self.id, [self._map(item) for item in values])
+            ids = [
+                str(item.get("paperId"))
+                for item in values
+                if isinstance(item, Mapping) and item.get("paperId")
+            ]
+            if not ids:
+                return SearchResult(self.id, [])
+            enriched = await self._request_json(
+                "POST",
+                f"{self.base_url}/paper/batch",
+                params={"fields": self.fields},
+                headers=self._headers(),
+                body={"ids": ids},
+            )
+            records = enriched if isinstance(enriched, list) else enriched.get("data", [])
+            return SearchResult(self.id, [self._map(item) for item in records if isinstance(item, Mapping)], requests=2)
         if kind not in {"references", "citations"}:
             self.unsupported(f"literature.{kind}")
         payload = _object(
-            await self.transport.json(
+            await self._request_json(
                 "GET",
                 f"{self.base_url}/paper/{quote(identifier, safe='')}/{kind}",
                 params={
@@ -284,6 +369,49 @@ class SemanticScholarProvider(BaseProvider):
             payload.get("total"),
             str(next_value) if next_value is not None else None,
         )
+
+    async def author(
+        self,
+        action: str,
+        *,
+        author_id: str | None = None,
+        query: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+        fields: tuple[str, ...] = (),
+    ) -> dict[str, Any]:
+        self.ensure_enabled()
+        if action == "search":
+            if not query:
+                raise OmniScholarError("query_required", "Author search requires query", category="validation")
+            url = f"{self.base_url}/author/search"
+            params = {
+                "query": query,
+                "limit": min(max(limit, 1), 100),
+                "offset": max(offset, 0),
+                "fields": self._normalise_fields(fields, author=True)
+                if fields
+                else "authorId,name,url,paperCount,citationCount,hIndex",
+            }
+        elif action in {"detail", "papers"}:
+            if not author_id:
+                raise OmniScholarError("author_id_required", "Author ID is required", category="validation")
+            suffix = "/papers" if action == "papers" else ""
+            url = f"{self.base_url}/author/{quote(author_id, safe='')}{suffix}"
+            params = {
+                "limit": min(max(limit, 1), 1000),
+                "offset": max(offset, 0),
+                "fields": self._normalise_fields(fields, author=action != "papers")
+                if fields
+                else (
+                    "paperId,title,abstract,authors,year,venue,citationCount,externalIds,url"
+                    if action == "papers"
+                    else "authorId,name,url,affiliations,paperCount,citationCount,hIndex"
+                ),
+            }
+        else:
+            raise OmniScholarError("unsupported_capability", f"Unsupported author action: {action}", category="capability")
+        return await self._request_json("GET", url, params=params, headers=self._headers())
 
     async def fulltext(self, identifier: str) -> dict[str, Any]:
         item = await self.get(identifier)

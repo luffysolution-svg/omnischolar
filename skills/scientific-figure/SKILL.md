@@ -2,7 +2,6 @@
 name: scientific-figure
 description: Generate or edit scientific illustration drafts with OmniScholar, including reference-guided and multi-reference work, or use Ai4Scholar for its declared figure actions. Use for mechanisms, graphical abstracts, workflows, apparatus diagrams, concept art, critique, or vectorization.
 license: MIT
-compatibility: Requires OmniScholar and a configured image provider.
 ---
 
 # Scientific figure workflow
@@ -15,12 +14,14 @@ Confirm the scientific message, audience, figure type, required entities and lab
 
 ## Route by declared capability
 
-1. Call `omnischolar_image_models` and use only descriptors where `usable=true` and the exact requested capability is declared.
+1. Call `omnischolar_image_models` with discovery enabled and use only descriptors where `usable=true` and the exact requested capability is declared. Preserve the provider/model choice in the request; if several discovered models are valid but differ in cost, quality, or modality, ask the user to choose. If the user does not choose, prefer the newest usable model for the task.
 2. A catalog-visible model with no declared capability remains unusable. Never infer text-to-image, edit, or multi-reference support from a model name.
 3. Use `omnischolar_image_generate` for text-to-image or declared image-to-image generation.
 4. Use `omnischolar_image_edit` for edit operations; multiple references require an explicit `multi-reference` declaration.
 5. Use `ai4scholar_figure` only for its declared actions and configured credentials.
 6. Use `omnischolar_image_service` with `action=status` for local configuration status or `action=job` only when a configured provider exposes that job contract.
+
+Pass common image controls using the tool's normalized names when supported: `size`, `aspectRatio`, `resolution`, `background`, `outputFormat`, `quality`, `n`, `negativePrompt`, and `seed`. Provider adapters translate these to their native contracts. Text-to-image, image-to-image, edit, transparency, aspect ratio, resolution, and batch count are separate capability checks; never infer one from another. Providers without a model-list endpoint must expose only versioned, provider-verified fallback models. `Atlas` and other custom endpoints need an explicit model contract and are never populated by guesses.
 
 If the chosen provider is absent, disabled, lacks credentials, lacks entitlement, or has no usable capability pin/curated descriptor, stop and report the exact blocker. Offer another configured provider only after confirming the same capability and informing the user. Atlas and custom providers require explicit endpoint/model contracts. Do not treat a successful model listing as generation entitlement.
 

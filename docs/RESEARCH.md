@@ -9,6 +9,7 @@
 | `research_sources` | 查看已启用的数据源和可用功能 |
 | `literature_search` | 检索论文，可限制年份、类型和开放获取状态 |
 | `literature_get` | 按 DOI、PMID/PMCID、arXiv ID 或数据源 ID 获取详情 |
+| `literature_author` | 查询 Semantic Scholar 作者、作者详情或作者论文列表 |
 | `literature_graph` | 查询参考文献、施引文献或推荐论文 |
 | `journal_metrics` | 查询已支持的期刊指标 |
 | `literature_fulltext` | 查找合法全文地址，或将允许访问的文件保存到输出目录 |
@@ -25,7 +26,7 @@
 
 检索时先用较小的 `limit`。优先按 DOI 去重；没有 DOI 时，再比较标题、年份和第一作者。标题相似只能用于筛选，不能代替正文证据。
 
-遇到 HTTP 429 时，OmniScholar 会返回限流信息。等待服务商给出的时间后再试，或改用支持同一查询的数据源。不要连续提交相同请求。
+遇到 HTTP 429 时，OmniScholar 会读取 `Retry-After`（若服务商提供），并对 Semantic Scholar 使用有界退避和可选的 `rateLimitPerSecond`。仍应避免连续提交相同请求。
 
 ## Zotero
 

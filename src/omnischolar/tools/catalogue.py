@@ -199,6 +199,20 @@ async def literature_get(
     return await _services(app).literature.get(arguments["provider"], arguments["id"])
 
 
+async def literature_author(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).literature.author(
+        arguments["provider"],
+        arguments["action"],
+        author_id=arguments.get("authorId"),
+        query=arguments.get("query"),
+        limit=arguments.get("limit", 20),
+        offset=arguments.get("offset", 0),
+        fields=tuple(arguments.get("fields", [])),
+    )
+
+
 async def literature_graph(
     arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
 ) -> Any:
@@ -473,9 +487,28 @@ async def image_models(arguments: dict[str, Any], _context: ToolExecutionContext
     return [
         asdict(item)
         for item in await _services(app).media.models(
-            arguments.get("provider"), discover=arguments.get("discover", False)
+            arguments.get("provider"), discover=arguments.get("discover", True)
         )
     ]
+
+
+def _image_request_options(arguments: dict[str, Any]) -> dict[str, Any]:
+    options = dict(arguments.get("options") or {})
+    aliases = {
+        "size": "size",
+        "aspectRatio": "aspect_ratio",
+        "resolution": "resolution",
+        "background": "background",
+        "outputFormat": "output_format",
+        "quality": "quality",
+        "n": "n",
+        "negativePrompt": "negative_prompt",
+        "seed": "seed",
+    }
+    for argument, option in aliases.items():
+        if argument in arguments:
+            options[option] = arguments[argument]
+    return options
 
 
 async def image_generate(arguments: dict[str, Any], context: ToolExecutionContext, app: Any) -> Any:
@@ -488,7 +521,7 @@ async def image_generate(arguments: dict[str, Any], context: ToolExecutionContex
         context=context,
         model=arguments.get("model"),
         references=references,
-        options=arguments.get("options"),
+        options=_image_request_options(arguments),
     )
 
 
@@ -500,7 +533,7 @@ async def image_edit(arguments: dict[str, Any], context: ToolExecutionContext, a
         context=context,
         model=arguments.get("model"),
         references=arguments["references"],
-        options=arguments.get("options"),
+        options=_image_request_options(arguments),
     )
 
 
@@ -617,6 +650,26 @@ def create_tool_definitions() -> list[ToolDefinition]:
         "Fetch one normalized literature record from an explicitly selected provider.",
         obj({"provider": STRING, "id": STRING}, ("provider", "id")),
         literature_get,
+        group="literature",
+        capabilities=("literature.lookup",),
+        network=True,
+    )
+    add(
+        "literature_author",
+        "Search a Semantic Scholar author, fetch author details, or list the author's papers.",
+        obj(
+            {
+                "provider": STRING,
+                "action": string_enum("search", "detail", "papers"),
+                "authorId": STRING,
+                "query": STRING,
+                "limit": {"type": "integer", "minimum": 1, "maximum": 1000},
+                "offset": {"type": "integer", "minimum": 0},
+                "fields": {"type": "array", "items": STRING, "maxItems": 50},
+            },
+            ("provider", "action"),
+        ),
+        literature_author,
         group="literature",
         capabilities=("literature.lookup",),
         network=True,
@@ -1229,11 +1282,20 @@ def create_tool_definitions() -> list[ToolDefinition]:
         "model": STRING,
         "prompt": {"type": "string", "minLength": 1, "maxLength": 20000},
         "references": {"type": "array", "items": STRING, "maxItems": 8},
+        "size": STRING,
+        "aspectRatio": STRING,
+        "resolution": STRING,
+        "background": string_enum("transparent", "opaque", "auto"),
+        "outputFormat": string_enum("png", "jpeg", "webp"),
+        "quality": STRING,
+        "n": {"type": "integer", "minimum": 1, "maximum": 10},
+        "negativePrompt": STRING,
+        "seed": {"type": "integer", "minimum": 0, "maximum": 2147483647},
         "options": {"type": "object"},
     }
     add(
         "omnischolar_image_generate",
-        "Generate a scientific image draft using capability routing and configured provider credentials.",
+        "Discover/select a usable image model and generate a scientific image draft. Omit provider/model to auto-select the newest discovered model.",
         obj(image_base, ("prompt",)),
         image_generate,
         group="media",
@@ -1245,7 +1307,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     )
     add(
         "omnischolar_image_edit",
-        "Edit scientific image references using an explicitly capable model.",
+        "Discover/select a usable image model and edit scientific image references.",
         obj(image_base, ("prompt", "references")),
         image_edit,
         group="media",

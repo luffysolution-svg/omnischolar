@@ -151,8 +151,9 @@
         "enabled": true,
         "apiKey": "",
         "apiKeyEnv": null,
+        "credentialsFile": null,
         "project": "your-project",
-        "location": "us-central1",
+        "location": "global",
         "models": {},
         "options": {}
       },
@@ -168,7 +169,7 @@
         "enabled": true,
         "apiKey": "",
         "apiKeyEnv": null,
-        "baseUrl": "https://fal.run",
+        "baseUrl": "https://queue.fal.run",
         "models": {},
         "options": {}
       },
@@ -179,7 +180,9 @@
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace"
+          "workspace": "your-workspace",
+          "region": "cn-beijing",
+          "protocol": "native"
         }
       },
       "qwen-cloud": {
@@ -189,16 +192,23 @@
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
         "options": {
-          "workspace": "your-workspace"
+          "workspace": "your-workspace",
+          "region": "ap-southeast-1",
+          "protocol": "native"
         }
       },
       "atlas": {
         "enabled": true,
         "apiKey": "",
         "apiKeyEnv": null,
-        "baseUrl": "https://your-atlas-provider.example/v1",
+        "baseUrl": "https://api.atlascloud.ai/api/v1",
         "models": {},
-        "options": {}
+        "options": {
+          "generationEndpoint": "model/generateImage",
+          "pollEndpoint": "model/prediction",
+          "pollIntervalSeconds": 2,
+          "pollTimeoutSeconds": 600
+        }
       },
       "custom": {
         "enabled": true,

@@ -2,7 +2,6 @@
 name: scholar-search
 description: Discover scholarly literature, patents, authors, citation networks, recommendations, journal metrics, snippets, and datasets with OmniScholar. Use for evidence gathering, related-work exploration, journal selection, or when local Zotero coverage is insufficient.
 license: MIT
-compatibility: Requires OmniScholar. Searches need network access; some configured providers require credentials.
 ---
 
 # Scholarly discovery
@@ -22,10 +21,11 @@ Follow the user's language. Keep tool and provider identifiers in their exact En
    - easyScholar only for its implemented journal-rank operation.
 4. Use `literature_get` to normalize and verify identifiers. Keep DOI, PMID, PMCID, arXiv ID, and provider IDs distinct.
 5. Use `literature_graph` only for relations declared by the selected provider. Citation, reference, and recommendation relations are not interchangeable.
-6. Use `literature_fulltext` first to resolve a lawful OA/full-text location. Resolution success does not itself authorize download, reuse, or external upload. Preserve license and access status.
-7. Use `journal_metrics` only for an enabled implemented source; do not infer missing metric years or ranking systems.
-8. Use `ai4scholar_*` tools only when the user selects Ai4Scholar and authorizes paid calls. Prefer `ai4scholar_batch` for multiple known IDs; use `ai4scholar_snippets` for focused evidence, `ai4scholar_dataset` for release data, and `ai4scholar_journal` for its own journal workflow.
-9. Report provenance, identifiers, ranking uncertainty, and evidence strength. Never fabricate metadata or claim support from title similarity alone.
+6. Use `literature_author` for Semantic Scholar author discovery and author-paper lookup. Resolve authors by stable author ID where possible; do not confuse an author's search result with a paper record.
+7. Use `literature_fulltext` first to resolve a lawful OA/full-text location. Resolution success does not itself authorize download, reuse, or external upload. Preserve license and access status.
+8. Use `journal_metrics` only for an enabled implemented source; do not infer missing metric years or ranking systems.
+9. Use `ai4scholar_*` tools only when the user selects Ai4Scholar and authorizes paid calls. Prefer `ai4scholar_batch` for multiple known IDs; use `ai4scholar_snippets` for focused evidence, `ai4scholar_dataset` for release data, and `ai4scholar_journal` for its own journal workflow.
+10. Report provenance, identifiers, ranking uncertainty, and evidence strength. Never fabricate metadata or claim support from title similarity alone.
 
 ## Fallbacks and failures
 
