@@ -94,7 +94,9 @@ Vertex AI can use a service-account JSON file:
 
 The service-account file is used locally to obtain an OAuth token and is never written to output artifacts. If `project` is omitted, OmniScholar reads `project_id` from the JSON; `location` defaults to `global`. Model availability still depends on project permissions, location, and model publication status.
 
-Atlas, fal, Vertex, and DashScope/Qwen expose different catalog capabilities. Atlas, fal, Vertex, and DashScope/Qwen have small built-in model sets checked against official documentation; custom services still need an exact `baseUrl`, model ID, capability list, and generation or edit endpoint. Do not infer capabilities from the model name or treat a built-in model as an entitlement guarantee.
+Atlas, fal, Vertex, and DashScope/Qwen expose different catalog capabilities. Atlas, fal, Vertex, and DashScope/Qwen have small built-in model sets checked against official documentation; when `modelCatalogEndpoint` is not configured, custom services make a best-effort request to `baseUrl/models`. If a downstream service has no catalog endpoint, or its models lack explicit capability fields, the tool falls back to the explicit model contracts in `models` and never infers image capabilities from a model name.
+
+The OpenAI example configuration presets `gpt-image-2`, `gpt-image-2.5-sunburst`, and `gpt-image-2.5-flare`; the Google/Vertex examples preset `gemini-3.1-flash-image`, `gemini-3.1-flash-lite-image`, and `gemini-3-pro-image`. These are model and capability presets, not entitlement guarantees.
 
 ## Generate and edit
 
@@ -109,6 +111,6 @@ Upload only images you may share with the selected service. After files are save
 - DashScope/Qwen supports the Qwen AI Platform native endpoint `https://dashscope.aliyuncs.com/api/v1` and regional Bailian workspace endpoints such as `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`. When `workspace` and `region` are supplied, the tool can derive the regional endpoint.
 - Gemini's `apiKeyEnv` must name an environment variable that exists.
 - Atlas Cloud uses `https://api.atlascloud.ai/api/v1`, submits to `model/generateImage`, and polls `model/prediction/{id}`. The built-in set includes official Nano Banana 2, GPT Image 2, and GPT Image 2.5 Flare/Sunburst IDs. Atlas image tasks are asynchronous and their `outputs` are saved locally.
-- Custom services need a working endpoint and model description.
+- Custom services automatically probe the standard OpenAI-compatible `/models` endpoint, or use `options.modelCatalogEndpoint` for a non-standard catalog URL. If the catalog lacks explicit `capabilities`/`supportedCapabilities`, declare `text-to-image`, `image-to-image`, or `edit` in `models` before calling it.
 
 Review text, structures, mechanisms, scale, and quantitative labels after generation. **AI images are illustrative drafts, not experimental data, real measurements, or scientific conclusions.**

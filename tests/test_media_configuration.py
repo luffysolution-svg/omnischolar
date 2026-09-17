@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from omnischolar.core import OmniScholarError
 from omnischolar.services.media import MediaProviderSettings, MediaService
 
 
@@ -125,6 +126,64 @@ class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("fal-ai/nano-banana-2", model_ids)
         self.assertIn("openai/gpt-image-2", model_ids)
         self.assertIn("openai/gpt-image-2.5/flare/edit", model_ids)
+
+    async def test_custom_discovers_default_openai_models_endpoint(self) -> None:
+        class Transport:
+            def __init__(self) -> None:
+                self.calls = []
+
+            async def json(self, method, url, **kwargs):
+                self.calls.append((method, url, kwargs))
+                return {
+                    "data": [
+                        {"id": "gpt-image-2", "capabilities": ["text-to-image"]},
+                        {"id": "chat-only-model"},
+                    ]
+                }
+
+        transport = Transport()
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                transport,
+                [MediaProviderSettings("custom", True, "key", "https://proxy.example/v1")],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            models = await service.models("custom", discover=True)
+
+        self.assertEqual(transport.calls[0][0], "GET")
+        self.assertTrue(transport.calls[0][1].endswith("/v1/models"))
+        image_model = next(model for model in models if model.id == "gpt-image-2")
+        chat_model = next(model for model in models if model.id == "chat-only-model")
+        self.assertTrue(image_model.usable)
+        self.assertEqual(image_model.capabilities, ("text-to-image",))
+        self.assertFalse(chat_model.usable)
+        self.assertEqual(chat_model.unavailable_reason, "model_capabilities_unpinned")
+
+    async def test_custom_catalog_failure_falls_back_to_manual_contract(self) -> None:
+        class Transport:
+            async def json(self, method, url, **kwargs):
+                raise OmniScholarError("network_error", "catalog unavailable", category="network")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                Transport(),
+                [
+                    MediaProviderSettings(
+                        "custom",
+                        True,
+                        "key",
+                        "https://proxy.example/v1",
+                        {"manual-image": {"text-to-image"}},
+                    )
+                ],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            models = await service.models("custom", discover=True)
+
+        self.assertEqual([model.id for model in models], ["manual-image"])
+        self.assertTrue(models[0].usable)
 
     async def test_fal_defaults_to_sync_mode_and_respects_explicit_opt_out(self) -> None:
         class Transport:

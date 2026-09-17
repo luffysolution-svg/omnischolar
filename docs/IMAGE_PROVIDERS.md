@@ -94,7 +94,9 @@ Vertex AI 可使用 service-account JSON：
 
 服务账号文件只用于本地换取 OAuth token，不会写入输出结果。若省略 `project`，工具会从 JSON 的 `project_id` 自动读取；默认 `location` 为 `global`。模型是否可用仍取决于项目授权、区域和模型发布状态。
 
-Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不同。Atlas、fal、Vertex、DashScope/Qwen 已提供少量基于官方文档核对的内置模型；自定义服务仍需要准确的 `baseUrl`、模型 ID、功能列表，以及生成或编辑接口。不要只凭模型名填写功能，也不要把内置模型视为账号已开通的保证。
+Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不同。Atlas、fal、Vertex、DashScope/Qwen 已提供少量基于官方文档核对的内置模型；自定义服务在未配置 `modelCatalogEndpoint` 时会尽力尝试 `baseUrl/models`。如果下游没有模型目录接口，或返回的模型没有明确能力字段，工具会回退到 `models` 中的显式模型合同，不会仅凭模型名推断图片能力。
+
+OpenAI 示例配置预设 `gpt-image-2`、`gpt-image-2.5-sunburst` 和 `gpt-image-2.5-flare`；Google/Vertex 示例配置预设 `gemini-3.1-flash-image`、`gemini-3.1-flash-lite-image` 和 `gemini-3-pro-image`。这些是模型 ID 与能力预设，不代表账号已经开通对应模型。
 
 ## 生成与编辑
 
@@ -109,6 +111,6 @@ Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不
 - DashScope/Qwen 支持千问 AI 平台的通用原生地址 `https://dashscope.aliyuncs.com/api/v1`，也支持百炼按地域的 workspace 地址，例如 `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`。当填写 `workspace` 和 `region` 时，工具可以自动拼接地域地址。
 - Gemini 配置中的 `apiKeyEnv` 必须指向已存在的环境变量。
 - Atlas Cloud 使用 `https://api.atlascloud.ai/api/v1`、`model/generateImage` 提交和 `model/prediction/{id}` 轮询；默认内置 Nano Banana 2、GPT Image 2、GPT Image 2.5 Flare/Sunburst 的官方模型 ID。Atlas 的图片任务是异步的，结果中的 `outputs` 会保存到本地。
-- 自定义服务必须给出可用的服务地址与模型说明。
+- 自定义服务会自动探测标准 OpenAI 兼容的 `/models`；也可以用 `options.modelCatalogEndpoint` 指定非标准目录地址。目录结果缺少明确 `capabilities`/`supportedCapabilities` 时只展示为未绑定能力，必须在 `models` 中声明 `text-to-image`、`image-to-image` 或 `edit` 后才能调用。
 
 生成后仍需人工检查文字、结构、机制、比例和定量描述。**AI 图片是示意草稿，不是实验数据、真实测量或科研结论。**

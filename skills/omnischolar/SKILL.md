@@ -37,6 +37,8 @@ For Semantic Scholar, keep paper and author operations separate: use `literature
 
 For image calls, read each selected model's `supported_parameters` from `omnischolar_image_models` before calling `omnischolar_image_generate` or `omnischolar_image_edit`. Provider parameter support is not interchangeable: OpenAI GPT Image uses `size`, Google Gemini uses `aspectRatio`/`resolution`/`outputFormat`, Vertex Gemini uses `aspectRatio`/`resolution`/`outputFormat`/`n`, Fal varies by model, and native DashScope/Qwen uses `size`/`n`/`negativePrompt`/`seed` without background or quality controls. Qwen AI Platform uses the public DashScope endpoint and does not require a workspace; Bailian workspace endpoints are a separate regional configuration.
 
+For custom providers, model discovery first uses `options.modelCatalogEndpoint` when configured and otherwise tries the OpenAI-compatible `baseUrl/models` endpoint. Treat catalog entries without explicit capability metadata as `model_capabilities_unpinned`; use the configured `models` contract to authorize image operations when the downstream provider has no usable catalog.
+
 Fal generation defaults to `options.sync_mode=true` to avoid downloading result CDN URLs; set it to `false` only for an endpoint that requires hosted output URLs.
 
 ## Boundaries

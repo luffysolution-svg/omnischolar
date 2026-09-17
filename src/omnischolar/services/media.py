@@ -342,6 +342,8 @@ class MediaService:
             else provider.id
         )
         url = CATALOG_URLS.get(catalog_key) or provider.options.get("modelCatalogEndpoint")
+        if provider.id == "custom" and not url and provider.base_url:
+            url = self._relative_endpoint(provider.base_url, "models")
         if not isinstance(url, str) or not url:
             return {}
         headers = {"Authorization": f"Bearer {provider.api_key}"}
@@ -349,7 +351,12 @@ class MediaService:
         if provider.id in {"google", "gemini"}:
             headers = {}
             params = {"key": provider.api_key}
-        payload = await self.transport.json("GET", url, params=params, headers=headers)
+        try:
+            payload = await self.transport.json("GET", url, params=params, headers=headers)
+        except OmniScholarError:
+            if provider.id == "custom":
+                return {}
+            raise
         values = payload.get("data") if isinstance(payload, dict) else None
         if not isinstance(values, list):
             values = payload.get("models", []) if isinstance(payload, dict) else []

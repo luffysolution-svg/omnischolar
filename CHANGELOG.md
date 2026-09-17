@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.21] - 2026-09-17
+
+- Auto-probe custom OpenAI-compatible providers at `baseUrl/models` when no catalog endpoint is configured, with safe fallback to explicit model contracts.
+- Preset the current official GPT Image and Gemini image model IDs in the example configuration.
+- Document custom catalog discovery and capability metadata requirements.
+
 ## [0.1.20] - 2026-09-17
 
 - Default Fal image generation to official `sync_mode=true` with an explicit opt-out for hosted-URL queue results.
