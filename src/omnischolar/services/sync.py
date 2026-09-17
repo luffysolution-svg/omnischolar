@@ -517,6 +517,8 @@ class SyncService:
             return {
                 "publicationId": plan.publication_id,
                 "directory": str(destination),
+                "markdownPath": str(destination / markdown_name),
+                "metadataPath": str(destination / "metadata.json"),
                 "status": "up_to_date",
                 "revision": manifest["revision"],
             }

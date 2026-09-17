@@ -112,7 +112,7 @@ claude plugin install omnischolar@omnischolar --scope user
 
 Choose `--scope project` to share the enabled plugin through repository settings, or `--scope local` to enable it only for yourself in the current repository. If Claude reports `Run /reload-plugins to activate`, run that command before using the plugin.
 
-Claude Code copies the repository-root plugin into its versioned cache, discovers the eight folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command uses the latest PyPI package:
+Claude Code copies the repository-root plugin into its versioned cache, discovers the nine folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command uses the latest PyPI package:
 
 ```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp

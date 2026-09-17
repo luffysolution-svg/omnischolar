@@ -46,11 +46,13 @@ http://127.0.0.1:23119/api
 
 聚合视图可包含书目信息、笔记、批注、附件信息、索引文本和本地 PDF 路径。OmniScholar 不会创建、修改、移动、加标签或删除 Zotero 数据。
 
+`zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。已解析文献使用 `omnischolar_read` 按全文游标、图表、公式、段落、对比或综述模式分段读取，完整 Markdown 仍保存在输出目录，不会默认一次返回给 Agent。
+
 Zotero 笔记和批注属于个人阅读记录，不应当作论文原文证据。需要引用论文结论时，仍要核对原文。
 
 ## MinerU 解析
 
-`omnischolar_parse` 检查 PDF 文件、计算 SHA-256，并使用 MinerU 返回正文、公式、表格和图片。解析结果会缓存；同一文件和解析设置再次调用时可直接命中缓存。
+`omnischolar_parse` 检查 PDF 文件、计算 SHA-256，并使用 MinerU 返回正文、公式、表格和图片。解析结果会缓存；同一文件和解析设置再次调用时可直接命中缓存。工具结果只返回解析摘要、文件路径和发布信息；正文通过 `omnischolar_read` 按需读取。
 
 配置好 MinerU API key 并启用服务后即可解析；OmniScholar 不会在没有凭据时自动上传。
 

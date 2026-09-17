@@ -32,6 +32,6 @@ class PiAdapter:
         result = await self.registry.execute(name, arguments, context, self.application)
         return {
             "content": [{"type": "text", "text": result.text}],
-            "details": result.structured_content,
+            "details": {},
             "isError": result.is_error,
         }

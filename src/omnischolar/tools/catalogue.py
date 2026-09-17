@@ -273,9 +273,15 @@ async def zotero_search(arguments: dict[str, Any], _context: ToolExecutionContex
 async def zotero_item(arguments: dict[str, Any], _context: ToolExecutionContext, app: Any) -> Any:
     return await _services(app).zotero.item(
         arguments["key"],
-        aggregate=arguments.get("mode", "aggregate") == "aggregate",
+        aggregate=arguments.get("mode", "item") == "aggregate",
         attachment_key=arguments.get("attachmentKey"),
     )
+
+
+async def literature_read(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).reader.read(arguments)
 
 
 async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, app: Any) -> Any:
@@ -750,7 +756,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     )
     add(
         "zotero_item",
-        "Read one Zotero item or aggregate paper with notes, annotations, attachments, indexed text and PDF location.",
+        "Read one Zotero item (metadata by default) or explicitly aggregate notes, annotations, attachments, indexed text and PDF location.",
         obj(
             {
                 "key": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
@@ -763,6 +769,32 @@ def create_tool_definitions() -> list[ToolDefinition]:
         group="zotero",
         capabilities=("zotero.item", "zotero.aggregate"),
         network=True,
+    )
+    add(
+        "omnischolar_read",
+        "Read bounded, mode-aware excerpts from locally published papers without returning the full document by default.",
+        obj(
+            {
+                "key": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "keys": {
+                    "type": "array",
+                    "items": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                    "minItems": 1,
+                    "maxItems": 8,
+                },
+                "attachmentKey": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "mode": string_enum("full", "figures", "formulas", "paragraphs", "compare", "review"),
+                "section": {"type": "string", "maxLength": 500},
+                "query": {"type": "string", "maxLength": 1000},
+                "cursor": NONNEGATIVE,
+                "maxChars": {"type": "integer", "minimum": 500, "maximum": 12000},
+                "maxItems": {"type": "integer", "minimum": 1, "maximum": 50},
+            },
+            ("mode",),
+        ),
+        literature_read,
+        group="literature",
+        capabilities=("literature.read", "literature.fulltext", "literature.figures", "literature.formulas"),
     )
     parse_schema = obj(
         {

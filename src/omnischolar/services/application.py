@@ -24,6 +24,7 @@ from .chemistry import ChemistryService
 from .materials import MaterialsProjectService
 from .media import MediaProviderSettings, MediaService
 from .mineru import MinerUService
+from .reader import LiteratureReader
 from .sync import SyncService
 from .transport import CoreServiceTransport
 from .zotero import ZoteroService
@@ -34,6 +35,7 @@ class ApplicationServices:
     literature: LiteratureRouter
     zotero: ZoteroService
     sync: SyncService
+    reader: LiteratureReader
     chemistry: ChemistryService
     ai4scholar: Ai4ScholarService | None
     mineru: MinerUService | None
@@ -206,6 +208,15 @@ class OmniScholarApplication:
             max_input_bytes=config.media.max_input_bytes,
             max_artifact_bytes=config.media.max_artifact_bytes,
         )
+        sync = SyncService(
+            config.output.root_directory,
+            namespace=config.sync.namespace,
+            backup=config.sync.backup,
+            literature_directory=config.output.literature_directory,
+            folder_name_template=config.output.folder_name_template,
+            filename_template=config.output.filename_template,
+            filename_separator=config.output.filename_separator,
+        )
         self.services = ApplicationServices(
             literature,
             ZoteroService(
@@ -214,15 +225,8 @@ class OmniScholarApplication:
                 max_items=config.zotero.max_items,
                 max_indexed_text_bytes=config.zotero.max_indexed_text_bytes,
             ),
-            SyncService(
-                config.output.root_directory,
-                namespace=config.sync.namespace,
-                backup=config.sync.backup,
-                literature_directory=config.output.literature_directory,
-                folder_name_template=config.output.folder_name_template,
-                filename_template=config.output.filename_template,
-                filename_separator=config.output.filename_separator,
-            ),
+            sync,
+            LiteratureReader(sync),
             chemistry,
             ai4scholar,
             mineru,

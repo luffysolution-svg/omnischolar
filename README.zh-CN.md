@@ -11,6 +11,7 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 检索 Semantic Scholar、OpenAlex、PubMed/PMC、arXiv、Crossref、Unpaywall、easyScholar、Google Scholar 和 Google Patents
 - 查询论文详情、作者、参考文献、施引文献、推荐、全文片段、数据集和期刊指标
 - 读取 Zotero 收藏夹、条目、笔记、批注、附件、索引文本和本地 PDF 路径，不修改文献库
+- 按全文游标、图表、公式、段落、文献对比和文献综述模式读取已解析文献，避免整篇正文一次进入上下文
 - 使用 MinerU 提取指定 PDF 的正文、公式、表格和图片
 - 查找引用候选，核对书目信息，再按要求生成参考文献
 - 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF

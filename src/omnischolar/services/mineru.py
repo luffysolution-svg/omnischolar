@@ -37,7 +37,8 @@ class MinerUResult:
 
     def summary(self) -> dict[str, Any]:
         return {
-            "markdown": self.markdown,
+            "markdownBytes": len(self.markdown.encode("utf-8")),
+            "markdownSha256": hashlib.sha256(self.markdown.encode("utf-8")).hexdigest(),
             "assets": [{"name": name, "bytes": len(value)} for name, value in self.assets.items()],
             "pdfSha256": self.pdf_sha256,
             "parseKey": self.parse_key,

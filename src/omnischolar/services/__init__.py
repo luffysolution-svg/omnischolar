@@ -5,6 +5,7 @@ from .application import ApplicationServices, OmniScholarApplication
 from .chemistry import ChemistryService
 from .materials import MaterialsProjectService
 from .mineru import MinerUResult, MinerUService
+from .reader import LiteratureReader
 from .sync import SyncPlan, SyncService
 from .transport import CoreServiceTransport, ServiceTransport
 from .zotero import ZoteroService, validate_zotero_key
@@ -17,6 +18,7 @@ __all__ = [
     "MaterialsProjectService",
     "MinerUResult",
     "MinerUService",
+    "LiteratureReader",
     "OmniScholarApplication",
     "ServiceTransport",
     "SyncPlan",

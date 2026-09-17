@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0] - 2026-09-18
+
+- Keep full parsed Markdown in the local publication while returning bounded parse metadata to agents.
+- Add `omnischolar_read` for cursor-based full-text reading, figures/tables, formulas, paragraph lookup, paper comparison, and literature-review evidence packets.
+- Stop duplicating every MCP result in both text and structured content; Pi adapters now keep one canonical result representation.
+- Add the `literature-reading` Skill and make metadata-only Zotero item reads the default.
+
 ## [0.1.24] - 2026-09-17
 
 - Add named custom provider profiles with independent API keys, endpoints, model capabilities, and image parameter contracts.

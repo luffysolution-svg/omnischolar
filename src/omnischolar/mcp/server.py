@@ -42,7 +42,6 @@ def tool_to_mcp(definition: ToolDefinition) -> types.Tool:
 def result_to_mcp(result: ToolExecutionResult) -> types.CallToolResult:
     return types.CallToolResult(
         content=[types.TextContent(type="text", text=result.text)],
-        structuredContent=result.structured_content,
         isError=result.is_error,
     )
 

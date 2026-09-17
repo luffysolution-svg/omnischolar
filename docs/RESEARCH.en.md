@@ -46,11 +46,13 @@ Enable â€œAllow other applications on this computer to communicate with Zoteroâ€
 
 The combined view can include metadata, notes, annotations, attachment details, indexed text, and a local PDF path. OmniScholar never creates, updates, moves, tags, or deletes Zotero data.
 
+`zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. After parsing, use `omnischolar_read` for cursor-based full-text reading or bounded figure, formula, paragraph, comparison, and review evidence. The complete Markdown remains in the output directory and is not returned to the agent by default.
+
 Notes and annotations are personal reading context, not evidence from the publication. Check the paper itself before citing a claim.
 
 ## MinerU parsing
 
-`omnischolar_parse` validates the PDF, computes SHA-256, and asks MinerU to return text, formulas, tables, and figures. Results are cached; the same file and parser settings can return a cache hit.
+`omnischolar_parse` validates the PDF, computes SHA-256, and asks MinerU to return text, formulas, tables, and figures. Results are cached; the same file and parser settings can return a cache hit. The tool returns parse metadata and publication paths; use `omnischolar_read` to retrieve bounded content.
 
 After MinerU is enabled and its API key is configured, parsing is directly available; OmniScholar does not upload without credentials.
 
