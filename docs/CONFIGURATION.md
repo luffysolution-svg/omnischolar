@@ -41,6 +41,10 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 `workspaceRoots` 限定可读取的本地文件，`output.rootDirectory` 限定写入位置。若要直接写入 Obsidian，可把输出目录设为 Vault 中的一个文件夹。
 
+核心服务支持 Windows、Linux 和 macOS。Zotero 功能需要本机运行 Zotero Desktop；XRD 计算需要可选的 `pymatgen` 后端。
+
+`omnischolar_status` 不显示配置文件绝对路径；需要查看路径时使用 `omnischolar config path`。
+
 新文献的子文件夹和文件名可以继续细分：
 
 ```json

@@ -41,6 +41,10 @@ If none of the first four sources exists, the first MCP start or installer run c
 
 `workspaceRoots` limits local file reads. `output.rootDirectory` limits file writes. To use Obsidian, set the output directory to a folder inside the vault.
 
+The core services support Windows, Linux, and macOS. Zotero features require Zotero Desktop on the local machine; XRD calculation requires the optional `pymatgen` backend.
+
+`omnischolar_status` does not display the absolute config path. Use `omnischolar config path` when the path is needed.
+
 The new-paper subfolder and file name can be customized as well:
 
 ```json
