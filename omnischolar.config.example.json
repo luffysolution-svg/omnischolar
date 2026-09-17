@@ -210,27 +210,33 @@
         "baseUrl": "https://images.example.edu/v1",
         "models": {
           "gpt-image-2": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           },
           "gpt-image-2.5-sunburst": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           },
           "gpt-image-2.5-flare": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           },
           "gemini-3.1-flash-image": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           },
           "gemini-3.1-flash-lite-image": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           },
           "gemini-3-pro-image": {
-            "capabilities": ["text-to-image"],
+            "capabilities": ["text-to-image", "image-to-image", "edit", "multi-reference"],
+            "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"],
             "paid": true
           }
         },

@@ -37,6 +37,8 @@ Adapters translate supported controls to native names. Unsupported controls must
 
 Custom providers make a best-effort probe of `baseUrl/models` when no `modelCatalogEndpoint` is configured. A returned model without explicit capability metadata remains unusable until its capability is declared in the configuration; providers without a model-list endpoint fall back to explicit model contracts.
 
+Multiple custom profiles may use distinct provider names with `providerType: "custom"`. Read each selected model's declared `supportedParameters`; for common OpenAI-compatible profiles these may include `size`, `resolution`, `background`, `outputFormat`, `quality`, and `n`, but do not assume all downstream profiles support every control.
+
 Fal image calls default to the provider's documented `sync_mode=true`, so returned data can be saved locally without downloading a result CDN URL. Pass `options.sync_mode=false` only when the selected endpoint requires the normal hosted-URL queue flow.
 
 If the chosen provider is absent, disabled, lacks credentials, lacks entitlement, or has no usable capability pin/curated descriptor, stop and report the exact blocker. Offer another configured provider only after confirming the same capability and informing the user. Atlas and custom providers require explicit endpoint/model contracts. Do not treat a successful model listing as generation entitlement.

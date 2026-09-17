@@ -39,6 +39,8 @@ For image calls, read each selected model's `supported_parameters` from `omnisch
 
 For custom providers, model discovery first uses `options.modelCatalogEndpoint` when configured and otherwise tries the OpenAI-compatible `baseUrl/models` endpoint. Treat catalog entries without explicit capability metadata as `model_capabilities_unpinned`; use the configured `models` contract to authorize image operations when the downstream provider has no usable catalog.
 
+Multiple custom profiles are supported with distinct provider names and `providerType: "custom"`. Keep each profile's API key in its own environment variable. Declare per-model capabilities and `supportedParameters`; common OpenAI-compatible image routes are `images/generations` and `images/edits`, but endpoint names remain configurable.
+
 Fal generation defaults to `options.sync_mode=true` to avoid downloading result CDN URLs; set it to `false` only for an endpoint that requires hosted output URLs.
 
 ## Boundaries

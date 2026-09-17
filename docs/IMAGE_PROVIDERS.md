@@ -113,4 +113,35 @@ Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不
 - Atlas Cloud 使用 `https://api.atlascloud.ai/api/v1`、`model/generateImage` 提交和 `model/prediction/{id}` 轮询；默认内置 Nano Banana 2、GPT Image 2、GPT Image 2.5 Flare/Sunburst 的官方模型 ID。Atlas 的图片任务是异步的，结果中的 `outputs` 会保存到本地。
 - 自定义服务会自动探测标准 OpenAI 兼容的 `/models`；也可以用 `options.modelCatalogEndpoint` 指定非标准目录地址。目录结果缺少明确 `capabilities`/`supportedCapabilities` 时只展示为未绑定能力，必须在 `models` 中声明 `text-to-image`、`image-to-image` 或 `edit` 后才能调用。custom 图片请求默认超时为 180 秒，可用 `options.imageTimeoutSeconds` 调整（上限 1800 秒）。
 
+可以在 `media.providers` 下配置多个 custom profile。profile 名称可以不同，但必须设置 `providerType: "custom"`；每个 profile 独立填写 `apiKeyEnv`、`baseUrl`、模型能力和 `supportedParameters`，调用时用对应 profile 名称选择服务。OpenAI/Gemini 兼容中转站常见的图片 endpoint 是 `images/generations` 和 `images/edits`，可通过 `generationEndpoint`、`editEndpoint` 调整。
+
+例如两个 API 分开配置：
+
+```json
+{
+  "custom-aixoras-openai": {
+    "providerType": "custom",
+    "apiKeyEnv": "OMNISCHOLAR_AIXORAS_OPENAI_API_KEY",
+    "baseUrl": "https://api.aixoras.com/v1",
+    "models": {
+      "gpt-image-2": {
+        "capabilities": ["text-to-image", "image-to-image", "edit"],
+        "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"]
+      }
+    }
+  },
+  "custom-aixoras-gemini": {
+    "providerType": "custom",
+    "apiKeyEnv": "OMNISCHOLAR_AIXORAS_GEMINI_API_KEY",
+    "baseUrl": "https://api.aixoras.com/v1",
+    "models": {
+      "gemini-3.1-flash-image": {
+        "capabilities": ["text-to-image", "image-to-image", "edit"],
+        "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"]
+      }
+    }
+  }
+}
+```
+
 生成后仍需人工检查文字、结构、机制、比例和定量描述。**AI 图片是示意草稿，不是实验数据、真实测量或科研结论。**

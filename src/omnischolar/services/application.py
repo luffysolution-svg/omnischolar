@@ -190,6 +190,12 @@ class OmniScholarApplication:
                     {model: set(pin.capabilities) for model, pin in section.models.items()},
                     options,
                     section.credentials_file,
+                    {
+                        model: tuple(sorted(pin.supported_parameters))
+                        for model, pin in section.models.items()
+                        if pin.supported_parameters
+                    },
+                    section.provider_type,
                 )
             )
         media = MediaService(

@@ -135,6 +135,8 @@ class MediaProviderSettings:
     models: dict[str, set[Capability]] = field(default_factory=dict)
     options: dict[str, Any] = field(default_factory=dict)
     credentials_file: Path | None = None
+    model_parameters: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    provider_type: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -177,6 +179,10 @@ def supported_parameters(provider_id: str, model_id: str) -> tuple[str, ...]:
     ):
         return ("size", "resolution", "n")
     return PROVIDER_PARAMETER_SUPPORT.get(provider_id, ())
+
+
+def _is_custom_provider(provider: MediaProviderSettings) -> bool:
+    return provider.id == "custom" or provider.provider_type == "custom"
 
 
 class MediaService:
@@ -237,6 +243,11 @@ class MediaService:
             if discover and provider.api_key:
                 catalog_models = await self._discover_catalog(provider)
             for model_id, capabilities in pins.items():
+                declared_parameters = (
+                    provider.model_parameters.get(model_id, ())
+                    if _is_custom_provider(provider)
+                    else supported_parameters(provider.id, model_id)
+                )
                 descriptors.append(
                     ModelDescriptor(
                         provider.id,
@@ -245,7 +256,7 @@ class MediaService:
                         "config_pin",
                         usable,
                         unavailable_reason,
-                        supported_parameters=supported_parameters(provider.id, model_id),
+                        supported_parameters=declared_parameters,
                     )
                 )
             for model_id, (capabilities, created) in catalog_models.items():
@@ -289,7 +300,9 @@ class MediaService:
 
     @staticmethod
     def _provider_contract_error(provider: MediaProviderSettings) -> str | None:
-        if provider.id in {"atlas", "custom"} and not provider.base_url:
+        if provider.id == "atlas" and not provider.base_url:
+            return "provider_base_url_required"
+        if _is_custom_provider(provider) and not provider.base_url:
             return "provider_base_url_required"
         if provider.id not in {"dashscope", "qwen", "qwen-cloud"}:
             return None
@@ -341,8 +354,9 @@ class MediaService:
             if provider.id == "gemini"
             else provider.id
         )
+        is_custom = _is_custom_provider(provider)
         url = CATALOG_URLS.get(catalog_key) or provider.options.get("modelCatalogEndpoint")
-        if provider.id == "custom" and not url and provider.base_url:
+        if is_custom and not url and provider.base_url:
             url = self._relative_endpoint(provider.base_url, "models")
         if not isinstance(url, str) or not url:
             return {}
@@ -354,7 +368,7 @@ class MediaService:
         try:
             payload = await self.transport.json("GET", url, params=params, headers=headers)
         except OmniScholarError:
-            if provider.id == "custom":
+            if is_custom:
                 return {}
             raise
         values = payload.get("data") if isinstance(payload, dict) else None
@@ -417,6 +431,12 @@ class MediaService:
         else:
             selected_model = None
         if not self._provider_contract_ready(provider):
+            if _is_custom_provider(provider):
+                raise OmniScholarError(
+                    "provider_base_url_required",
+                    "Custom image providers require baseUrl",
+                    category="config",
+                )
             raise OmniScholarError(
                 "dashscope_workspace_required",
                 "DashScope current image API requires a workspace-scoped endpoint",
@@ -456,6 +476,7 @@ class MediaService:
                 category="capability",
             )
         request_options = self._validated_request_options(options or {})
+        self._validate_model_options(selected_model, request_options)
         await context.progress(0, 2, "submitting image operation")
         payload = await self._call_provider(
             provider, selected_model.id, capability, prompt, resolved, request_options
@@ -495,6 +516,37 @@ class MediaService:
         return resolved
 
     @staticmethod
+    def _validate_model_options(model: ModelDescriptor, options: dict[str, Any]) -> None:
+        aliases = {
+            "aspect_ratio": "aspectRatio",
+            "output_format": "outputFormat",
+            "negative_prompt": "negativePrompt",
+        }
+        known = {
+            "size",
+            "resolution",
+            "aspect_ratio",
+            "background",
+            "output_format",
+            "quality",
+            "n",
+            "negative_prompt",
+            "seed",
+        }
+        declared = set(model.supported_parameters)
+        unsupported = sorted(
+            key
+            for key in options
+            if key in known and aliases.get(key, key) not in declared
+        )
+        if unsupported:
+            raise OmniScholarError(
+                "parameter_unsupported",
+                f"Model {model.id} does not support image parameters: {', '.join(unsupported)}",
+                category="capability",
+            )
+
+    @staticmethod
     def _validated_request_options(options: dict[str, Any]) -> dict[str, Any]:
         forbidden = {
             "apikey",
@@ -525,7 +577,7 @@ class MediaService:
         provider: MediaProviderSettings, options: dict[str, Any]
     ) -> dict[str, Any]:
         mapped = dict(options)
-        if provider.id in {"openai", "custom"}:
+        if provider.id == "openai" or _is_custom_provider(provider):
             if "resolution" in mapped:
                 if "size" in mapped:
                     raise OmniScholarError(
@@ -772,7 +824,7 @@ class MediaService:
         options: dict[str, Any],
     ) -> Any:
         options = self._map_provider_options(provider, options)
-        if provider.id in {"openai", "custom"}:
+        if provider.id == "openai" or _is_custom_provider(provider):
             base = provider.base_url or "https://api.openai.com/v1"
             headers = {"Authorization": f"Bearer {provider.api_key}"}
             if references:

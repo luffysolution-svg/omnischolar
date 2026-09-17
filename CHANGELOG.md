@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.24] - 2026-09-17
+
+- Add named custom provider profiles with independent API keys, endpoints, model capabilities, and image parameter contracts.
+- Support custom model-level controls for size, resolution, background, output format, quality, count, and image editing workflows.
+
 ## [0.1.23] - 2026-09-17
 
 - Extend OpenAI-compatible image request timeouts to 180 seconds by default, with a bounded custom-provider override.

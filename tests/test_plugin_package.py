@@ -63,6 +63,10 @@ class CodexPluginPackageTests(unittest.TestCase):
             "gemini-3-pro-image",
         }
         self.assertEqual(set(providers["custom"]["models"]), expected_custom)
+        self.assertEqual(
+            providers["custom"]["models"]["gpt-image-2"]["supportedParameters"],
+            ["size", "resolution", "background", "outputFormat", "quality", "n"],
+        )
 
     def test_portable_mcp_uses_latest_pypi_release(self) -> None:
         document = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))

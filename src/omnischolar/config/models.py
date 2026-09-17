@@ -171,11 +171,25 @@ class DataConfig(ConfigModel):
 
 class MediaModelPin(ConfigModel):
     capabilities: set[Literal["text-to-image", "image-to-image", "edit", "multi-reference"]]
+    supported_parameters: set[
+        Literal[
+            "size",
+            "resolution",
+            "aspectRatio",
+            "background",
+            "outputFormat",
+            "quality",
+            "n",
+            "negativePrompt",
+            "seed",
+        ]
+    ] = Field(default_factory=set)
     paid: bool = True
 
 
 class MediaProviderConfig(CredentialedConfig):
     enabled: bool = True
+    provider_type: Literal["custom"] | None = None
     base_url: str | None = None
     project: str | None = None
     location: str | None = None

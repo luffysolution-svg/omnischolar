@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from omnischolar.core import OmniScholarError
-from omnischolar.services.media import MediaProviderSettings, MediaService
+from omnischolar.services.media import MediaProviderSettings, MediaService, ModelDescriptor
 
 
 class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
@@ -184,6 +184,58 @@ class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual([model.id for model in models], ["manual-image"])
         self.assertTrue(models[0].usable)
+
+    async def test_named_custom_profile_uses_declared_parameters_and_openai_routes(self) -> None:
+        class Transport:
+            async def json(self, method, url, **kwargs):
+                self.call = (method, url, kwargs)
+                return {}
+
+        transport = Transport()
+        with tempfile.TemporaryDirectory() as temporary:
+            service = MediaService(
+                transport,
+                [
+                    MediaProviderSettings(
+                        "custom-aixoras-openai",
+                        True,
+                        "key",
+                        "https://proxy.example/v1",
+                        {"gpt-image-2": {"text-to-image"}},
+                        {},
+                        None,
+                        {"gpt-image-2": ("size", "background", "quality", "n")},
+                        "custom",
+                    )
+                ],
+                output_root=Path(temporary),
+                workspace_roots=(),
+            )
+            models = await service.models("custom-aixoras-openai")
+            await service._call_provider(
+                service.providers["custom-aixoras-openai"],
+                "gpt-image-2",
+                "text-to-image",
+                "draw",
+                [],
+                {"size": "1024x1024", "n": 1},
+            )
+
+        self.assertEqual(models[0].supported_parameters, ("size", "background", "quality", "n"))
+        self.assertTrue(transport.call[1].endswith("/images/generations"))
+
+    def test_model_parameter_contract_rejects_undeclared_controls(self) -> None:
+        model = ModelDescriptor(
+            "custom",
+            "gpt-image-2",
+            ("text-to-image",),
+            "config_pin",
+            True,
+            supported_parameters=("size", "n"),
+        )
+        with self.assertRaises(OmniScholarError) as raised:
+            MediaService._validate_model_options(model, {"quality": "high"})
+        self.assertEqual(raised.exception.code, "parameter_unsupported")
 
     async def test_fal_defaults_to_sync_mode_and_respects_explicit_opt_out(self) -> None:
         class Transport:

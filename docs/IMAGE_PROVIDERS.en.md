@@ -113,4 +113,35 @@ Upload only images you may share with the selected service. After files are save
 - Atlas Cloud uses `https://api.atlascloud.ai/api/v1`, submits to `model/generateImage`, and polls `model/prediction/{id}`. The built-in set includes official Nano Banana 2, GPT Image 2, and GPT Image 2.5 Flare/Sunburst IDs. Atlas image tasks are asynchronous and their `outputs` are saved locally.
 - Custom services automatically probe the standard OpenAI-compatible `/models` endpoint, or use `options.modelCatalogEndpoint` for a non-standard catalog URL. If the catalog lacks explicit `capabilities`/`supportedCapabilities`, declare `text-to-image`, `image-to-image`, or `edit` in `models` before calling it. Custom image requests default to a 180-second timeout and can be adjusted with `options.imageTimeoutSeconds` up to 1800 seconds.
 
+Multiple custom profiles can be configured under `media.providers`. Profile names may differ, but each must set `providerType: "custom"`; every profile has its own `apiKeyEnv`, `baseUrl`, model capabilities, and `supportedParameters`. Select the profile by its provider name when calling the tool. Common OpenAI/Gemini-compatible image endpoints are `images/generations` and `images/edits`; override them with `generationEndpoint` and `editEndpoint` when needed.
+
+For example, keep separate keys for two model families:
+
+```json
+{
+  "custom-aixoras-openai": {
+    "providerType": "custom",
+    "apiKeyEnv": "OMNISCHOLAR_AIXORAS_OPENAI_API_KEY",
+    "baseUrl": "https://api.aixoras.com/v1",
+    "models": {
+      "gpt-image-2": {
+        "capabilities": ["text-to-image", "image-to-image", "edit"],
+        "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"]
+      }
+    }
+  },
+  "custom-aixoras-gemini": {
+    "providerType": "custom",
+    "apiKeyEnv": "OMNISCHOLAR_AIXORAS_GEMINI_API_KEY",
+    "baseUrl": "https://api.aixoras.com/v1",
+    "models": {
+      "gemini-3.1-flash-image": {
+        "capabilities": ["text-to-image", "image-to-image", "edit"],
+        "supportedParameters": ["size", "resolution", "background", "outputFormat", "quality", "n"]
+      }
+    }
+  }
+}
+```
+
 Review text, structures, mechanisms, scale, and quantitative labels after generation. **AI images are illustrative drafts, not experimental data, real measurements, or scientific conclusions.**
