@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.20] - 2026-09-17
+
+- Default Fal image generation to official `sync_mode=true` with an explicit opt-out for hosted-URL queue results.
+- Add regression coverage and update scientific-figure routing guidance for CDN-independent Fal artifacts.
+
 ## [0.1.19] - 2026-09-17
 
 - Distinguished Qwen AI Platform public DashScope endpoints from Bailian workspace endpoints.

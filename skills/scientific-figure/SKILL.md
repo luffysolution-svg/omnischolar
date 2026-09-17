@@ -35,6 +35,8 @@ Pass common image controls using the tool's normalized names only when the selec
 
 Adapters translate supported controls to native names. Unsupported controls must be omitted or reported as `parameter_unsupported`; do not silently drop them. Text-to-image, image-to-image, edit, transparency, aspect ratio, resolution, and batch count are separate capability checks; never infer one from another. Providers without a model-list endpoint must expose only versioned, provider-verified fallback models. `Atlas` and other custom endpoints need an explicit model contract and are never populated by guesses.
 
+Fal image calls default to the provider's documented `sync_mode=true`, so returned data can be saved locally without downloading a result CDN URL. Pass `options.sync_mode=false` only when the selected endpoint requires the normal hosted-URL queue flow.
+
 If the chosen provider is absent, disabled, lacks credentials, lacks entitlement, or has no usable capability pin/curated descriptor, stop and report the exact blocker. Offer another configured provider only after confirming the same capability and informing the user. Atlas and custom providers require explicit endpoint/model contracts. Do not treat a successful model listing as generation entitlement.
 
 The generated configuration enables provider sections by default, but a provider still needs its credential and a usable capability descriptor. Do not ask the user to disable unrelated providers; report only the missing credential or contract for the selected provider.

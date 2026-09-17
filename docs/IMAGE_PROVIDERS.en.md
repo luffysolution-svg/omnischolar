@@ -105,6 +105,7 @@ Upload only images you may share with the selected service. After files are save
 ## Current provider notes
 
 - fal has been tested for queue submission, polling, data-URI results, text-to-image, and two-reference editing. If the local machine cannot resolve the fal CDN, a data-URI result can still be saved.
+- Fal defaults to the official `sync_mode=true` path, saving the data URI directly without downloading an output CDN URL; set `options.sync_mode=false` to opt into the traditional hosted-URL flow.
 - DashScope/Qwen supports the Qwen AI Platform native endpoint `https://dashscope.aliyuncs.com/api/v1` and regional Bailian workspace endpoints such as `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`. When `workspace` and `region` are supplied, the tool can derive the regional endpoint.
 - Gemini's `apiKeyEnv` must name an environment variable that exists.
 - Atlas Cloud uses `https://api.atlascloud.ai/api/v1`, submits to `model/generateImage`, and polls `model/prediction/{id}`. The built-in set includes official Nano Banana 2, GPT Image 2, and GPT Image 2.5 Flare/Sunburst IDs. Atlas image tasks are asynchronous and their `outputs` are saved locally.

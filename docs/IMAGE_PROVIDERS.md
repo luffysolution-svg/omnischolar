@@ -105,6 +105,7 @@ Atlas、fal、Vertex、DashScope/Qwen 和自定义服务的模型目录能力不
 ## 当前服务说明
 
 - fal 已验证队列提交、轮询、data URI 结果、文生图和双参考图编辑。本机若无法解析 fal CDN，data URI 结果仍可保存。
+- Fal 默认使用官方 `sync_mode=true`，直接保存 data URI，不需要下载输出 CDN；可通过 `options.sync_mode=false` 选择传统远程 URL 流程。
 - DashScope/Qwen 支持千问 AI 平台的通用原生地址 `https://dashscope.aliyuncs.com/api/v1`，也支持百炼按地域的 workspace 地址，例如 `https://<workspace>.cn-beijing.maas.aliyuncs.com/api/v1`。当填写 `workspace` 和 `region` 时，工具可以自动拼接地域地址。
 - Gemini 配置中的 `apiKeyEnv` 必须指向已存在的环境变量。
 - Atlas Cloud 使用 `https://api.atlascloud.ai/api/v1`、`model/generateImage` 提交和 `model/prediction/{id}` 轮询；默认内置 Nano Banana 2、GPT Image 2、GPT Image 2.5 Flare/Sunburst 的官方模型 ID。Atlas 的图片任务是异步的，结果中的 `outputs` 会保存到本地。

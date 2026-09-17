@@ -126,6 +126,35 @@ class MediaConfigurationTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("openai/gpt-image-2", model_ids)
         self.assertIn("openai/gpt-image-2.5/flare/edit", model_ids)
 
+    async def test_fal_defaults_to_sync_mode_and_respects_explicit_opt_out(self) -> None:
+        class Transport:
+            def __init__(self) -> None:
+                self.calls = []
+
+            async def json(self, method, url, **kwargs):
+                self.calls.append((method, url, kwargs))
+                return {"status": "submitted"}
+
+        for options, expected in (({}, True), ({"sync_mode": False}, False)):
+            transport = Transport()
+            with tempfile.TemporaryDirectory() as temporary:
+                service = MediaService(
+                    transport,
+                    [MediaProviderSettings("fal", True, "key", "https://queue.fal.run")],
+                    output_root=Path(temporary),
+                    workspace_roots=(),
+                )
+                await service._call_provider(
+                    service.providers["fal"],
+                    "fal-ai/nano-banana-2",
+                    "text-to-image",
+                    "draw",
+                    [],
+                    options,
+                )
+
+            self.assertEqual(transport.calls[0][2]["body"]["sync_mode"], expected)
+
     def test_qwen_platform_region_and_native_protocol_are_resolved(self) -> None:
         generic = MediaProviderSettings(
             "dashscope", True, "key", "https://dashscope.aliyuncs.com/compatible-mode/v1", {}, {}

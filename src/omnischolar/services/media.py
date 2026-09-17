@@ -987,6 +987,8 @@ class MediaService:
         endpoint = self._relative_endpoint(base, model)
         headers = {"Authorization": f"Key {provider.api_key}"}
         body = self._payload_options(options)
+        if "sync_mode" not in body:
+            body["sync_mode"] = True
         body["prompt"] = prompt
         if references:
             body["image_urls"] = [
