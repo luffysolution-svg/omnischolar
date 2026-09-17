@@ -78,7 +78,7 @@ npx skills remove --skill '*' --agent codex --global --yes
 The plugin and host configurations start the latest PyPI MCP with:
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 </details>

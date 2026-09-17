@@ -72,14 +72,10 @@ codex plugin add omnischolar@omnischolar
 安装后的插件包含 `plugin.json`、`skills/` 和 `mcp.json`。其 MCP 配置执行：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
-```
-
-`uvx` 会创建隔离环境并运行 `@latest` 指定的最新包，无需另行运行 `pip install`。若需强制刷新包缓存，可运行：
-
-```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
+
+`uvx` 会创建隔离环境，并在每次启动时刷新包缓存后运行 PyPI 最新包，无需另行运行 `pip install`。
 
 若要更新 Codex Git Marketplace 和插件：
 
@@ -118,7 +114,7 @@ claude plugin install omnischolar@omnischolar --scope user
 Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 8 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令使用 PyPI 最新包：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 第一次启动 MCP 需要能够访问 Python 包索引。Skills 使用 `omnischolar` 命名空间，例如 `/omnischolar:scholar-search` 和 `/omnischolar:zotero-research`。
@@ -236,5 +232,5 @@ npx skills remove --skill '*' -a codex -y
 OmniScholar 的 MCP 入口只有本地 stdio：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```

@@ -54,6 +54,8 @@ class CodexPluginPackageTests(unittest.TestCase):
         self.assertEqual(
             server["args"],
             [
+                "--refresh-package",
+                "luffysolution-omnischolar",
                 "--from",
                 "luffysolution-omnischolar@latest",
                 "omnischolar",

@@ -5,6 +5,8 @@
       "type": "stdio",
       "command": "uvx",
       "args": [
+        "--refresh-package",
+        "luffysolution-omnischolar",
         "--from",
         "luffysolution-omnischolar@latest",
         "omnischolar",

@@ -65,7 +65,14 @@ class HostContract:
 
 LATEST_MCP_PROCESS: dict[str, Any] = {
     "command": "uvx",
-    "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
+    "args": [
+        "--refresh-package",
+        "luffysolution-omnischolar",
+        "--from",
+        "luffysolution-omnischolar@latest",
+        "omnischolar",
+        "mcp",
+    ],
 }
 LATEST_MCP_STDIO: dict[str, Any] = {"type": "stdio", **LATEST_MCP_PROCESS}
 
@@ -114,6 +121,8 @@ CONTRACTS: dict[HostId, HostContract] = {
             "type": "local",
             "command": [
                 "uvx",
+                "--refresh-package",
+                "luffysolution-omnischolar",
                 "--from",
                 "luffysolution-omnischolar@latest",
                 "omnischolar",
@@ -366,12 +375,20 @@ def _is_owned_server(value: object) -> bool:
     command = value.get("command")
     args = value.get("args")
     normalized_args = list(args or [])
-    uvx_owned = (
-        command == "uvx"
-        and len(normalized_args) == 4
-        and normalized_args[0] == "--from"
-        and normalized_args[2:] == ["omnischolar", "mcp"]
-        and normalized_args[1].startswith("luffysolution-omnischolar")
+    uvx_owned = command == "uvx" and (
+        (
+            len(normalized_args) == 4
+            and normalized_args[0] == "--from"
+            and normalized_args[2:] == ["omnischolar", "mcp"]
+            and normalized_args[1].startswith("luffysolution-omnischolar")
+        )
+        or (
+            len(normalized_args) == 6
+            and normalized_args[:2] == ["--refresh-package", "luffysolution-omnischolar"]
+            and normalized_args[2] == "--from"
+            and normalized_args[4:] == ["omnischolar", "mcp"]
+            and normalized_args[3].startswith("luffysolution-omnischolar")
+        )
     )
     return (
         (command == "omnischolar" and normalized_args == ["mcp"])

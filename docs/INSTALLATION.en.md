@@ -72,14 +72,10 @@ Restart the ChatGPT desktop app after adding the marketplace. Open **Plugins**, 
 The installed plugin contains `plugin.json`, `skills/`, and `mcp.json`. Its MCP entry executes:
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
-```
-
-`uvx` creates an isolated environment and runs the latest package requested by `@latest`, so this route does not require a separate `pip install`. To force a package-cache refresh, run:
-
-```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
+
+`uvx` creates an isolated environment, refreshes the package cache on every start, and runs the latest PyPI package, so this route does not require a separate `pip install`.
 
 To update the Codex Git marketplace and plugin, run:
 
@@ -118,7 +114,7 @@ Choose `--scope project` to share the enabled plugin through repository settings
 Claude Code copies the repository-root plugin into its versioned cache, discovers the eight folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command uses the latest PyPI package:
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 The first MCP start needs package-index access. Skills are namespaced with `omnischolar`, for example `/omnischolar:scholar-search` and `/omnischolar:zotero-research`.
@@ -228,5 +224,5 @@ These commands install Skills only; they do not install the `omnischolar` Python
 The only MCP server entry in this release is local stdio:
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```

@@ -65,7 +65,7 @@ codex plugin marketplace upgrade omnischolar
 ChatGPT 桌面应用中重启应用后打开 **Plugins**，选择 **OmniScholar** 并安装或启用；Codex CLI 可运行 `/plugins` 浏览插件。插件已经包含 Skills，并通过下面的命令启动 PyPI 最新 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 ### Claude Code 插件
@@ -136,7 +136,7 @@ npx skills remove --skill '*' --agent codex --global --yes
     "omnischolar": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"]
+      "args": ["--refresh-package", "luffysolution-omnischolar", "--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"]
     }
   }
 }
