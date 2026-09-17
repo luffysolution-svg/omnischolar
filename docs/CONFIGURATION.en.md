@@ -16,6 +16,8 @@ The first matching file is used; files are not merged:
 
 Relative paths resolve from the config file. Misspelled fields and invalid values are rejected.
 
+Services in the example configuration are enabled by default. Fill in the relevant API key to use them directly.
+
 If none of the first four sources exists, the first MCP start or installer run creates a complete user-level configuration template. The template includes all service sections, `apiKey`, `apiKeyEnv`, and Vertex fields such as `project` and `location`. On Windows this is normally `%LOCALAPPDATA%\\omnischolar\\omnischolar.config.json`, on Linux `~/.config/omnischolar/omnischolar.config.json`, and on macOS `~/Library/Application Support/omnischolar/omnischolar.config.json`. You can also run `omnischolar config init`. Existing configuration is never overwritten. Nested files created by older versions are not migrated or read automatically; copy settings manually if needed.
 
 ## Minimal config
@@ -65,8 +67,7 @@ API keys may be entered directly in the provider's `apiKey` field:
   "schemaVersion": 1,
   "ai4scholar": {
     "enabled": true,
-    "apiKey": "paste Ai4Scholar API key here",
-    "allowPaid": false
+    "apiKey": "paste Ai4Scholar API key here"
   },
   "data": {
     "materialsProject": {
@@ -97,7 +98,7 @@ Credential order is `apiKey`, the variable named by `apiKeyEnv`, then the servic
 | Unpaywall | Contact email required |
 | easyScholar | API key required |
 | Zotero | No key; the local API must be enabled |
-| MinerU | API key and explicit PDF upload approval |
+| MinerU | API key |
 | Ai4Scholar | API key; some calls use account credit |
 | Materials Project | API key required |
 | Image services | Provider key, model, and endpoint as required |
@@ -105,11 +106,8 @@ Credential order is `apiKey`, the variable named by `apiKeyEnv`, then the servic
 
 ## Paid calls and uploads
 
-A stored key does not approve spending or upload.
-
-- Ai4Scholar and image generation require `allowPaid` in the config and again in the individual tool call.
-- MinerU and reference-image uploads require `allowExternalUpload` in the config and again in the tool call.
-- Sync recovery only repairs local files; it does not reuse previous upload approval.
+After the relevant API key is configured, Ai4Scholar, image generation, MinerU, and reference-image uploads work directly. Providers without keys do not make requests automatically.
+- Sync recovery only repairs local files.
 - If a paid request times out after the provider may have accepted it, OmniScholar does not retry automatically.
 
 ## Literature search
@@ -141,8 +139,7 @@ A stored key does not approve spending or upload.
   "mineru": {
     "enabled": true,
     "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY",
-    "model": "pipeline",
-    "allowExternalUpload": false
+    "model": "pipeline"
   }
 }
 ```

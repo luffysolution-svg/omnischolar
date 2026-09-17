@@ -25,8 +25,6 @@ Each model must explicitly declare the operation it supports. A model name appea
     "defaultImageProvider": "fal"
   },
   "media": {
-    "allowPaid": false,
-    "allowExternalUpload": false,
     "providers": {
       "fal": {
         "enabled": true,
@@ -36,7 +34,7 @@ Each model must explicitly declare the operation it supports. A model name appea
         "options": {}
       },
       "dashscope": {
-        "enabled": false,
+        "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
@@ -45,7 +43,7 @@ Each model must explicitly declare the operation it supports. A model name appea
         }
       },
       "qwen-cloud": {
-        "enabled": false,
+        "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
@@ -62,7 +60,7 @@ A custom service needs an exact `baseUrl`, model ID, capability list, and genera
 
 ## Generate and edit
 
-Before submitting a task, define the scientific content, labels, units, aspect ratio, and file format. Generation requires `allowPaid` for that call. Uploading a reference image also requires `allowExternalUpload` for that call.
+Before submitting a task, define the scientific content, labels, units, aspect ratio, and file format. Once the image provider key is configured, generation and reference-image upload are directly available.
 
 Upload only images you may share with the selected service. After files are saved, signed URLs and base64 source data are removed from the returned payload. Downloads are checked for public HTTPS, file size, MIME type, and image signature. If one file in a multi-file result is missing, the incomplete set is not published.
 

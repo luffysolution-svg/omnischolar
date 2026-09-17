@@ -21,6 +21,8 @@ Choose the smallest workflow that answers the request. Follow the user's languag
 
 For an unfamiliar environment, call `omnischolar_status`, `omnischolar_capabilities`, and the relevant source-status tool before selecting a provider. If no provider supports the requested capability, report the missing configuration or capability and offer an available non-equivalent workflow only with a clear label.
 
+The generated configuration enables provider sections by default. Use providers with configured credentials and report `credential_required` when a selected provider is not configured.
+
 ## Safe multi-stage sequence
 
 1. Search only when discovery is needed; preserve provider provenance and identifiers.

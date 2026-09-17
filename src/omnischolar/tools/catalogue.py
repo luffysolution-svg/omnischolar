@@ -6,7 +6,7 @@ import difflib
 import hashlib
 import re
 import unicodedata
-from dataclasses import asdict, replace
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -54,14 +54,6 @@ def _required(value: Any, name: str, service: str) -> Any:
             "service_unavailable", f"{service} is disabled or not configured", category="config"
         )
     return value
-
-
-def _authorized(context: ToolExecutionContext, arguments: dict[str, Any]) -> ToolExecutionContext:
-    return replace(
-        context,
-        allow_external_upload=arguments.get("allowExternalUpload") is True,
-        allow_paid=arguments.get("allowPaid") is True,
-    )
 
 
 _IMAGE_LINK = re.compile(r"(!\[[^\]]*\]\()([^)]+)(\))")
@@ -283,7 +275,6 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         raise OmniScholarError(
             "pdf_unavailable", "Selected Zotero PDF is not locally readable", category="filesystem"
         )
-    context = _authorized(context, arguments)
     parsed = await mineru.parse_pdf(
         Path(selected["localPath"]),
         context,
@@ -348,7 +339,7 @@ async def _ai(
     method: str, arguments: dict[str, Any], context: ToolExecutionContext, app: Any
 ) -> Any:
     service = _required(_services(app).ai4scholar, "ai4scholar", "Ai4Scholar")
-    return await getattr(service, method)(arguments, _authorized(context, arguments))
+    return await getattr(service, method)(arguments, context)
 
 
 async def ai_search(a: dict[str, Any], c: ToolExecutionContext, app: Any) -> Any:
@@ -494,7 +485,7 @@ async def image_generate(arguments: dict[str, Any], context: ToolExecutionContex
         provider_id=arguments.get("provider") or app.loaded.config.defaults.default_image_provider,
         capability=capability,
         prompt=arguments["prompt"],
-        context=_authorized(context, arguments),
+        context=context,
         model=arguments.get("model"),
         references=references,
         options=arguments.get("options"),
@@ -506,7 +497,7 @@ async def image_edit(arguments: dict[str, Any], context: ToolExecutionContext, a
         provider_id=arguments.get("provider") or app.loaded.config.defaults.default_image_provider,
         capability="edit",
         prompt=arguments["prompt"],
-        context=_authorized(context, arguments),
+        context=context,
         model=arguments.get("model"),
         references=arguments["references"],
         options=arguments.get("options"),
@@ -724,14 +715,13 @@ def create_tool_definitions() -> list[ToolDefinition]:
         {
             "key": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
             "attachmentKey": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
-            "allowExternalUpload": BOOL,
             "language": STRING,
             "enableFormula": BOOL,
             "enableTable": BOOL,
             "isOcr": BOOL,
             "force": BOOL,
         },
-        ("key", "allowExternalUpload"),
+        ("key",),
     )
     add(
         "omnischolar_parse",
@@ -766,7 +756,6 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "attachmentKey": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
                 "reason": {"type": "string", "maxLength": 500},
                 "force": BOOL,
-                "allowExternalUpload": BOOL,
             },
             ("action",),
         ),
@@ -778,7 +767,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
         interaction=True,
     )
 
-    ai_common = {"allowPaid": BOOL, "allowExternalUpload": BOOL}
+    ai_common: dict[str, Any] = {}
     add(
         "ai4scholar_search",
         "Search Semantic Scholar, PubMed, Google Scholar, or Google Patents through explicitly selected paid Ai4Scholar.",
@@ -819,7 +808,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "before": STRING,
                 "after": STRING,
             },
-            ("source", "query", "allowPaid"),
+            ("source", "query"),
         ),
         ai_search,
         group="ai4scholar",
@@ -847,7 +836,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "recommendationPool": string_enum("recent", "all-cs"),
                 "publicationDateOrYear": STRING,
             },
-            ("source", "action", "id", "allowPaid"),
+            ("source", "action", "id"),
         ),
         ai_paper,
         group="ai4scholar",
@@ -875,7 +864,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "afterAuthor": STRING,
                 "publicationDateOrYear": STRING,
             },
-            ("source", "action", "allowPaid"),
+            ("source", "action"),
         ),
         ai_author,
         group="ai4scholar",
@@ -896,7 +885,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "ids": {"type": "array", "items": STRING, "minItems": 1, "maxItems": 1000},
                 "fields": STRING,
             },
-            ("source", "ids", "allowPaid"),
+            ("source", "ids"),
         ),
         ai_batch,
         group="ai4scholar",
@@ -918,7 +907,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "limit": {"type": "integer", "minimum": 1, "maximum": 500},
                 "fields": STRING,
             },
-            ("positivePaperIds", "allowPaid"),
+            ("positivePaperIds",),
         ),
         ai_recommend,
         group="ai4scholar",
@@ -932,7 +921,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     add(
         "ai4scholar_cite",
         "Retrieve citation formats for a Google Scholar result through Ai4Scholar.",
-        obj({**ai_common, "paperId": STRING, "language": STRING}, ("paperId", "allowPaid")),
+        obj({**ai_common, "paperId": STRING, "language": STRING}, ("paperId",)),
         ai_cite,
         group="citation",
         capabilities=("citation.format",),
@@ -959,7 +948,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "minCitationCount": NONNEGATIVE,
                 "limit": {"type": "integer", "minimum": 1, "maximum": 1000},
             },
-            ("query", "allowPaid"),
+            ("query",),
         ),
         ai_snippets,
         group="ai4scholar",
@@ -994,7 +983,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "startReleaseId": STRING,
                 "endReleaseId": STRING,
             },
-            ("action", "allowPaid"),
+            ("action",),
         ),
         ai_dataset,
         group="ai4scholar",
@@ -1031,7 +1020,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "categories": {"type": "array", "items": STRING, "maxItems": 100},
                 "filters": {"type": "object"},
             },
-            ("action", "allowPaid"),
+            ("action",),
         ),
         ai_journal,
         group="ai4scholar",
@@ -1056,7 +1045,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "fieldsOfStudy": STRING,
                 "citationStyle": STRING,
             },
-            ("text", "allowPaid"),
+            ("text",),
         ),
         ai_candidates,
         group="citation",
@@ -1092,7 +1081,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "lang": STRING,
                 "vectorizeMode": STRING,
             },
-            ("action", "allowPaid"),
+            ("action",),
         ),
         ai_figure,
         group="media",
@@ -1241,13 +1230,11 @@ def create_tool_definitions() -> list[ToolDefinition]:
         "prompt": {"type": "string", "minLength": 1, "maxLength": 20000},
         "references": {"type": "array", "items": STRING, "maxItems": 8},
         "options": {"type": "object"},
-        "allowExternalUpload": BOOL,
-        "allowPaid": BOOL,
     }
     add(
         "omnischolar_image_generate",
-        "Generate a scientific image draft using capability routing and explicit paid/upload authorization.",
-        obj(image_base, ("prompt", "allowPaid")),
+        "Generate a scientific image draft using capability routing and configured provider credentials.",
+        obj(image_base, ("prompt",)),
         image_generate,
         group="media",
         capabilities=("text-to-image", "image-to-image", "multi-reference"),
@@ -1259,7 +1246,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     add(
         "omnischolar_image_edit",
         "Edit scientific image references using an explicitly capable model.",
-        obj(image_base, ("prompt", "references", "allowExternalUpload", "allowPaid")),
+        obj(image_base, ("prompt", "references")),
         image_edit,
         group="media",
         capabilities=("media.edit", "multi-reference"),

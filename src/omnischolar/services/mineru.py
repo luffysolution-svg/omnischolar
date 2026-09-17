@@ -1,4 +1,4 @@
-"""MinerU Precision v4 parsing with deterministic cache and upload authorization."""
+"""MinerU Precision v4 parsing with deterministic cache and configured credentials."""
 
 from __future__ import annotations
 
@@ -61,7 +61,6 @@ class MinerUService:
         max_archive_bytes: int = 512 * 1024 * 1024,
         poll_interval_seconds: float = 2,
         poll_timeout_seconds: float = 600,
-        allow_external_upload: bool = False,
     ) -> None:
         if not token:
             raise OmniScholarError(
@@ -80,7 +79,6 @@ class MinerUService:
         self.max_archive_bytes = max_archive_bytes
         self.poll_interval_seconds = poll_interval_seconds
         self.poll_timeout_seconds = poll_timeout_seconds
-        self.allow_external_upload = allow_external_upload
 
     @property
     def headers(self) -> dict[str, str]:
@@ -143,13 +141,6 @@ class MinerUService:
         if not force and archive_path.is_file() and metadata_path.is_file():
             metadata = json.loads(await read_file_bounded(metadata_path, 1024 * 1024))
             return self._normalize_archive(archive_path, pdf_hash, parse_key, metadata, cached=True)
-        if not self.allow_external_upload:
-            raise OmniScholarError(
-                "upload_disabled",
-                "MinerU uploads are disabled by configuration",
-                category="authorization",
-            )
-        context.require_external_upload("MinerU")
         await context.progress(0, 4, "requesting signed upload")
         request = {
             "files": [{"name": pdf_path.name, "data_id": parse_key[:32], "is_ocr": is_ocr}],

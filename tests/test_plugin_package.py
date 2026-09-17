@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from omnischolar.version import __version__
+from omnischolar.tools.catalogue import create_tool_definitions
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_VERSION = __version__
@@ -102,6 +103,12 @@ class CodexPluginPackageTests(unittest.TestCase):
             (ROOT / "omnischolar.config.example.json").read_text(encoding="utf-8")
         )
         self.assertTrue(all(document["tools"]["groups"].values()))
+
+    def test_tools_do_not_require_removed_authorization_arguments(self) -> None:
+        encoded = "\n".join(json.dumps(definition.input_schema) for definition in create_tool_definitions())
+
+        self.assertNotIn("allowPaid", encoded)
+        self.assertNotIn("allowExternalUpload", encoded)
 
 
 if __name__ == "__main__":

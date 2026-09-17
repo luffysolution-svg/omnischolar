@@ -31,8 +31,10 @@ class ConfigSource:
     def directory(self) -> Path:
         return self.path.parent if self.path else self.base_directory
 
-    def status(self) -> dict[str, str | None]:
-        return {"kind": self.kind, "path": str(self.path) if self.path else None}
+    def status(self) -> dict[str, str]:
+        """Describe the source without disclosing a user's local filesystem path."""
+
+        return {"kind": self.kind}
 
 
 @dataclass(frozen=True, slots=True)

@@ -2,7 +2,7 @@
 name: scholar-search
 description: Discover scholarly literature, patents, authors, citation networks, recommendations, journal metrics, snippets, and datasets with OmniScholar. Use for evidence gathering, related-work exploration, journal selection, or when local Zotero coverage is insufficient.
 license: MIT
-compatibility: Requires OmniScholar. Searches need network access; some configured providers require credentials or paid authorization.
+compatibility: Requires OmniScholar. Searches need network access; some configured providers require credentials.
 ---
 
 # Scholarly discovery

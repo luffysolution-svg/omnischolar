@@ -51,10 +51,7 @@ Notes and annotations are personal reading context, not evidence from the public
 
 `omnischolar_parse` validates the PDF, computes SHA-256, and asks MinerU to return text, formulas, tables, and figures. Results are cached; the same file and parser settings can return a cache hit.
 
-Upload requires both approvals:
-
-1. `mineru.allowExternalUpload` is `true` in the config;
-2. `allowExternalUpload` is `true` in the individual `omnischolar_parse` call.
+After MinerU is enabled and its API key is configured, parsing is directly available; OmniScholar does not upload without credentials.
 
 OmniScholar does not upload a Zotero attachment automatically. Confirm the exact item and file, then approve that upload separately. `force` creates a new parse and upload, so it needs fresh approval.
 

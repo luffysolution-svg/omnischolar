@@ -124,7 +124,6 @@ class OmniScholarApplication:
                 service_transport,
                 api_key=ai_key,
                 base_url=config.ai4scholar.base_url,
-                allow_paid=config.ai4scholar.allow_paid,
                 timeout_seconds=config.ai4scholar.timeout_seconds,
                 figure_timeout_seconds=config.ai4scholar.figure_timeout_seconds,
                 max_response_bytes=config.ai4scholar.max_response_bytes,
@@ -145,7 +144,6 @@ class OmniScholarApplication:
                 max_pdf_bytes=config.mineru.max_pdf_bytes,
                 poll_interval_seconds=config.mineru.poll_interval_seconds,
                 poll_timeout_seconds=config.mineru.poll_timeout_seconds,
-                allow_external_upload=config.mineru.allow_external_upload,
             )
             if config.mineru.enabled and mineru_key
             else None
@@ -188,8 +186,6 @@ class OmniScholarApplication:
             media_settings,
             output_root=config.output.root_directory,
             workspace_roots=tuple(config.runtime.workspace_roots),
-            allow_external_upload=config.media.allow_external_upload,
-            allow_paid=config.media.allow_paid,
             max_input_bytes=config.media.max_input_bytes,
             max_artifact_bytes=config.media.max_artifact_bytes,
         )

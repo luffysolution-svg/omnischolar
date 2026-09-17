@@ -2,7 +2,7 @@
 name: scientific-figure
 description: Generate or edit scientific illustration drafts with OmniScholar, including reference-guided and multi-reference work, or use Ai4Scholar for its declared figure actions. Use for mechanisms, graphical abstracts, workflows, apparatus diagrams, concept art, critique, or vectorization.
 license: MIT
-compatibility: Requires OmniScholar and a configured image provider. Generation is paid; reference upload additionally requires explicit external-upload authorization.
+compatibility: Requires OmniScholar and a configured image provider.
 ---
 
 # Scientific figure workflow
@@ -19,15 +19,17 @@ Confirm the scientific message, audience, figure type, required entities and lab
 2. A catalog-visible model with no declared capability remains unusable. Never infer text-to-image, edit, or multi-reference support from a model name.
 3. Use `omnischolar_image_generate` for text-to-image or declared image-to-image generation.
 4. Use `omnischolar_image_edit` for edit operations; multiple references require an explicit `multi-reference` declaration.
-5. Use `ai4scholar_figure` only for its declared actions and explicit paid authorization.
+5. Use `ai4scholar_figure` only for its declared actions and configured credentials.
 6. Use `omnischolar_image_service` with `action=status` for local configuration status or `action=job` only when a configured provider exposes that job contract.
 
 If the chosen provider is absent, disabled, lacks credentials, lacks entitlement, or has no usable capability pin/curated descriptor, stop and report the exact blocker. Offer another configured provider only after confirming the same capability and informing the user. Atlas and custom providers require explicit endpoint/model contracts. Do not treat a successful model listing as generation entitlement.
 
+The generated configuration enables provider sections by default, but a provider still needs its credential and a usable capability descriptor. Do not ask the user to disable unrelated providers; report only the missing credential or contract for the selected provider.
+
 ## Upload and cost
 
-- Paid generation requires both configuration enablement and `allowPaid=true` on the current call.
-- Any reference image requires both configuration enablement and `allowExternalUpload=true` on the current call.
+- Paid generation requires an enabled provider with a configured credential.
+- Reference images require an enabled provider with a configured credential; local references must still be inside configured workspace roots.
 - Use only user-authorized or Agent-generated references. Never substitute a private image.
 - Start with one economical image and the smallest useful dimensions. Do not blindly retry an ambiguous paid submission.
 - Provider URLs and task identifiers are transport details; use saved local artifacts and do not expose signed URLs.

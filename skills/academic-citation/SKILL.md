@@ -2,7 +2,7 @@
 name: academic-citation
 description: Verify, format, and insert scholarly citations with OmniScholar. Use for APA, IEEE, GB/T 7714 and other styles, citation-network evidence, bibliography generation, candidate discovery, or verified citation insertion.
 license: MIT
-compatibility: Requires OmniScholar. Online verification needs an enabled literature provider; Ai4Scholar formatting and candidate operations may require paid authorization.
+compatibility: Requires OmniScholar. Online verification needs an enabled literature provider; Ai4Scholar formatting and candidate operations require configured credentials.
 ---
 
 # Academic citation

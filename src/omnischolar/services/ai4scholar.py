@@ -32,7 +32,6 @@ class Ai4ScholarService:
         *,
         api_key: str,
         base_url: str = "https://ai4scholar.net",
-        allow_paid: bool = False,
         timeout_seconds: float = 60,
         figure_timeout_seconds: float = 300,
         max_response_bytes: int = 16 * 1024 * 1024,
@@ -49,7 +48,6 @@ class Ai4ScholarService:
         self.transport = transport
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
-        self.allow_paid = allow_paid
         self.timeout_seconds = timeout_seconds
         self.figure_timeout_seconds = figure_timeout_seconds
         self.max_response_bytes = max_response_bytes
@@ -61,19 +59,6 @@ class Ai4ScholarService:
     def headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.api_key}", "Accept": "application/json"}
 
-    def _authorize(
-        self, context: ToolExecutionContext, operation: str, *, free: bool = False
-    ) -> None:
-        if free:
-            return
-        if not self.allow_paid:
-            raise OmniScholarError(
-                "paid_disabled",
-                f"Ai4Scholar {operation} is disabled by configuration",
-                category="authorization",
-            )
-        context.require_paid(f"Ai4Scholar {operation}")
-
     async def _request(
         self,
         method: str,
@@ -82,10 +67,8 @@ class Ai4ScholarService:
         context: ToolExecutionContext,
         params: dict[str, Any] | None = None,
         body: dict[str, Any] | None = None,
-        free: bool = False,
         timeout_seconds: float | None = None,
     ) -> Any:
-        self._authorize(context, path, free=free)
         value = await self.transport.json(
             method,
             f"{self.base_url}{path}",
@@ -101,7 +84,6 @@ class Ai4ScholarService:
         self, path: str, *, context: ToolExecutionContext, body: dict[str, Any]
     ) -> list[dict[str, Any]]:
         """Parse a bounded SSE response without persisting unbounded provider output."""
-        self._authorize(context, path)
         text = await self.transport.text(
             "POST",
             f"{self.base_url}{path}",
@@ -374,7 +356,7 @@ class Ai4ScholarService:
         )
 
     async def credits(self, context: ToolExecutionContext) -> Any:
-        return await self._request("GET", "/api/credits", context=context, free=True)
+        return await self._request("GET", "/api/credits", context=context)
 
     async def dataset(self, args: dict[str, Any], context: ToolExecutionContext) -> Any:
         action = args["action"]
@@ -520,8 +502,6 @@ class Ai4ScholarService:
         }
 
     async def figure(self, args: dict[str, Any], context: ToolExecutionContext) -> Any:
-        if args.get("images"):
-            context.require_external_upload("Ai4Scholar Figure")
         body = {
             key: value
             for key, value in {

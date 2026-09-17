@@ -7,7 +7,7 @@ from string import Formatter
 from typing import Any, Literal
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 
 def _camel(value: str) -> str:
@@ -88,8 +88,8 @@ def _research_providers() -> dict[str, ResearchProviderConfig]:
         "pubmed": ResearchProviderConfig(),
         "arxiv": ResearchProviderConfig(),
         "crossref": ResearchProviderConfig(),
-        "unpaywall": ResearchProviderConfig(enabled=False),
-        "easyscholar": ResearchProviderConfig(enabled=False),
+        "unpaywall": ResearchProviderConfig(),
+        "easyscholar": ResearchProviderConfig(),
     }
 
 
@@ -114,14 +114,13 @@ class ResearchConfig(ConfigModel):
 
 
 class Ai4ScholarConfig(CredentialedConfig):
-    enabled: bool = False
+    enabled: bool = True
     base_url: str = "https://ai4scholar.net"
     timeout_seconds: float = Field(default=60, ge=1, le=600)
     figure_timeout_seconds: float = Field(default=300, ge=1, le=600)
     max_response_bytes: int = Field(default=16 * 1024 * 1024, ge=1024, le=128 * 1024 * 1024)
     max_artifact_bytes: int = Field(default=50 * 1024 * 1024, ge=1024, le=512 * 1024 * 1024)
     artifact_timeout_seconds: float = Field(default=120, ge=1, le=600)
-    allow_paid: bool = False
 
 
 class ZoteroConfig(ConfigModel):
@@ -142,7 +141,7 @@ class ZoteroConfig(ConfigModel):
 
 
 class MinerUConfig(CredentialedConfig):
-    enabled: bool = False
+    enabled: bool = True
     base_url: str = "https://mineru.net/api/v4"
     lightweight_base_url: str = "https://mineru.net/api/v1/agent"
     model: Literal["pipeline", "vlm", "MinerU-HTML"] = "pipeline"
@@ -150,18 +149,17 @@ class MinerUConfig(CredentialedConfig):
     poll_interval_seconds: float = Field(default=2, ge=0.2, le=60)
     poll_timeout_seconds: float = Field(default=600, ge=5, le=7_200)
     max_pdf_bytes: int = Field(default=200 * 1024 * 1024, ge=1024, le=200 * 1024 * 1024)
-    allow_external_upload: bool = False
     allow_lightweight_fallback: bool = False
 
 
 class MaterialsProjectConfig(CredentialedConfig):
-    enabled: bool = False
+    enabled: bool = True
     base_url: str = "https://api.materialsproject.org"
     max_pages: int = Field(default=10, ge=1, le=100)
 
 
 class CasConfig(CredentialedConfig):
-    enabled: bool = False
+    enabled: bool = True
     base_url: str | None = None
     contract_file: Path | None = None
 
@@ -177,7 +175,7 @@ class MediaModelPin(ConfigModel):
 
 
 class MediaProviderConfig(CredentialedConfig):
-    enabled: bool = False
+    enabled: bool = True
     base_url: str | None = None
     project: str | None = None
     location: str | None = None
@@ -188,8 +186,6 @@ class MediaProviderConfig(CredentialedConfig):
 
 class MediaConfig(ConfigModel):
     providers: dict[str, MediaProviderConfig] = Field(default_factory=dict)
-    allow_external_upload: bool = False
-    allow_paid: bool = False
     max_input_bytes: int = Field(default=25 * 1024 * 1024, ge=1024, le=200 * 1024 * 1024)
     max_artifact_bytes: int = Field(default=50 * 1024 * 1024, ge=1024, le=512 * 1024 * 1024)
 
@@ -267,9 +263,3 @@ class OmniScholarConfig(ConfigModel):
     media: MediaConfig = Field(default_factory=MediaConfig)
     sync: SyncConfig = Field(default_factory=SyncConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
-
-    @model_validator(mode="after")
-    def authorization_consistency(self) -> OmniScholarConfig:
-        if self.mineru.allow_lightweight_fallback and not self.mineru.allow_external_upload:
-            raise ValueError("MinerU lightweight fallback still requires allowExternalUpload")
-        return self

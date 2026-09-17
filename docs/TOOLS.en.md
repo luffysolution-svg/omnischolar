@@ -46,4 +46,4 @@ Tool and capability names match the values returned to agents.
 | `omnischolar_image_service` | media | `media.service` | none | yes | none | free |
 
 Arguments not declared in a tool's input schema are rejected.
-Paid or upload-capable tools require both configuration and per-call authorization.
+Paid or upload-capable tools require an enabled service with valid credentials.

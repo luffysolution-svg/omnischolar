@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes target the latest released OmniScholar version. Version 0.1.2 is the current release.
+Security fixes target the latest released OmniScholar version. Version 0.1.14 is the current release.
 
 ## Report a vulnerability
 
@@ -13,7 +13,7 @@ Please do not open a public issue before a vulnerability is fixed. This open-sou
 ## Security properties
 
 - Zotero is local and GET-only.
-- Paid calls and uploads require approval in both configuration and the individual call.
+- Paid calls and uploads require an enabled provider with configured credentials; local file access and provider contracts remain enforced.
 - Local file access stays within configured roots.
 - MinerU archives are checked before extraction.
 - Known secrets are removed from status, errors, logs, and tool results.

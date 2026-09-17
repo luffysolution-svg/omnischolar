@@ -23,6 +23,12 @@ class ConfigBootstrapTests(unittest.TestCase):
             user_config_path("omnischolar", appauthor=False) / "omnischolar.config.json",
         )
 
+    def test_config_source_status_does_not_disclose_local_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            source = load_config(user_directory=Path(temporary) / "missing").source
+
+        self.assertEqual(source.status(), {"kind": "defaults"})
+
     def test_creates_one_user_config_with_all_tool_groups_enabled(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             user_directory = Path(temporary) / "config" / "omnischolar"
@@ -47,7 +53,18 @@ class ConfigBootstrapTests(unittest.TestCase):
             self.assertIn("{title}", document["output"]["folderNameTemplate"])
             self.assertIn("{title}", document["output"]["filenameTemplate"])
             self.assertIn("{extension}", document["output"]["assetFilenameTemplate"])
+            self.assertNotIn("allowPaid", path.read_text(encoding="utf-8"))
+            self.assertNotIn("allowExternalUpload", path.read_text(encoding="utf-8"))
             self.assertEqual(load_config(user_directory=user_directory).source.kind, "user")
+
+    def test_default_provider_sections_are_enabled(self) -> None:
+        config = OmniScholarConfig()
+
+        self.assertTrue(all(provider.enabled for provider in config.research.providers.values()))
+        self.assertTrue(config.ai4scholar.enabled)
+        self.assertTrue(config.mineru.enabled)
+        self.assertTrue(config.data.materials_project.enabled)
+        self.assertTrue(config.data.cas_common_chemistry.enabled)
 
     def test_does_not_replace_project_config(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

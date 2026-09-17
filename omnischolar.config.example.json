@@ -67,13 +67,13 @@
         "maxPages": 10
       },
       "unpaywall": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "email": "researcher@example.edu",
         "maxPages": 10
       },
       "easyscholar": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_EASYSCHOLAR_API_KEY",
         "maxPages": 5
@@ -81,13 +81,12 @@
     }
   },
   "ai4scholar": {
-    "enabled": false,
+    "enabled": true,
     "baseUrl": "https://ai4scholar.net",
     "apiKey": "",
     "apiKeyEnv": "OMNISCHOLAR_AI4SCHOLAR_API_KEY",
     "timeoutSeconds": 60,
-    "maxResponseBytes": 16777216,
-    "allowPaid": false
+    "maxResponseBytes": 16777216
   },
   "zotero": {
     "enabled": true,
@@ -95,7 +94,7 @@
     "maxItems": 500
   },
   "mineru": {
-    "enabled": false,
+    "enabled": true,
     "baseUrl": "https://mineru.net/api/v4",
     "lightweightBaseUrl": "https://mineru.net/api/v1/agent",
     "apiKey": "",
@@ -105,19 +104,18 @@
     "pollIntervalSeconds": 2,
     "pollTimeoutSeconds": 600,
     "maxPdfBytes": 209715200,
-    "allowExternalUpload": false,
     "allowLightweightFallback": false
   },
   "data": {
     "materialsProject": {
-      "enabled": false,
+      "enabled": true,
       "baseUrl": "https://api.materialsproject.org",
       "apiKey": "",
       "apiKeyEnv": "OMNISCHOLAR_MATERIALS_PROJECT_API_KEY",
       "maxPages": 10
     },
     "casCommonChemistry": {
-      "enabled": false,
+      "enabled": true,
       "apiKey": "",
       "apiKeyEnv": "OMNISCHOLAR_CAS_API_KEY",
       "baseUrl": null,
@@ -125,13 +123,11 @@
     }
   },
   "media": {
-    "allowExternalUpload": false,
-    "allowPaid": false,
     "maxInputBytes": 26214400,
     "maxArtifactBytes": 52428800,
     "providers": {
       "openai": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_OPENAI_API_KEY",
         "baseUrl": "https://api.openai.com/v1",
@@ -144,7 +140,7 @@
         "options": {}
       },
       "google": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_GEMINI_API_KEY",
         "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
@@ -152,7 +148,7 @@
         "options": {}
       },
       "vertex": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_VERTEX_ACCESS_TOKEN",
         "project": "your-project",
@@ -161,7 +157,7 @@
         "options": {}
       },
       "xai": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_XAI_API_KEY",
         "baseUrl": "https://api.x.ai/v1",
@@ -169,7 +165,7 @@
         "options": {}
       },
       "fal": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_FAL_API_KEY",
         "baseUrl": "https://fal.run",
@@ -177,7 +173,7 @@
         "options": {}
       },
       "dashscope": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
@@ -187,7 +183,7 @@
         }
       },
       "qwen-cloud": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
@@ -197,7 +193,7 @@
         }
       },
       "atlas": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_ATLAS_API_KEY",
         "baseUrl": "https://your-atlas-provider.example/v1",
@@ -205,7 +201,7 @@
         "options": {}
       },
       "custom": {
-        "enabled": false,
+        "enabled": true,
         "apiKey": "",
         "apiKeyEnv": "OMNISCHOLAR_CUSTOM_IMAGE_API_KEY",
         "baseUrl": "https://images.example.edu/v1",

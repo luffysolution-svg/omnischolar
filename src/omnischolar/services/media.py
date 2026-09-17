@@ -95,8 +95,6 @@ class MediaService:
         *,
         output_root: Path,
         workspace_roots: tuple[Path, ...],
-        allow_external_upload: bool = False,
-        allow_paid: bool = False,
         max_input_bytes: int = 25 * 1024 * 1024,
         max_artifact_bytes: int = 50 * 1024 * 1024,
     ) -> None:
@@ -104,8 +102,6 @@ class MediaService:
         self.providers = {provider.id: provider for provider in providers}
         self.output_root = output_root
         self.workspace_roots = workspace_roots
-        self.allow_external_upload = allow_external_upload
-        self.allow_paid = allow_paid
         self.max_input_bytes = max_input_bytes
         self.max_artifact_bytes = max_artifact_bytes
 
@@ -142,6 +138,9 @@ class MediaService:
             pins = provider.models
             contract_error = self._provider_contract_error(provider)
             contract_ready = contract_error is None
+            credential_error = self._provider_credential_error(provider)
+            usable = contract_ready and credential_error is None
+            unavailable_reason = credential_error or contract_error
             catalog_ids: set[str] = set()
             if discover and provider.id in CATALOG_URLS and provider.api_key:
                 catalog_ids = await self._discover_catalog(provider)
@@ -152,8 +151,8 @@ class MediaService:
                         model_id,
                         tuple(sorted(capabilities)),
                         "config_pin",
-                        contract_ready,
-                        contract_error,
+                        usable,
+                        unavailable_reason,
                     )
                 )
             curated = CURATED_MODELS.get(provider.id, {})
@@ -169,8 +168,8 @@ class MediaService:
                         model_id,
                         tuple(sorted(capabilities)),
                         source,
-                        contract_ready,
-                        contract_error,
+                        usable,
+                        unavailable_reason,
                     )
                 )
             for model_id in sorted(catalog_ids - set(pins) - set(curated)):
@@ -197,6 +196,12 @@ class MediaService:
         if isinstance(workspace, str) and _DASHSCOPE_WORKSPACE.fullmatch(workspace) is not None:
             return None
         return "dashscope_workspace_required"
+
+    @staticmethod
+    def _provider_credential_error(provider: MediaProviderSettings) -> str | None:
+        if provider.id != "vertex" and not provider.api_key:
+            return "credential_required"
+        return None
 
     @classmethod
     def _provider_contract_ready(cls, provider: MediaProviderSettings) -> bool:
@@ -251,13 +256,6 @@ class MediaService:
                 f"No pinned/catalogued {provider_id} model supports {capability}",
                 category="capability",
             )
-        if not self.allow_paid:
-            raise OmniScholarError(
-                "paid_disabled",
-                "Image generation is disabled by configuration",
-                category="authorization",
-            )
-        context.require_paid(f"{provider_id} image generation")
         resolved = await self._resolve_references(references or [], context)
         if capability != "text-to-image" and not resolved:
             raise OmniScholarError(
@@ -292,14 +290,6 @@ class MediaService:
         self, references: list[str], context: ToolExecutionContext
     ) -> list[tuple[str, bytes | None, str]]:
         resolved: list[tuple[str, bytes | None, str]] = []
-        if references:
-            if not self.allow_external_upload:
-                raise OmniScholarError(
-                    "upload_disabled",
-                    "Reference image upload is disabled by configuration",
-                    category="authorization",
-                )
-            context.require_external_upload("image provider")
         for value in references:
             parsed = urlparse(value)
             if parsed.scheme in {"http", "https"}:

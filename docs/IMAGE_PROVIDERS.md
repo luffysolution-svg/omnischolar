@@ -25,8 +25,6 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
     "defaultImageProvider": "fal"
   },
   "media": {
-    "allowPaid": false,
-    "allowExternalUpload": false,
     "providers": {
       "fal": {
         "enabled": true,
@@ -36,7 +34,7 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
         "options": {}
       },
       "dashscope": {
-        "enabled": false,
+        "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_DASHSCOPE_API_KEY",
         "baseUrl": "https://your-workspace.cn-beijing.maas.aliyuncs.com/api/v1",
         "models": {},
@@ -45,7 +43,7 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
         }
       },
       "qwen-cloud": {
-        "enabled": false,
+        "enabled": true,
         "apiKeyEnv": "OMNISCHOLAR_QWEN_API_KEY",
         "baseUrl": "https://your-workspace.ap-southeast-1.maas.aliyuncs.com/api/v1",
         "models": {},
@@ -62,7 +60,7 @@ OmniScholar 可连接 OpenAI、xAI、Gemini、Vertex AI、fal.ai、DashScope/Qwe
 
 ## 生成与编辑
 
-提交任务前应明确图片要表达的科学内容、标签、单位、比例和文件格式。生成需要本次 `allowPaid` 授权；上传参考图还需要本次 `allowExternalUpload` 授权。
+提交任务前应明确图片要表达的科学内容、标签、单位、比例和文件格式。配置好图片服务 API key 后即可直接生成或上传参考图。
 
 只能上传有权交给第三方处理的图片。图片保存后，返回结果中的签名 URL 和 base64 原文会被移除。下载文件会检查 HTTPS 地址、文件大小、MIME 类型和图片文件头；多文件任务缺少任一文件时，不发布不完整结果。
 

@@ -124,7 +124,9 @@ npx skills remove --skill '*' --agent codex --global --yes
 
 ## 配置与 MCP 示例
 
-首次启动 MCP 或运行安装器时，如果没有可发现的配置，OmniScholar 会创建用户级 `omnischolar.config.json` 模板。API key 可以直接填写到 `apiKey`，也可以用 `apiKeyEnv` 指定环境变量。
+首次启动 MCP 或运行安装器时，如果没有可发现的配置，OmniScholar 会创建用户级 `omnischolar.config.json` 模板。模板中的服务默认处于启用状态；填写 API key 后即可使用对应服务，没有凭据的服务不会自动发起请求。API key 可以直接填写到 `apiKey`，也可以用 `apiKeyEnv` 指定环境变量。
+
+填写对应 API key 并启用服务后，即可直接使用 Ai4Scholar、图片生成、MinerU 和参考图上传。
 
 根目录的 [`mcp.json`](mcp.json) 是可直接复制到支持 MCP 的 Agent 中的 stdio 示例，内容如下：
 

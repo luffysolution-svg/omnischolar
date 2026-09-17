@@ -51,10 +51,7 @@ Zotero 笔记和批注属于个人阅读记录，不应当作论文原文证据�
 
 `omnischolar_parse` 检查 PDF 文件、计算 SHA-256，并使用 MinerU 返回正文、公式、表格和图片。解析结果会缓存；同一文件和解析设置再次调用时可直接命中缓存。
 
-上传必须同时得到两次确认：
-
-1. 配置中的 `mineru.allowExternalUpload` 为 `true`；
-2. 本次 `omnischolar_parse` 调用中的 `allowExternalUpload` 为 `true`。
+配置好 MinerU API key 并启用服务后即可解析；OmniScholar 不会在没有凭据时自动上传。
 
 OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体条目和文件，再单独批准上传。`force` 会重新解析并产生一次新上传，因此也需要新的授权。
 

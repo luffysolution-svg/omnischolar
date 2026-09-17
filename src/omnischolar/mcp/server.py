@@ -53,7 +53,7 @@ def create_server(runtime: OmniScholarRuntime) -> Server[Any, Any]:
     server: Server[Any, Any] = Server(
         "omnischolar",
         version=__version__,
-        instructions="Use OmniScholar Skills to choose research tools. Paid calls and uploads require confirmation in the tool arguments.",
+        instructions="Use OmniScholar Skills to choose research tools. Paid calls and uploads require configured provider credentials.",
     )
 
     @server.list_tools()  # type: ignore[untyped-decorator, no-untyped-call]

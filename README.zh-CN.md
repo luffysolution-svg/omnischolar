@@ -180,7 +180,7 @@ OpenAlex、PubMed、arXiv 和 Crossref 无需 API key。其他服务按需启用
 ## 文件、上传与费用
 
 - Zotero 只连接本机 `23119` 端口，并且只发送 GET 请求。
-- MinerU 只有在配置和本次工具调用都确认 `allowExternalUpload` 后，才会接收选中的 PDF。
+- MinerU 只在服务启用且配置了 API key 后接收选中的 PDF。
 - 图片服务会接收提示词，以及你允许上传的参考图；生成和编辑可能消耗账户额度。
 - Ai4Scholar 的部分调用可能消耗账户额度。仅保存 API key 不代表同意付费调用。
 - 付费请求发生网络错误后，如果无法确定服务端是否已经受理，OmniScholar 不会自动重试。

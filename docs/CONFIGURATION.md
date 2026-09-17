@@ -16,6 +16,8 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 相对路径以配置文件所在目录为基准。拼错字段名或填写不合法的值时，程序会直接报错。
 
+示例配置中的服务默认启用。填写对应 API key 后即可直接使用。
+
 如果前四项都不存在，第一次启动 MCP 或执行安装命令时会自动创建用户级完整配置模板。模板包含所有服务区块、`apiKey`、`apiKeyEnv` 以及 Vertex 的 `project`、`location` 等字段；Windows 通常位于 `%LOCALAPPDATA%\omnischolar\omnischolar.config.json`，Linux 通常位于 `~/.config/omnischolar/omnischolar.config.json`，macOS 通常位于 `~/Library/Application Support/omnischolar/omnischolar.config.json`。也可以运行 `omnischolar config init` 主动创建；程序不会覆盖已有配置。旧版本生成的嵌套目录文件不会自动迁移或读取，请按需手动复制设置。
 
 ## 最小配置
@@ -65,8 +67,7 @@ API key 可以直接写入对应服务的 `apiKey`。例如：
   "schemaVersion": 1,
   "ai4scholar": {
     "enabled": true,
-    "apiKey": "在这里填写 Ai4Scholar API key",
-    "allowPaid": false
+    "apiKey": "在这里填写 Ai4Scholar API key"
   },
   "data": {
     "materialsProject": {
@@ -105,10 +106,7 @@ API key 可以直接写入对应服务的 `apiKey`。例如：
 
 ## 付费与上传
 
-保存 key 不会自动允许付费或上传。
-
-- Ai4Scholar 和图片生成需在配置中启用 `allowPaid`，调用时还要再次确认 `allowPaid`。
-- MinerU 与参考图上传需在配置中启用 `allowExternalUpload`，调用时还要再次确认同名参数。
+填写对应 API key 后即可使用 Ai4Scholar、图片生成、MinerU 和参考图上传。CAS 需要正式接口契约文件，DashScope/Qwen 需要 workspace 地址。
 - 同步恢复只处理本地文件，不会沿用以前的上传许可。
 - 付费请求超时后，如果服务端结果不明确，程序不会自动重试。
 
@@ -141,8 +139,7 @@ API key 可以直接写入对应服务的 `apiKey`。例如：
   "mineru": {
     "enabled": true,
     "apiKeyEnv": "OMNISCHOLAR_MINERU_API_KEY",
-    "model": "pipeline",
-    "allowExternalUpload": false
+    "model": "pipeline"
   }
 }
 ```

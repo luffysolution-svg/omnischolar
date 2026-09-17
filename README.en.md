@@ -93,7 +93,9 @@ You are my research assistant using OmniScholar. Search and cite reliable schola
 
 ## Configuration and examples
 
-On the first MCP start or installer run, OmniScholar creates a complete user-level `omnischolar.config.json` template. API keys can be entered directly as `apiKey`, or supplied through the named `apiKeyEnv` environment variable.
+On the first MCP start or installer run, OmniScholar creates a complete user-level `omnischolar.config.json` template. Services in the template are enabled by default; after you provide an API key, the corresponding service is ready to use, while services without credentials do not make requests automatically. API keys can be entered directly as `apiKey`, or supplied through the named `apiKeyEnv` environment variable.
+
+Enable the service and fill in its API key to use Ai4Scholar, image generation, MinerU, and reference-image uploads directly.
 
 The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys: the MCP process reads the global [`omnischolar.config.example.json`](omnischolar.config.example.json), which can be created with `omnischolar config init`. The plugin copy is [`.mcp.json`](.mcp.json).
 

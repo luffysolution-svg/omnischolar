@@ -46,4 +46,4 @@
 | `omnischolar_image_service` | media | `media.service` | none | yes | none | free |
 
 未在输入 schema 中声明的参数会被拒绝。
-付费或上传工具必须同时通过配置开关和本次调用的显式授权。
+付费或上传工具需要启用对应服务并配置有效凭据。
