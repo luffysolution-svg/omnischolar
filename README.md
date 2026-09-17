@@ -59,7 +59,11 @@ uv tool install --reinstall luffysolution-omnischolar
 ```sh
 codex plugin marketplace add luffysolution-svg/omnischolar --ref main
 codex plugin add omnischolar@omnischolar
+
+# 更新已安装的 Codex 插件
 codex plugin marketplace upgrade omnischolar
+codex plugin remove omnischolar@omnischolar
+codex plugin add omnischolar@omnischolar
 ```
 
 ChatGPT 桌面应用中重启应用后打开 **Plugins**，选择 **OmniScholar** 并安装或启用；Codex CLI 可运行 `/plugins` 浏览插件。插件已经包含 Skills，并通过下面的命令启动 PyPI 最新 MCP：

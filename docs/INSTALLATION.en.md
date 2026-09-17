@@ -81,6 +81,7 @@ To update the Codex Git marketplace and plugin, run:
 
 ```sh
 codex plugin marketplace upgrade omnischolar
+codex plugin remove omnischolar@omnischolar
 codex plugin add omnischolar@omnischolar
 ```
 

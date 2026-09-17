@@ -48,8 +48,14 @@ Codex plugin:
 ```sh
 codex plugin marketplace add luffysolution-svg/omnischolar --ref main
 codex plugin add omnischolar@omnischolar
+```
+
+Update the installed Codex plugin:
+
+```sh
 codex plugin marketplace upgrade omnischolar
 codex plugin remove omnischolar@omnischolar
+codex plugin add omnischolar@omnischolar
 ```
 
 Claude Code plugin:

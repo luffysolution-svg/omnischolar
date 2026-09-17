@@ -81,6 +81,7 @@ uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar
 
 ```sh
 codex plugin marketplace upgrade omnischolar
+codex plugin remove omnischolar@omnischolar
 codex plugin add omnischolar@omnischolar
 ```
 
