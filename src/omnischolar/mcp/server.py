@@ -28,7 +28,11 @@ def tool_to_mcp(definition: ToolDefinition) -> types.Tool:
         name=definition.name,
         description=definition.description,
         inputSchema=definition.input_schema,
-        outputSchema=definition.output_schema,
+        # The JSON payload is carried in bounded text content. Advertising the
+        # same schema here would require every MCP response to repeat the full
+        # payload in structuredContent, which defeats the context-size fix and
+        # is unnecessary for clients that can parse the JSON text.
+        outputSchema=None,
         annotations=types.ToolAnnotations(
             readOnlyHint=definition.annotations.read_only_hint,
             destructiveHint=definition.annotations.destructive_hint,
