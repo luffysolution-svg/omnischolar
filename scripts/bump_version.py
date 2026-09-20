@@ -20,6 +20,40 @@ def _replace(path: Path, old: str, new: str) -> None:
     path.write_text(updated, encoding="utf-8", newline="\n")
 
 
+def _replace_package_lock_version(path: Path, old: str, new: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    pattern = re.compile(r'("version"\s*:\s*")' + re.escape(old) + r'(")')
+    matches = list(pattern.finditer(text))
+    if len(matches) < 2:
+        raise SystemExit(f"root package versions were not found in {path}")
+    replacements = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal replacements
+        if replacements >= 2:
+            return match.group(0)
+        replacements += 1
+        return f"{match.group(1)}{new}{match.group(2)}"
+
+    updated = pattern.sub(replace, text)
+    if replacements != 2:
+        raise SystemExit(f"expected two root package versions in {path}")
+    path.write_text(updated, encoding="utf-8", newline="\n")
+
+
+def _replace_uv_lock_version(path: Path, old: str, new: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r'(\[\[package\]\]\s+name = "luffysolution-omnischolar"\s+version = ")'
+        + re.escape(old)
+        + r'(")'
+    )
+    updated, count = pattern.subn(rf"\g<1>{new}\g<2>", text, count=1)
+    if count != 1:
+        raise SystemExit(f"project version was not found in {path}")
+    path.write_text(updated, encoding="utf-8", newline="\n")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("version", help="new semantic version, for example 0.1.3")
@@ -47,7 +81,13 @@ def main() -> int:
         "uv.lock",
     ]
     for relative in exact_files:
-        _replace(ROOT / relative, old, args.version)
+        path = ROOT / relative
+        if relative == "package-lock.json":
+            _replace_package_lock_version(path, old, args.version)
+        elif relative == "uv.lock":
+            _replace_uv_lock_version(path, old, args.version)
+        else:
+            _replace(path, old, args.version)
 
     # Validate JSON after the mechanical update so a malformed edit cannot be released.
     for relative in [
