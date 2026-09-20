@@ -99,6 +99,10 @@ The output location and new-file naming can be customized in the global configur
 
 Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` independently controls each paper directory name. `filenameSeparator` accepts `-`, `+`, and `_`, and is shared by paper, folder, and attachment templates. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, `{extension}`, and `{separator}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization. Here, attachment images means parsed image assets, not the original Zotero PDF attachment.
 
+When `output.source.copyPdf` is enabled, the selected Zotero PDF is copied into each paper's `source/` directory and `zotero-reading-record.md` is generated. The record keeps Zotero notes and PDF annotations in separate sections, including annotation type, color, page, tags, comments, and relative PDF links. These are personal reading records, not independent paper evidence.
+
+Use `omnischolar_analysis` to write structured analyses: `full-read` and `targeted-reading` for one paper, and `compare` and `review` for multiple papers. By default, single-paper analyses are stored under `Analysis/Single/<paper>/` and multi-paper analyses under `Analysis/Multi/`; paths and filename templates are configurable under `output.source` and `output.analysis`.
+
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 
 Sync distinguishes new content, no change, metadata changes, parse changes, render changes, missing files, conflicts, exclusions, and interrupted recovery. Metadata repair, rerendering, and transaction recovery do not upload a PDF.

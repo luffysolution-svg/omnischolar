@@ -16,7 +16,9 @@ from typing import Any, Literal
 
 import anyio
 
-from omnischolar.core import OmniScholarError, atomic_write, confined_path
+from omnischolar.core import OmniScholarError, atomic_write, confined_path, read_file_bounded
+
+from .zotero_render import render_zotero_reading_record
 
 SyncStatus = Literal[
     "new",
@@ -167,6 +169,12 @@ class SyncService:
         folder_name_template: str = "{author}{separator}{year}{separator}{title}",
         filename_template: str = "{author}{separator}{year}{separator}{title}",
         filename_separator: str = "-",
+        source_directory: str = "source",
+        copy_pdf: bool = True,
+        source_pdf_filename_template: str = "paper.pdf",
+        zotero_reading_record_filename: str = "zotero-reading-record.md",
+        embed_pdf: bool = True,
+        max_source_pdf_bytes: int = 200 * 1024 * 1024,
     ) -> None:
         self.root = output_root.resolve()
         self.namespace = namespace or f"vault-{stable_hash(str(self.root))[:16]}"
@@ -175,6 +183,12 @@ class SyncService:
         self.folder_name_template = folder_name_template
         self.filename_template = filename_template
         self.filename_separator = filename_separator
+        self.source_directory = source_directory.strip("/\\")
+        self.copy_pdf = copy_pdf
+        self.source_pdf_filename_template = source_pdf_filename_template
+        self.zotero_reading_record_filename = zotero_reading_record_filename
+        self.embed_pdf = embed_pdf
+        self.max_source_pdf_bytes = max_source_pdf_bytes
         self.state_root = self.root / ".omnischolar"
         self.manifest_path = self.state_root / "manifest.json"
         self.transaction_root = self.state_root / "transactions"
@@ -188,6 +202,30 @@ class SyncService:
             separator=self.filename_separator,
         )
         return "/".join(part for part in (self.literature_directory, stem) if part)
+
+    def _source_pdf_name(self, paper: dict[str, Any]) -> str:
+        raw_creators = paper.get("creators")
+        creators: list[Any] = raw_creators if isinstance(raw_creators, list) else []
+        author = next(
+            (
+                item
+                for item in creators
+                if isinstance(item, dict) and item.get("creatorType") == "author"
+            ),
+            {},
+        )
+        values = {
+            "author": str(author.get("lastName") or author.get("name") or "UnknownAuthor"),
+            "year": str(paper.get("year") or paper.get("date") or "UnknownYear")[:4],
+            "title": str(paper.get("title") or "Untitled"),
+            "zoteroKey": str(paper.get("zoteroKey") or ""),
+            "separator": self.filename_separator,
+        }
+        rendered = self.source_pdf_filename_template.format(**values)
+        name = _safe_component(rendered, "paper.pdf", max_bytes=180)
+        if not name.lower().endswith(".pdf"):
+            name = f"{name}.pdf"
+        return name
 
     def _empty_manifest(self) -> dict[str, Any]:
         return {
@@ -455,6 +493,29 @@ class SyncService:
                     )
                 await atomic_write(staging, f"assets/{name}", content)
                 managed[f"assets/{name}"] = stable_hash(content)
+            source_pdf_name = self._source_pdf_name(paper)
+            source_pdf_relative = f"{self.source_directory}/{source_pdf_name}"
+            selected_pdf = paper.get("selectedPdf")
+            selected_pdf_path = (
+                Path(str(selected_pdf.get("localPath")))
+                if isinstance(selected_pdf, dict) and selected_pdf.get("localPath")
+                else None
+            )
+            if self.copy_pdf and selected_pdf_path and selected_pdf_path.is_file():
+                pdf_bytes = await read_file_bounded(
+                    selected_pdf_path,
+                    self.max_source_pdf_bytes,
+                )
+                await atomic_write(staging, source_pdf_relative, pdf_bytes)
+                managed[source_pdf_relative] = stable_hash(pdf_bytes)
+            record_relative = f"{self.source_directory}/{self.zotero_reading_record_filename}"
+            record = render_zotero_reading_record(
+                paper,
+                pdf_filename=source_pdf_name,
+                embed_pdf=self.embed_pdf and self.copy_pdf,
+            )
+            await atomic_write(staging, record_relative, record.encode("utf-8"))
+            managed[record_relative] = stable_hash(record)
             sidecar = {
                 "schemaVersion": 1,
                 "publication": {"id": plan.publication_id, "namespace": self.namespace},
@@ -519,6 +580,10 @@ class SyncService:
                 "directory": str(destination),
                 "markdownPath": str(destination / markdown_name),
                 "metadataPath": str(destination / "metadata.json"),
+                "sourcePdfPath": str(destination / source_pdf_relative)
+                if self.copy_pdf and selected_pdf_path and selected_pdf_path.is_file()
+                else None,
+                "zoteroReadingRecordPath": str(destination / record_relative),
                 "status": "up_to_date",
                 "revision": manifest["revision"],
             }

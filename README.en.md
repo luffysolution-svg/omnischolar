@@ -20,7 +20,7 @@ It can search public indexes, combine online records with your Zotero notes, sen
 - Generate or edit scientific illustrations with configured image services
 - Preserve local Markdown edits and place incoming conflict versions in `.conflicts/`
 
-OmniScholar exposes 43 tools. See the [tool list](docs/TOOLS.en.md).
+OmniScholar exposes 44 tools. See the [tool list](docs/TOOLS.en.md).
 
 <details>
 <summary>Install and connect an agent</summary>
@@ -106,7 +106,7 @@ Enable the service and fill in its API key to use Ai4Scholar, image generation, 
 
 The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys: the MCP process reads the global [`omnischolar.config.example.json`](omnischolar.config.example.json), which can be created with `omnischolar config init`. The plugin copy is [`.mcp.json`](.mcp.json).
 
-Configure the Obsidian output location, paper folders, Markdown files, and parsed image assets with `output.rootDirectory`, `output.literatureDirectory`, `output.folderNameTemplate`, `output.filenameTemplate`, `output.filenameSeparator`, and `output.assetFilenameTemplate`; see [literature and output configuration](docs/RESEARCH.en.md).
+Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, Zotero reading records, and structured analyses with `output.rootDirectory`, `output.literatureDirectory`, `output.source`, and `output.analysis`; see [literature and output configuration](docs/RESEARCH.en.md).
 
 ## Try it
 

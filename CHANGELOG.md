@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.3] - 2026-09-20
+
+- Add configurable source PDF and styled Zotero reading-record publication for notes and PDF annotations.
+- Add source-fingerprinted `omnischolar_analysis` outputs for single-paper `full-read`/`targeted-reading` and multi-paper `compare`/`review` workflows.
+- Improve Obsidian analysis links, canonical Sources sections, figure embeds, Markdown table layouts, and block-math formula output.
+- Fix Zotero local API annotation discovery and filter annotations by their actual parent attachment.
+- Update SCI literature Skills and release documentation for language-aware structured reading workflows.
+
+## [0.3.2] - 2026-09-20
+
+- Fix Zotero PDF annotation discovery for the local API by querying annotation items by `parentItem` and filtering returned annotations by their actual parent attachment.
+- Add regression coverage for annotation colors, pages, comments, tags, and cross-attachment filtering.
+
+## [0.3.1] - 2026-09-20
+
+- Add configurable Zotero source output with copied PDFs and a styled `zotero-reading-record.md` that separates notes from PDF annotations.
+- Add `omnischolar_analysis` for source-fingerprinted `full-read`, `targeted-reading`, `compare`, and `review` Markdown outputs under configurable `Analysis/Single` and `Analysis/Multi` directories.
+- Update literature Skills with SCI-focused single-paper templates, compact multi-paper comparison/review workflows, language-aware output, and source-conflict rules.
+
 ## [0.3.0] - 2026-09-20
 
 - Add bounded local focused retrieval with BM25 + TF-IDF ranking, paragraph locators, section filters, and explicit empty-result behavior.

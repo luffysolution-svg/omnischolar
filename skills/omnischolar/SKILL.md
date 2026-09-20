@@ -16,6 +16,7 @@ Choose the smallest workflow that answers the request. Follow the user's languag
 - Focused retrieval, paragraph location, evidence caching, or retrieval-first paper work: follow `literature-retrieval`.
 - Interpreting parsed papers, full-text reading, figure/formula analysis, comparisons, or literature reviews: follow `literature-reading`.
 - Citation evidence, candidates, formatting, or insertion: follow `academic-citation`.
+- Structured single-paper or multi-paper analysis output: follow `literature-reading` and persist with `omnischolar_analysis`.
 - Generated or edited illustrations: follow `scientific-figure`.
 - Materials Project records and exports: follow `materials-project`.
 - CAS substance records and contract status: follow `chemical-data`.
@@ -33,6 +34,7 @@ The generated configuration enables provider sections by default. Use providers 
 5. Call `omnischolar_parse` only when structured PDF extraction is necessary and both configuration and the current tool call authorize external upload.
 6. Read generated content progressively and verify claims against retrieved evidence.
 7. Format citations only after identity and relevance checks.
+8. For saved analyses, keep `Analysis/Single` and `Analysis/Multi` as the only top-level analysis branches; use `full-read`, `targeted-reading`, `compare`, or `review` as the analysis type.
 8. Route image work by declared capability, then inspect the result for scientific errors.
 
 For Semantic Scholar, keep paper and author operations separate: use `literature_search`/`literature_get` for papers, `literature_graph` for recommendations and citation relations, and `literature_author` for author search, author detail, or an author's papers. Respect provider throttling and `Retry-After`; do not treat a transient 429 or 5xx as evidence that the API is unsupported.

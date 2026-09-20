@@ -12,6 +12,7 @@ from .loader import (
 )
 from .models import (
     Ai4ScholarConfig,
+    AnalysisOutputConfig,
     CasConfig,
     DataConfig,
     DefaultsConfig,
@@ -25,6 +26,7 @@ from .models import (
     ResearchConfig,
     ResearchProviderConfig,
     RuntimeConfig,
+    SourceOutputConfig,
     SyncConfig,
     ToolGroups,
     ToolsConfig,
@@ -33,6 +35,7 @@ from .models import (
 
 __all__ = [
     "Ai4ScholarConfig",
+    "AnalysisOutputConfig",
     "CasConfig",
     "ConfigSource",
     "DataConfig",
@@ -49,6 +52,7 @@ __all__ = [
     "ResearchProviderConfig",
     "ResolvedCredential",
     "RuntimeConfig",
+    "SourceOutputConfig",
     "SyncConfig",
     "ToolGroups",
     "ToolsConfig",

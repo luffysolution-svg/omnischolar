@@ -19,4 +19,7 @@ Follow the user's language. MinerU receives PDF bytes over the network and may c
 7. Distinguish extracted text, visual observation, captions, and author claims. Cite exact sections or numbered objects where possible.
 8. State OCR, equation, table, or layout limitations that affect confidence.
 
+9. After successful publication, verify that the managed paper directory contains the configured `source/` PDF and `zotero-reading-record.md`. The reading record must keep Zotero notes and PDF annotations in separate sections, preserve annotation color/type/page/tag information, and link back to the copied PDF with relative paths.
+10. Use `omnischolar_analysis` to persist `full-read` or `targeted-reading` output under the configured single-paper analysis directory. Do not overwrite the MinerU source Markdown.
+
 Read [sync.md](references/sync.md) for managed-output states. If MinerU is unavailable, use bounded Zotero indexed text and notes when sufficient; otherwise report that structured full-text parsing is blocked. Never upload a different attachment as a fallback without explicit selection.

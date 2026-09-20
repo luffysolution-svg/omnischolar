@@ -20,6 +20,7 @@ from omnischolar.providers.literature import (
 )
 
 from .ai4scholar import Ai4ScholarService
+from .analysis import AnalysisService
 from .chemistry import ChemistryService
 from .materials import MaterialsProjectService
 from .media import MediaProviderSettings, MediaService
@@ -37,6 +38,7 @@ class ApplicationServices:
     literature: LiteratureRouter
     zotero: ZoteroService
     sync: SyncService
+    analysis: AnalysisService
     reading_context: ReadingContextStore
     reader: LiteratureReader
     retriever: LiteratureRetriever
@@ -220,9 +222,15 @@ class OmniScholarApplication:
             folder_name_template=config.output.folder_name_template,
             filename_template=config.output.filename_template,
             filename_separator=config.output.filename_separator,
+            source_directory=config.output.source.directory,
+            copy_pdf=config.output.source.copy_pdf,
+            source_pdf_filename_template=config.output.source.pdf_filename_template,
+            zotero_reading_record_filename=config.output.source.zotero_reading_record_filename,
+            embed_pdf=config.output.source.embed_pdf,
         )
         reading_context = ReadingContextStore(config.output.root_directory)
         reader = LiteratureReader(sync, context_store=reading_context)
+        analysis = AnalysisService(sync, reader, config.output)
         self.services = ApplicationServices(
             literature,
             ZoteroService(
@@ -232,6 +240,7 @@ class OmniScholarApplication:
                 max_indexed_text_bytes=config.zotero.max_indexed_text_bytes,
             ),
             sync,
+            analysis,
             reading_context,
             reader,
             LiteratureRetriever(reader, context_store=reading_context),
