@@ -88,12 +88,16 @@ class LiteratureReaderTests(unittest.IsolatedAsyncioTestCase):
             comparison = await reader.read(
                 {"keys": ["PAPER123", "PAPER124"], "mode": "compare"}
             )
+            review = await reader.read(
+                {"keys": ["PAPER123", "PAPER124"], "mode": "review", "query": "catalyst selectivity"}
+            )
 
         self.assertEqual(figures["items"][0]["caption"], "Figure 1: Reaction pathway.")
         self.assertEqual(figures["items"][1]["kind"], "table")
         self.assertEqual(formulas["items"][0]["formula"], "$$E = mc^2$$")
         self.assertIn("selectivity", paragraphs["items"][0]["text"])
         self.assertEqual(len(comparison["documents"]), 2)
+        self.assertTrue(all(document["evidence"] for document in review["documents"]))
 
 
 if __name__ == "__main__":

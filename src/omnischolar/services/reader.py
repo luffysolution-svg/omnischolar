@@ -271,10 +271,15 @@ class LiteratureReader:
     @classmethod
     def _paragraphs(cls, text: str, query: str | None, max_items: int) -> list[dict[str, Any]]:
         wanted = (query or "").casefold().strip()
+        terms = [
+            term.casefold()
+            for term in re.findall(r"[A-Za-z0-9_]+|[\u3400-\u9fff]", wanted)
+        ]
         items: list[dict[str, Any]] = []
         for record in cls.paragraph_records(text):
             value = record["text"]
-            if wanted and wanted not in value.casefold():
+            lowered = value.casefold()
+            if wanted and wanted not in lowered and not all(term in lowered for term in terms):
                 continue
             items.append(
                 {
