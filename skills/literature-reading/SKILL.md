@@ -55,7 +55,8 @@ Use this when the user asks about a mechanism, method, result, limitation, figur
 For extracted figures, tables, and formulas:
 
 - Build a compact two-column Markdown table for figures and tables. The left column is `预览` and the right column is `图表名称、原文位置与分析解读`.
-- In the left column, embed available local figure images with a bounded Obsidian thumbnail such as `![[path/to/figure.png|260]]`; the embedded image must be clickable to the source asset/PDF context when the host supports it.
+- Do not put Obsidian image width-alias syntax such as `![[path/to/figure.png|260]]` directly inside a Markdown table cell: the `|260` is parsed as an extra table column. Use the original MinerU asset with an image embed without a width alias: `![[Literatures/<paper>/assets/image-1.jpg]]`. Because the embed points directly to the original MinerU asset, clicking the image opens that original asset; do not add another pipe-based alias inside the table.
+- Keep the table exactly two columns. Each extracted image/panel gets its own table row: one original MinerU image embed in the left cell and four clearly separated ordered items in the right cell: `1. 图表标题`、`2. 原文位置`、`3. 作者原文表述`、`4. 图表解读`. Add visible line breaks between the four items. Repeat the shared figure context when several panels belong to one figure, but do not group multiple images into one left cell or create extra table columns.
 - For tables, keep the left cell compact with a collapsible or bounded table preview; do not put a very wide table inside the right cell.
 - In the right column, keep separate lines for object name, source section/page, author caption, visual or tabular observation, and interpretation. Do not turn a caption into an unsupported scientific conclusion.
 - Render important equations as an ordered list. Each item must contain the equation in block math `$$ ... $$`, followed by variables, purpose, assumptions/conditions, and the paper-specific interpretation. Never show escaped formula source inside backticks.
@@ -92,6 +93,8 @@ Do not call a bounded user-selected set a systematic review unless a systematic 
 ## Sources and links
 
 Do not add your own duplicate `Sources` section. `omnischolar_analysis` appends one canonical `## Sources` section containing Obsidian links to the MinerU document, copied PDF, and `zotero-reading-record.md`. Use those links for navigation instead of manually constructing relative paths.
+
+Do not include YAML frontmatter in the `content` passed to `omnischolar_analysis`; the tool writes the canonical analysis frontmatter. If a model supplies frontmatter anyway, it must be removed before writing.
 
 ## Update and follow-up workflow
 

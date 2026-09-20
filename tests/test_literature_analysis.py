@@ -123,6 +123,57 @@ class LiteratureAnalysisTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("[[", single_text)
             self.assertIn("| Dimension |", compare_text)
 
+    async def test_analysis_removes_input_frontmatter_and_normalises_table_images(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            service = SyncService(root, namespace="test-vault")
+            pdf = root / "paper.pdf"
+            pdf.write_bytes(b"%PDF-test")
+            assets = root / "assets"
+            assets.mkdir()
+            (assets / "image-1.png").write_bytes(b"image-1")
+            (assets / "image-2.png").write_bytes(b"image-2")
+            await service.publish(_paper("PAPER123", "A Paper", pdf), "# A Paper\n\nEvidence", {}, parse_key="a")
+            reader = LiteratureReader(service)
+            analysis = AnalysisService(service, reader, OutputConfig())
+
+            result = await analysis.execute(
+                {
+                    "action": "write",
+                    "analysisType": "targeted-reading",
+                    "key": "PAPER123",
+                    "content": (
+                        "---\n"
+                        "analysisType: targeted-reading\n"
+                        "scope: figures\n"
+                        "---\n\n"
+                        "---\n"
+                        "generatedAgain: true\n"
+                        "---\n\n"
+                        "# Targeted\n\n"
+                        "| 预览 | 图表名称、原文位置与分析解读 |\n"
+                        "| --- | --- |\n"
+                        "| ![[assets/image-1.png]] ![[assets/image-2.png]] | Figure 1 | extra |\n"
+                    ),
+                    "language": "zh-CN",
+                    "overwrite": True,
+                }
+            )
+
+            text = (root / result["path"]).read_text(encoding="utf-8")
+            self.assertEqual(text.count("analysisType:"), 1)
+            self.assertNotIn("scope: figures", text)
+            self.assertNotIn("generatedAgain: true", text)
+            self.assertIn("![[assets/image-1.png]]", text)
+            self.assertIn("![[assets/image-2.png]]", text)
+            self.assertEqual(text.count("![[assets/"), 2)
+            self.assertIn("1. **图表标题**：Figure 1", text)
+            self.assertIn("2. **原文位置**：见对应图注/正文", text)
+            self.assertIn("3. **作者原文表述**：见论文图注和对应正文段落", text)
+            self.assertIn("4. **图表解读**：", text)
+            self.assertNotIn("<img ", text)
+            self.assertNotIn("|220]]", text)
+
 
 if __name__ == "__main__":
     unittest.main()

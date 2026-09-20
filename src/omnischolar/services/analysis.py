@@ -8,6 +8,7 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import unquote
 
 from omnischolar.core import OmniScholarError, atomic_write, confined_path, read_file_bounded
 
@@ -95,6 +96,7 @@ class AnalysisService:
             source_links,
             content,
             arguments.get("language"),
+            relative_path,
         )
         target = confined_path(self.sync.root, relative_path)
         if target.exists() and not bool(arguments.get("overwrite", False)):
@@ -250,13 +252,145 @@ class AnalysisService:
             return path.name
 
     @staticmethod
+    def _strip_input_frontmatter(content: str) -> str:
+        body = content.lstrip("\ufeff")
+        while body.startswith("---"):
+            match = re.match(r"\A---\s*\n.*?\n---\s*(?:\n|\Z)", body, flags=re.DOTALL)
+            if not match:
+                break
+            body = body[match.end() :].lstrip()
+        return body.strip()
+
+    def _normalise_table_image_embeds(self, body: str, analysis_path: str) -> str:
+        analysis_directory = (self.sync.root / analysis_path).parent
+        vault_root = self._vault_root()
+
+        def resolve_asset(raw_path: str) -> Path:
+            raw_path = unquote(raw_path).replace("\\", "/")
+            raw = Path(raw_path)
+            if raw.is_absolute():
+                return raw
+            if raw_path.startswith("../"):
+                return (analysis_directory / raw).resolve()
+            candidate = vault_root / raw
+            return candidate if candidate.exists() else (analysis_directory / raw).resolve()
+
+        def relative_asset(path: Path) -> str:
+            try:
+                relative = path.resolve().relative_to(vault_root.resolve()).as_posix()
+            except ValueError:
+                relative = os.path.relpath(path, analysis_directory)
+            return Path(relative).as_posix()
+
+        def make_markdown_image(raw_path: str) -> str:
+            original = resolve_asset(raw_path)
+            vault_link = relative_asset(original)
+            return f"![[{vault_link}]]"
+
+        wiki_pattern = re.compile(r"!\[\[(?P<path>[^\]]+)\]\]")
+
+        def figure_right_cell(value: str) -> str:
+            if "图表标题" in value:
+                if "1. **图表标题**：" in value:
+                    headings = re.findall(r"\*\*(Figure\s+\d+[^*<]+)\*\*", value)
+                    title = headings[-1].strip(" 。") if headings else "图表标题"
+                    if headings:
+                        marker = f"**{headings[-1]}**"
+                        interpretation = value.rsplit(marker, 1)[-1].strip(" 。")
+                    else:
+                        interpretation = value.rsplit("4. **图表解读**：", 1)[-1].strip()
+                    location_match = re.search(r"§\s*[^，。 ]+", title)
+                    location = location_match.group(0) if location_match else "见对应图注/正文"
+                    author_match = re.search(
+                        r"3\. \*\*作者原文表述\*\*：(.+?)(?=<br><br>|$)", value
+                    )
+                    author = author_match.group(1).strip() if author_match else "见论文图注和对应正文段落。"
+                    return (
+                        f"1. **图表标题**：{title}<br><br>"
+                        f"2. **原文位置**：{location}<br><br>"
+                        f"3. **作者原文表述**：{author}<br><br>"
+                        f"4. **图表解读**：{interpretation.strip()}"
+                    )
+                fields = {}
+                for label in ("图表标题", "原文位置", "作者原文表述", "图表解读"):
+                    field = re.search(
+                        rf"(?:^|<br>)\s*[-\d.]+\s*\*?\*?{label}\*?\*?：(.+?)(?=<br>|$)",
+                        value,
+                    )
+                    fields[label] = field.group(1).strip() if field else "见对应图注/正文"
+                return (
+                    f"1. **图表标题**：{fields['图表标题']}<br><br>"
+                    f"2. **原文位置**：{fields['原文位置']}<br><br>"
+                    f"3. **作者原文表述**：{fields['作者原文表述']}<br><br>"
+                    f"4. **图表解读**：{fields['图表解读']}"
+                )
+            compact = re.sub(r"\s*<br>\s*", " ", value).strip()
+            bold = re.search(r"\*\*(.+?)\*\*", compact)
+            heading = bold.group(1).strip(" 。") if bold else compact
+            location_match = re.search(r"(§\s*[^，。]+)", heading)
+            location = location_match.group(1) if location_match else "见对应图注/正文"
+            name_match = re.search(r"名称：(.+?)(?=原文观察：|解读：|$)", compact)
+            observation_match = re.search(r"原文观察：(.+?)(?=解读：|$)", compact)
+            interpretation_match = re.search(r"解读：(.+)$", compact)
+            title = (name_match.group(1).strip(" 。") if name_match else heading)
+            observation = (
+                observation_match.group(1).strip(" 。")
+                if observation_match
+                else "见论文图注和对应正文段落；MinerU 未抽取可靠逐字表述。"
+            )
+            interpretation = interpretation_match.group(1).strip(" 。") if interpretation_match else compact
+            if not interpretation_match and bold:
+                interpretation = compact.replace(bold.group(0), "", 1).strip(" 。")
+            return (
+                f"1. **图表标题**：{title}<br><br>"
+                f"2. **原文位置**：{location}<br><br>"
+                f"3. **作者原文表述**：{observation}<br><br>"
+                f"4. **图表解读**：{interpretation}"
+            )
+
+        output: list[str] = []
+        in_figure_table = False
+        for line in body.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("|") and "预览" in stripped and "图表名称" in stripped:
+                in_figure_table = True
+                output.append("| 预览 | 图表名称、原文位置与分析解读 |")
+                continue
+            if in_figure_table:
+                if not stripped.startswith("|"):
+                    in_figure_table = False
+                    output.append(line)
+                    continue
+                if re.fullmatch(r"\|[\s|:-]+\|", stripped):
+                    output.append("| --- | --- |")
+                    continue
+                matches = [
+                    (match.start(), match.end(), make_markdown_image(match.group("path")))
+                    for match in wiki_pattern.finditer(line)
+                ]
+                if matches:
+                    tail = line[matches[-1][1] :].strip().lstrip("|").strip()
+                    right = re.split(r"\s+\|", tail, maxsplit=1)[0].strip()
+                    right_cell = figure_right_cell(right)
+                    output.extend(f"| {item[2]} | {right_cell} |" for item in matches)
+                elif line.count("|") >= 3:
+                    output.append(line)
+                continue
+            if stripped.startswith("|"):
+                output.append(line)
+            else:
+                output.append(line)
+        return "\n".join(output)
+
     def _document(
+        self,
         analysis_type: str,
         keys: list[str],
         fingerprint: str,
         source_links: list[dict[str, str]],
         content: str,
         language: str | None,
+        analysis_path: str,
     ) -> str:
         import json
 
@@ -270,11 +404,13 @@ class AnalysisService:
             "status": "ready",
             "updatedAt": _now(),
         }
+        body = self._strip_input_frontmatter(content)
         body = re.sub(
             r"(?ims)^##\s+(?:Sources|来源|来源与阅读记录)\s*$.*?(?=^##\s+|\Z)",
             "",
-            content.strip(),
+            body,
         ).strip()
+        body = self._normalise_table_image_embeds(body, analysis_path)
         lines = ["---"]
         for key, value in frontmatter.items():
             if isinstance(value, list):
