@@ -55,7 +55,8 @@ Use this when the user asks about a mechanism, method, result, limitation, figur
 For extracted figures, tables, and formulas:
 
 - Build a compact two-column Markdown table for figures and tables. The left column is `预览` and the right column is `图表名称、原文位置与分析解读`.
-- In the left column, embed available local figure images with a bounded Obsidian thumbnail such as `![[path/to/figure.png|260]]`; the embedded image must be clickable to the source asset/PDF context when the host supports it.
+- Do not put Obsidian thumbnail syntax such as `![[path/to/figure.png|260]]` directly inside a Markdown table cell: the `|260` is parsed as an extra table column. In table cells, use a clickable, bounded HTML thumbnail such as `<a href="path/to/figure.png"><img src="path/to/figure.png" width="220"></a>` or another pipe-free equivalent. The analysis writer also normalizes this syntax for safety.
+- The thumbnail must be clickable to the source asset/PDF context when the host supports it. Keep one representative thumbnail per figure row and group additional panels vertically or in a collapsible block so the table remains readable.
 - For tables, keep the left cell compact with a collapsible or bounded table preview; do not put a very wide table inside the right cell.
 - In the right column, keep separate lines for object name, source section/page, author caption, visual or tabular observation, and interpretation. Do not turn a caption into an unsupported scientific conclusion.
 - Render important equations as an ordered list. Each item must contain the equation in block math `$$ ... $$`, followed by variables, purpose, assumptions/conditions, and the paper-specific interpretation. Never show escaped formula source inside backticks.
@@ -92,6 +93,8 @@ Do not call a bounded user-selected set a systematic review unless a systematic 
 ## Sources and links
 
 Do not add your own duplicate `Sources` section. `omnischolar_analysis` appends one canonical `## Sources` section containing Obsidian links to the MinerU document, copied PDF, and `zotero-reading-record.md`. Use those links for navigation instead of manually constructing relative paths.
+
+Do not include YAML frontmatter in the `content` passed to `omnischolar_analysis`; the tool writes the canonical analysis frontmatter. If a model supplies frontmatter anyway, it must be removed before writing.
 
 ## Update and follow-up workflow
 

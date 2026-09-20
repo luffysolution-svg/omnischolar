@@ -95,6 +95,7 @@ class AnalysisService:
             source_links,
             content,
             arguments.get("language"),
+            relative_path,
         )
         target = confined_path(self.sync.root, relative_path)
         if target.exists() and not bool(arguments.get("overwrite", False)):
@@ -250,13 +251,84 @@ class AnalysisService:
             return path.name
 
     @staticmethod
+    def _strip_input_frontmatter(content: str) -> str:
+        body = content.lstrip("\ufeff")
+        while body.startswith("---"):
+            match = re.match(r"\A---\s*\n.*?\n---\s*(?:\n|\Z)", body, flags=re.DOTALL)
+            if not match:
+                break
+            body = body[match.end() :].lstrip()
+        return body.strip()
+
+    def _normalise_table_image_embeds(self, body: str, analysis_path: str) -> str:
+        analysis_directory = (self.sync.root / analysis_path).parent
+        vault_root = self._vault_root()
+
+        def replace(match: re.Match[str]) -> str:
+            vault_path = match.group("path").replace("\\", "/")
+            candidate = vault_root / vault_path
+            if not candidate.exists():
+                candidate = analysis_directory / vault_path
+            try:
+                relative = os.path.relpath(candidate, analysis_directory)
+            except ValueError:
+                relative = vault_path
+            href = Path(relative).as_posix()
+            escaped = (
+                href.replace("&", "&amp;")
+                .replace('"', "&quot;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+            )
+            width = match.group("width")
+            return (
+                f'<a href="{escaped}"><img src="{escaped}" alt="图表预览" '
+                f'width="{width}"></a>'
+            )
+
+        pattern = re.compile(
+            r"!\[\[(?P<path>[^\]|]+?)\s*\|\s*(?P<width>\d{2,4})\]\]"
+        )
+        output: list[str] = []
+        in_figure_table = False
+        for line in body.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("|") and "预览" in stripped and "图表名称" in stripped:
+                in_figure_table = True
+                output.append("| 预览 | 图表名称、原文位置与分析解读 |")
+                continue
+            if in_figure_table:
+                if not stripped.startswith("|"):
+                    in_figure_table = False
+                    output.append(line)
+                    continue
+                if re.fullmatch(r"\|[\s|:-]+\|", stripped):
+                    output.append("| --- | --- |")
+                    continue
+                matches = list(pattern.finditer(line))
+                if matches:
+                    previews = "<br>".join(replace(match) for match in matches)
+                    tail = line[matches[-1].end() :].strip().lstrip("|").strip()
+                    right = re.split(r"\s+\|", tail, maxsplit=1)[0].strip()
+                    output.append(f"| {previews} | {right} |")
+                elif "<img " in line and line.count("|") >= 3:
+                    output.append(line)
+                continue
+            if stripped.startswith("|"):
+                output.append(pattern.sub(replace, line))
+            else:
+                output.append(line)
+        return "\n".join(output)
+
     def _document(
+        self,
         analysis_type: str,
         keys: list[str],
         fingerprint: str,
         source_links: list[dict[str, str]],
         content: str,
         language: str | None,
+        analysis_path: str,
     ) -> str:
         import json
 
@@ -270,11 +342,13 @@ class AnalysisService:
             "status": "ready",
             "updatedAt": _now(),
         }
+        body = self._strip_input_frontmatter(content)
         body = re.sub(
             r"(?ims)^##\s+(?:Sources|来源|来源与阅读记录)\s*$.*?(?=^##\s+|\Z)",
             "",
-            content.strip(),
+            body,
         ).strip()
+        body = self._normalise_table_image_embeds(body, analysis_path)
         lines = ["---"]
         for key, value in frontmatter.items():
             if isinstance(value, list):

@@ -123,6 +123,46 @@ class LiteratureAnalysisTests(unittest.IsolatedAsyncioTestCase):
             self.assertIn("[[", single_text)
             self.assertIn("| Dimension |", compare_text)
 
+    async def test_analysis_removes_input_frontmatter_and_normalises_table_thumbnails(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            service = SyncService(root, namespace="test-vault")
+            pdf = root / "paper.pdf"
+            pdf.write_bytes(b"%PDF-test")
+            await service.publish(_paper("PAPER123", "A Paper", pdf), "# A Paper\n\nEvidence", {}, parse_key="a")
+            reader = LiteratureReader(service)
+            analysis = AnalysisService(service, reader, OutputConfig())
+
+            result = await analysis.execute(
+                {
+                    "action": "write",
+                    "analysisType": "targeted-reading",
+                    "key": "PAPER123",
+                    "content": (
+                        "---\n"
+                        "analysisType: targeted-reading\n"
+                        "scope: figures\n"
+                        "---\n\n"
+                        "---\n"
+                        "generatedAgain: true\n"
+                        "---\n\n"
+                        "# Targeted\n\n"
+                        "| 预览 | 图表名称、原文位置与分析解读 |\n"
+                        "| --- | --- |\n"
+                        "| ![[assets/image-1.png  | 220]] | Figure 1 | extra |\n"
+                    ),
+                    "language": "zh-CN",
+                    "overwrite": True,
+                }
+            )
+
+            text = (root / result["path"]).read_text(encoding="utf-8")
+            self.assertEqual(text.count("analysisType:"), 1)
+            self.assertNotIn("scope: figures", text)
+            self.assertNotIn("generatedAgain: true", text)
+            self.assertIn('<img src="assets/image-1.png"', text)
+            self.assertNotIn("|220]]", text)
+
 
 if __name__ == "__main__":
     unittest.main()
