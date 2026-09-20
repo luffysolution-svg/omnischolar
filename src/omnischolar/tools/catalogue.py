@@ -284,6 +284,24 @@ async def literature_read(
     return await _services(app).reader.read(arguments)
 
 
+async def literature_focus(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).retriever.search(arguments)
+
+
+async def literature_locate(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).reader.locate(arguments)
+
+
+async def literature_context(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).reading_context.execute(arguments)
+
+
 async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, app: Any) -> Any:
     services = _services(app)
     mineru = _required(services.mineru, "mineru", "MinerU")
@@ -789,12 +807,95 @@ def create_tool_definitions() -> list[ToolDefinition]:
                 "cursor": NONNEGATIVE,
                 "maxChars": {"type": "integer", "minimum": 500, "maximum": 12000},
                 "maxItems": {"type": "integer", "minimum": 1, "maximum": 50},
+                "contextId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
             },
             ("mode",),
         ),
         literature_read,
         group="literature",
         capabilities=("literature.read", "literature.fulltext", "literature.figures", "literature.formulas"),
+    )
+    add(
+        "omnischolar_focus",
+        "Search locally published Zotero papers for bounded evidence paragraphs with stable line locators; does not return full documents.",
+        obj(
+            {
+                "query": {"type": "string", "minLength": 1, "maxLength": 1000},
+                "keys": {
+                    "type": "array",
+                    "items": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                    "maxItems": 50,
+                },
+                "section": {"type": "string", "maxLength": 500},
+                "topK": {"type": "integer", "minimum": 1, "maximum": 50},
+                "maxChars": {"type": "integer", "minimum": 500, "maximum": 8000},
+                "maxPerDocument": {"type": "integer", "minimum": 1, "maximum": 10},
+                "includeContext": BOOL,
+                "contextId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+            },
+            ("query",),
+        ),
+        literature_focus,
+        group="literature",
+        capabilities=("literature.focus", "literature.retrieval", "literature.evidence"),
+    )
+    add(
+        "omnischolar_locate",
+        "Locate matching paragraphs in one parsed Zotero paper and return bounded text with heading, line, and character anchors.",
+        obj(
+            {
+                "key": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "attachmentKey": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "query": {"type": "string", "minLength": 1, "maxLength": 1000},
+                "section": {"type": "string", "maxLength": 500},
+                "matchMode": string_enum("allTerms", "phrase"),
+                "maxItems": {"type": "integer", "minimum": 1, "maximum": 50},
+                "maxChars": {"type": "integer", "minimum": 500, "maximum": 8000},
+                "contextId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+            },
+            ("key", "query"),
+        ),
+        literature_locate,
+        group="literature",
+        capabilities=("literature.locate", "literature.paragraphs", "literature.evidence"),
+    )
+    add(
+        "omnischolar_context",
+        "Open, append, list, page, or clear bounded local evidence contexts for multi-turn literature work.",
+        obj(
+            {
+                "action": string_enum("open", "add", "list", "get", "clear"),
+                "contextId": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,64}$"},
+                "title": {"type": "string", "maxLength": 200},
+                "cursor": NONNEGATIVE,
+                "maxItems": {"type": "integer", "minimum": 1, "maximum": 50},
+                "maxChars": {"type": "integer", "minimum": 500, "maximum": 12000},
+                "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 50,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "text": {"type": "string", "maxLength": 4000},
+                            "excerpt": {"type": "string", "maxLength": 4000},
+                            "source": {"type": "object", "additionalProperties": {"type": "string"}},
+                            "zoteroKey": {"type": "string"},
+                            "title": {"type": "string"},
+                            "heading": {"type": "string"},
+                            "locator": {"type": "string"},
+                            "markdownPath": {"type": "string"},
+                        },
+                        "additionalProperties": False,
+                    },
+                },
+            },
+            ("action",),
+        ),
+        literature_context,
+        group="literature",
+        capabilities=("literature.context.open", "literature.context.append", "literature.context.read"),
+        side="filesystem",
     )
     parse_schema = obj(
         {

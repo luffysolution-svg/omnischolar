@@ -25,7 +25,7 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 调用已配置的图片服务生成或编辑科研示意图
 - 保留手工修改过的 Markdown，把待合并版本放入 `.conflicts/`
 
-OmniScholar 共提供 38 个工具，完整列表见[工具目录](docs/TOOLS.md)。
+OmniScholar 共提供 43 个工具，完整列表见[工具目录](docs/TOOLS.md)。
 
 <details>
 <summary>安装与部署</summary>

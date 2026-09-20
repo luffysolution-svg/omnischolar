@@ -20,7 +20,7 @@ It can search public indexes, combine online records with your Zotero notes, sen
 - Generate or edit scientific illustrations with configured image services
 - Preserve local Markdown edits and place incoming conflict versions in `.conflicts/`
 
-OmniScholar exposes 38 tools. See the [tool list](docs/TOOLS.en.md).
+OmniScholar exposes 43 tools. See the [tool list](docs/TOOLS.en.md).
 
 <details>
 <summary>Install and connect an agent</summary>

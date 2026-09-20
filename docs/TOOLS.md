@@ -19,6 +19,9 @@
 | `zotero_search` | zotero | `zotero.search` | none | yes | none | free |
 | `zotero_item` | zotero | `zotero.item`, `zotero.aggregate` | none | yes | none | free |
 | `omnischolar_read` | literature | `literature.read`, `literature.fulltext`, `literature.figures`, `literature.formulas` | none | no | none | free |
+| `omnischolar_focus` | literature | `literature.focus`, `literature.retrieval`, `literature.evidence` | none | no | none | free |
+| `omnischolar_locate` | literature | `literature.locate`, `literature.paragraphs`, `literature.evidence` | none | no | none | free |
+| `omnischolar_context` | literature | `literature.context.open`, `literature.context.append`, `literature.context.read` | filesystem | no | none | free |
 | `omnischolar_parse` | parsing | `pdf.parse`, `sync.publish` | external-upload | yes | mineru | metered |
 | `omnischolar_sync` | parsing | `sync.plan`, `sync.apply`, `sync.recovery` | filesystem | yes | none | free |
 | `ai4scholar_search` | ai4scholar | `ai4scholar.search` | paid | yes | ai4scholar | paid |

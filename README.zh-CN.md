@@ -18,7 +18,7 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 调用已配置的图片服务生成或编辑科研示意图
 - 保留手工修改过的 Markdown，把待合并版本放入 `.conflicts/`
 
-OmniScholar 共提供 38 个工具，完整列表见[工具目录](docs/TOOLS.md)。
+OmniScholar 共提供 43 个工具，完整列表见[工具目录](docs/TOOLS.md)。
 
 ## 安装
 
@@ -67,7 +67,7 @@ codex plugin add omnischolar@omnischolar
 
 在 ChatGPT 桌面应用中重启应用，打开 **Plugins**，选择 **OmniScholar** Marketplace，然后安装或启用 **OmniScholar**。在 Codex CLI 中可运行 `/plugins` 浏览同一 Marketplace。
 
-插件会同时安装 8 个 Skills，并从 PyPI 最新版本启动本地 MCP：
+插件会同时安装 10 个 Skills，并从 PyPI 最新版本启动本地 MCP：
 
 ```sh
 uvx --from luffysolution-omnischolar@latest omnischolar mcp
@@ -197,6 +197,8 @@ OpenAlex、PubMed、arXiv 和 Crossref 无需 API key。其他服务按需启用
 | `scholar-search` | 文献、专利、作者、引用网络、期刊和数据集 |
 | `zotero-research` | 本地 Zotero 匹配、笔记、批注和附件 |
 | `paper-reading` | MinerU 解析，以及正文、公式、表格和图片精读 |
+| `literature-reading` | 全文、图表、公式、段落、比较和综述解读 |
+| `literature-retrieval` | 聚焦检索、段落定位和有界阅读上下文 |
 | `academic-citation` | 证据核对、引用候选、格式化和参考文献 |
 | `scientific-figure` | 科研图片生成、编辑、检查和标注 |
 | `materials-project` | 材料筛选、性质、计算来源、相数据和导出 |

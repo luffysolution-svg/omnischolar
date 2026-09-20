@@ -21,8 +21,15 @@ _CAPTION = re.compile(r"(?i)^\s*(?:figure|fig\.?|table)\s*\d*\s*[:.]?")
 class LiteratureReader:
     """Read managed Markdown without returning an unbounded document."""
 
-    def __init__(self, sync: SyncService, *, max_document_bytes: int = 32 * 1024 * 1024) -> None:
+    def __init__(
+        self,
+        sync: SyncService,
+        *,
+        context_store: Any | None = None,
+        max_document_bytes: int = 32 * 1024 * 1024,
+    ) -> None:
         self.sync = sync
+        self.context_store = context_store
         self.max_document_bytes = max_document_bytes
 
     async def read(self, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -55,16 +62,82 @@ class LiteratureReader:
             "markdownPath": str(source["markdownPath"]),
         }
         if mode == "full":
-            return {**common, **self._chunk(scoped, arguments.get("cursor", 0), arguments.get("maxChars", 8000))}
-        if mode == "paragraphs":
-            return {**common, "items": self._paragraphs(scoped, arguments.get("query"), arguments.get("maxItems", 20))}
-        if mode == "formulas":
-            return {**common, "items": self._formulas(scoped, arguments.get("maxItems", 20))}
-        if mode == "figures":
-            return {**common, "items": self._figures(scoped, source["directory"], arguments.get("maxItems", 20))}
-        raise OmniScholarError(
-            "invalid_reading_mode", f"Unsupported reading mode: {mode}", category="validation"
-        )
+            result = {**common, **self._chunk(scoped, arguments.get("cursor", 0), arguments.get("maxChars", 8000))}
+        elif mode == "paragraphs":
+            result = {**common, "items": self._paragraphs(scoped, arguments.get("query"), arguments.get("maxItems", 20))}
+        elif mode == "formulas":
+            result = {**common, "items": self._formulas(scoped, arguments.get("maxItems", 20))}
+        elif mode == "figures":
+            result = {**common, "items": self._figures(scoped, source["directory"], arguments.get("maxItems", 20))}
+        else:
+            raise OmniScholarError(
+                "invalid_reading_mode", f"Unsupported reading mode: {mode}", category="validation"
+            )
+        return await self._cache_result(result, arguments)
+
+    async def source(self, key: str, attachment_key: str | None = None) -> dict[str, Any]:
+        """Return a local publication source for bounded internal workflows."""
+        return await self._source(key, attachment_key)
+
+    async def locate(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        key = arguments.get("key")
+        if not isinstance(key, str):
+            raise OmniScholarError(
+                "key_required", "Paragraph location requires one Zotero key", category="validation"
+            )
+        query = str(arguments.get("query", "")).strip()
+        if not query:
+            raise OmniScholarError(
+                "query_required", "Paragraph location requires a query", category="validation"
+            )
+        source = await self._source(key, arguments.get("attachmentKey"))
+        records = self.paragraph_records(source["markdown"], arguments.get("section"))
+        lowered_query = query.casefold()
+        terms = [term.casefold() for term in re.findall(r"[A-Za-z0-9_]+|[\u3400-\u9fff]", query)]
+        mode = arguments.get("matchMode", "allTerms")
+        max_items = max(1, min(int(arguments.get("maxItems", 20)), 50))
+        max_chars = max(500, min(int(arguments.get("maxChars", 4_000)), 8_000))
+        matches: list[dict[str, Any]] = []
+        for record in records:
+            value = record["text"]
+            lowered = value.casefold()
+            exact = lowered_query in lowered
+            all_terms = bool(terms) and all(term in lowered for term in terms)
+            if (mode == "phrase" and not exact) or (mode == "allTerms" and not all_terms):
+                continue
+            if mode not in {"phrase", "allTerms"}:
+                raise OmniScholarError(
+                    "invalid_match_mode", f"Unsupported paragraph match mode: {mode}", category="validation"
+                )
+            score = 2.0 if exact else 1.0
+            score += sum(1.0 for term in set(terms) if term in lowered)
+            matches.append(
+                {
+                    "zoteroKey": source["key"],
+                    "title": source["title"],
+                    "heading": record["heading"],
+                    "paragraphId": f"p-{record['start']}",
+                    "start": record["start"],
+                    "end": record["end"],
+                    "lineStart": record["lineStart"],
+                    "lineEnd": record["lineEnd"],
+                    "locator": f"{source['markdownPath'].name}#L{record['lineStart']}-L{record['lineEnd']}",
+                    "score": score,
+                    "text": value[:max_chars],
+                    "markdownPath": str(source["markdownPath"]),
+                }
+            )
+            if len(matches) >= max_items:
+                break
+        result = {
+            "zoteroKey": source["key"],
+            "title": source["title"],
+            "query": query,
+            "matchMode": mode,
+            "items": matches,
+            "markdownPath": str(source["markdownPath"]),
+        }
+        return await self._cache_result(result, arguments)
 
     async def _source(self, key: str, attachment_key: str | None) -> dict[str, Any]:
         parent_key = validate_zotero_key(key)
@@ -128,9 +201,9 @@ class LiteratureReader:
         return candidates[0]
 
     @staticmethod
-    def _section(text: str, section: str | None) -> str:
+    def _section_bounds(text: str, section: str | None) -> tuple[int, int]:
         if not section:
-            return text
+            return 0, len(text)
         headings = list(_HEADING.finditer(text))
         wanted = section.casefold()
         for index, match in enumerate(headings):
@@ -143,10 +216,40 @@ class LiteratureReader:
                 if len(next_heading.group(1)) <= level:
                     end = next_heading.start()
                     break
-            return text[match.start() : end].strip()
+            return match.start(), end
         raise OmniScholarError(
             "section_not_found", f"No heading matched section: {section}", category="validation"
         )
+
+    @classmethod
+    def _section(cls, text: str, section: str | None) -> str:
+        start, end = cls._section_bounds(text, section)
+        return text[start:end].strip()
+
+    @classmethod
+    def paragraph_records(cls, text: str, section: str | None = None) -> list[dict[str, Any]]:
+        start, end = cls._section_bounds(text, section)
+        scoped = text[start:end]
+        headings = list(_HEADING.finditer(scoped))
+        records: list[dict[str, Any]] = []
+        for match in re.finditer(r"(?s)\S.*?(?=\n\s*\n|\Z)", scoped):
+            value = match.group(0).strip()
+            if not value or value.startswith("#"):
+                continue
+            heading_match = [heading for heading in headings if heading.start() <= match.start()]
+            absolute_start = start + match.start()
+            absolute_end = start + match.end()
+            records.append(
+                {
+                    "text": value,
+                    "heading": heading_match[-1].group(2).strip() if heading_match else None,
+                    "start": absolute_start,
+                    "end": absolute_end,
+                    "lineStart": text.count("\n", 0, absolute_start) + 1,
+                    "lineEnd": text.count("\n", 0, absolute_end) + 1,
+                }
+            )
+        return records
 
     @staticmethod
     def _chunk(text: str, cursor: int, max_chars: int) -> dict[str, Any]:
@@ -165,17 +268,25 @@ class LiteratureReader:
             "text": text[start:end].strip(),
         }
 
-    @staticmethod
-    def _paragraphs(text: str, query: str | None, max_items: int) -> list[dict[str, Any]]:
+    @classmethod
+    def _paragraphs(cls, text: str, query: str | None, max_items: int) -> list[dict[str, Any]]:
         wanted = (query or "").casefold().strip()
         items: list[dict[str, Any]] = []
-        for block in re.split(r"\n\s*\n", text):
-            value = block.strip()
-            if not value or value.startswith("#") or (wanted and wanted not in value.casefold()):
+        for record in cls.paragraph_records(text):
+            value = record["text"]
+            if wanted and wanted not in value.casefold():
                 continue
-            heading_matches = list(_HEADING.finditer(value))
-            heading = heading_matches[0].group(2).strip() if heading_matches else None
-            items.append({"text": value[:4000], "heading": heading})
+            items.append(
+                {
+                    "text": value[:4000],
+                    "heading": record["heading"],
+                    "paragraphId": f"p-{record['start']}",
+                    "start": record["start"],
+                    "end": record["end"],
+                    "lineStart": record["lineStart"],
+                    "lineEnd": record["lineEnd"],
+                }
+            )
             if len(items) >= max(1, min(int(max_items), 50)):
                 break
         return items
@@ -197,7 +308,9 @@ class LiteratureReader:
     @classmethod
     def _figures(cls, text: str, directory: Path, max_items: int) -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
+        figure_index = 0
         for match in _IMAGE.finditer(text):
+            figure_index += 1
             target = match.group(1).strip()
             if "://" in target or target.startswith("data:"):
                 continue
@@ -211,25 +324,59 @@ class LiteratureReader:
             items.append(
                 {
                     "kind": "figure",
+                    "objectId": f"figure-{figure_index}",
                     "path": str(asset_path),
+                    "exists": asset_path.exists(),
                     "caption": caption,
                     "heading": cls._heading_at(text, match.start()),
+                    "analysisContext": cls._nearby_context(text, match.start(), line_end),
                 }
             )
             if len(items) >= max(1, min(int(max_items), 50)):
                 break
         table_pattern = re.compile(r"(?m)(?:^\|.*\|\s*$\n?){2,}")
+        table_index = 0
         for match in table_pattern.finditer(text):
+            table_index += 1
             items.append(
                 {
                     "kind": "table",
+                    "objectId": f"table-{table_index}",
                     "markdown": match.group(0).strip(),
                     "heading": cls._heading_at(text, match.start()),
+                    "analysisContext": cls._nearby_context(text, match.start(), match.end()),
                 }
             )
             if len(items) >= max(1, min(int(max_items), 50)):
                 break
         return items
+
+    @staticmethod
+    def _nearby_context(text: str, start: int, end: int, limit: int = 1_200) -> str:
+        before = text[max(0, start - limit // 2) : start].strip()
+        after = text[end : min(len(text), end + limit // 2)].strip()
+        return "\n\n".join(part for part in (before, after) if part)[-limit:]
+
+    async def _cache_result(self, result: dict[str, Any], arguments: dict[str, Any]) -> dict[str, Any]:
+        context_id = arguments.get("contextId")
+        if not context_id or not self.context_store:
+            return result
+        items = result.get("items")
+        if not isinstance(items, list):
+            text = result.get("text") or result.get("evidence")
+            items = [{"text": text}] if text else []
+        bounded: list[dict[str, Any]] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            if item.get("text"):
+                bounded.append(item)
+            elif item.get("analysisContext"):
+                bounded.append({**item, "text": item["analysisContext"]})
+        result["context"] = await self.context_store.add_items(
+            str(context_id), bounded, title=f"{result.get('mode', 'reading').title()} evidence"
+        )
+        return result
 
     async def _multi(self, keys: list[str], mode: str, arguments: dict[str, Any]) -> dict[str, Any]:
         documents: list[dict[str, Any]] = []
@@ -258,4 +405,22 @@ class LiteratureReader:
                     "markdownPath": str(source["markdownPath"]),
                 }
             )
-        return {"mode": mode, "documents": documents}
+        result = {"mode": mode, "documents": documents}
+        if arguments.get("contextId") and self.context_store:
+            result["context"] = await self.context_store.add_items(
+                str(arguments["contextId"]),
+                [
+                    {
+                        "text": document["evidence"],
+                        "source": {
+                            key: document[key]
+                            for key in ("zoteroKey", "title", "doi", "markdownPath")
+                            if document.get(key) is not None
+                        },
+                    }
+                    for document in documents
+                    if document.get("evidence")
+                ],
+                title=f"{mode.title()} evidence",
+            )
+        return result

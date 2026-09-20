@@ -13,6 +13,7 @@ Choose the smallest workflow that answers the request. Follow the user's languag
 - Literature, patents, authors, citation graphs, recommendations, journals, snippets, or datasets: follow `scholar-search`.
 - Local collections, metadata, notes, annotations, attachments, or PDF selection: follow `zotero-research`.
 - Structured PDF text, equations, tables, figures, or close reading: follow `paper-reading`.
+- Focused retrieval, paragraph location, evidence caching, or retrieval-first paper work: follow `literature-retrieval`.
 - Interpreting parsed papers, full-text reading, figure/formula analysis, comparisons, or literature reviews: follow `literature-reading`.
 - Citation evidence, candidates, formatting, or insertion: follow `academic-citation`.
 - Generated or edited illustrations: follow `scientific-figure`.

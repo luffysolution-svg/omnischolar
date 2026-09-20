@@ -48,6 +48,14 @@ http://127.0.0.1:23119/api
 
 `zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。已解析文献使用 `omnischolar_read` 按全文游标、图表、公式、段落、对比或综述模式分段读取，完整 Markdown 仍保存在输出目录，不会默认一次返回给 Agent。
 
+### 聚焦检索与阅读上下文
+
+已解析的本地文献可以用 `omnischolar_focus` 做有界的 BM25 + TF-IDF 向量混合证据检索。它返回匹配段落、章节、字符范围和 `paper.md#Lx-Ly` 行定位，不返回整篇 Markdown；可用 `keys`、`section`、`topK` 和 `maxPerDocument` 限定范围。当前本地后端会明确返回 `strategy=hybrid-bm25-tfidf`、`vectorBackend=tfidf-local` 和 `semantic=false`，因此不会把词项向量相似度误称为真正的语义 embedding 检索。
+
+需要单篇精确定位时使用 `omnischolar_locate`，按短语或全部词项匹配段落，并保留 Zotero key、标题、章节和定位锚点。图表读取使用 `omnischolar_read` 的 `figures` 模式，返回图片路径、表格 Markdown、标题以及受限的图表上下文；Agent 仍需区分图像观察、图注、作者结论和自己的解释。
+
+多轮阅读可以先用 `omnischolar_context` 的 `open` 创建上下文，再把 `contextId` 传给 `omnischolar_focus`、`omnischolar_locate` 或 `omnischolar_read`。缓存只保存选中的证据片段，`get` 仍然分页并受字符上限约束，不会自动把整篇论文再次注入 Agent。`compare` 和 `review` 模式也可以把每篇文献的有界证据加入同一个上下文。
+
 Zotero 笔记和批注属于个人阅读记录，不应当作论文原文证据。需要引用论文结论时，仍要核对原文。
 
 ## MinerU 解析

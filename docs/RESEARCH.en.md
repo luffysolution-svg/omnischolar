@@ -48,6 +48,14 @@ The combined view can include metadata, notes, annotations, attachment details, 
 
 `zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. After parsing, use `omnischolar_read` for cursor-based full-text reading or bounded figure, formula, paragraph, comparison, and review evidence. The complete Markdown remains in the output directory and is not returned to the agent by default.
 
+### Focused retrieval and reading contexts
+
+Use `omnischolar_focus` over parsed local publications for bounded BM25 + TF-IDF vector evidence retrieval. It returns matching paragraphs, headings, character ranges, and `paper.md#Lx-Ly` line locators rather than a complete Markdown document. Restrict it with `keys`, `section`, `topK`, and `maxPerDocument`. The local backend explicitly reports `strategy=hybrid-bm25-tfidf`, `vectorBackend=tfidf-local`, and `semantic=false`, so term-vector similarity is not presented as dense semantic embedding retrieval.
+
+Use `omnischolar_locate` for exact paragraph location in one paper, with phrase or all-term matching and Zotero key, title, section, and stable anchors. Use `omnischolar_read` with `mode=figures` for image paths, table Markdown, captions, and bounded figure/table context. The agent must still distinguish visual observation, caption text, author claims, and interpretation.
+
+For multi-turn reading, call `omnischolar_context` with `open`, then pass its `contextId` to `omnischolar_focus`, `omnischolar_locate`, or `omnischolar_read`. The cache stores selected evidence only; `get` is paginated and bounded, so it does not automatically re-inject a complete paper into the agent. `compare` and `review` can add per-paper evidence to the same context.
+
 Notes and annotations are personal reading context, not evidence from the publication. Check the paper itself before citing a claim.
 
 ## MinerU parsing

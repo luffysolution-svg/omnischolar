@@ -6,6 +6,8 @@ from .chemistry import ChemistryService
 from .materials import MaterialsProjectService
 from .mineru import MinerUResult, MinerUService
 from .reader import LiteratureReader
+from .reading_context import ReadingContextStore
+from .retrieval import LiteratureRetriever
 from .sync import SyncPlan, SyncService
 from .transport import CoreServiceTransport, ServiceTransport
 from .zotero import ZoteroService, validate_zotero_key
@@ -19,6 +21,8 @@ __all__ = [
     "MinerUResult",
     "MinerUService",
     "LiteratureReader",
+    "LiteratureRetriever",
+    "ReadingContextStore",
     "OmniScholarApplication",
     "ServiceTransport",
     "SyncPlan",
