@@ -8,4 +8,4 @@
 - Pi: see `pi.md`; the npm Extension bridges the local MCP server
 - WorkBuddy/CodeBuddy: merge `workbuddy.json` into `~/.codebuddy/.mcp.json` or project `.mcp.json`
 
-All supported MCP entries start the latest PyPI package with `uvx --from luffysolution-omnischolar@latest omnischolar mcp`. These files contain no provider credentials.
+All supported MCP entries start the latest PyPI package with `uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp`. These files contain no provider credentials.

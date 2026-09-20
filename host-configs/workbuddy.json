@@ -3,7 +3,7 @@
     "omnischolar": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
+      "args": ["--refresh-package", "luffysolution-omnischolar", "--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
       "description": "OmniScholar research tools"
     }
   }

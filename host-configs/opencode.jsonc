@@ -3,7 +3,7 @@
   "mcp": {
     "omnischolar": {
       "type": "local",
-      "command": ["uvx", "--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
+      "command": ["uvx", "--refresh-package", "luffysolution-omnischolar", "--from", "luffysolution-omnischolar@latest", "omnischolar", "mcp"],
       "enabled": true,
       "timeout": 10000
     }

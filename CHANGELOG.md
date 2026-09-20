@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0] - 2026-09-20
+
+- Add bounded local focused retrieval with BM25 + TF-IDF ranking, paragraph locators, section filters, and explicit empty-result behavior.
+- Add persistent bounded reading contexts for multi-turn single-paper and multi-paper workflows.
+- Extend literature reading with stable paragraph anchors, figure/table analysis context, multi-paper comparison, review evidence, and cache-aware workflows.
+- Add the `literature-retrieval` Skill and align all Skill frontmatter with the current validator.
+- Keep MCP results protocol-compatible without duplicating full payloads in `structuredContent`; add regression coverage for standard MCP clients.
+- Validate real Zotero workflows across three papers, including cache hits, forced reparse/overwrite, full-text pagination, figures, formulas, comparison, review, and fail-closed errors.
+
 ## [0.2.0] - 2026-09-18
 
 - Keep full parsed Markdown in the local publication while returning bounded parse metadata to agents.
