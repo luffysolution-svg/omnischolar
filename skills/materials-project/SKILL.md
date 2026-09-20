@@ -2,7 +2,6 @@
 name: materials-project
 description: Query Materials Project records, inspect structures and phase data, and export sourced results with OmniScholar. Use for materials screening, property retrieval, phase analysis, XRD capability checks, or JSON/CSV/Markdown/CIF export.
 license: MIT
-compatibility: Requires OmniScholar and a Materials Project API key. Simulated XRD additionally requires the optional local backend reported by the runtime.
 ---
 
 # Materials Project

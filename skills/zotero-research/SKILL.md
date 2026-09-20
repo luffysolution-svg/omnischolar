@@ -2,7 +2,6 @@
 name: zotero-research
 description: Search and inspect the user's local Zotero library with OmniScholar. Use for collections, bibliographic metadata, notes, annotations, attachments, indexed text, local-paper matching, or selecting a PDF without modifying Zotero.
 license: MIT
-compatibility: Requires OmniScholar and a running Zotero desktop instance with local application access enabled.
 ---
 
 # Read-only Zotero research

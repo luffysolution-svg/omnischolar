@@ -2,7 +2,6 @@
 name: chemical-data
 description: Inspect CAS Common Chemistry contract status and query substance records only when a provider-issued API contract is configured. Use for chemical names, CAS Registry Numbers, structures, and basic compound information; not literature, reaction, or materials-property discovery.
 license: MIT
-compatibility: Requires OmniScholar. CAS search and detail remain contract-blocked unless the user supplies an authorized provider-issued endpoint/request/response contract.
 ---
 
 # Chemical substance data

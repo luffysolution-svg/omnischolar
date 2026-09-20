@@ -2,7 +2,6 @@
 name: paper-reading
 description: Parse and analyze a selected local PDF with OmniScholar and MinerU. Use when the task needs structured full text, equations, tables, figures, captions, or close reading beyond metadata and Zotero notes.
 license: MIT
-compatibility: Requires OmniScholar; Zotero-based reading needs local Zotero, and external parsing needs configured MinerU access.
 ---
 
 # PDF parsing and close reading
