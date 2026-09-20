@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.4] - 2026-09-21
+
+- Fix structured analysis frontmatter so generated documents contain one canonical frontmatter block.
+- Render each targeted-reading figure/panel as a two-column Markdown table row using the original MinerU asset embed.
+- Keep figure analysis as four ordered fields: title, source location, author statement, and interpretation.
+- Remove generated thumbnail asset support and retain only original MinerU images.
+- Add regression coverage for repeated frontmatter, table image parsing, original asset links, and ordered figure analysis fields.
+
 ## [0.3.3] - 2026-09-20
 
 - Add configurable source PDF and styled Zotero reading-record publication for notes and PDF annotations.
