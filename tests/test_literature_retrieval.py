@@ -80,6 +80,9 @@ class LiteratureRetrievalTests(unittest.IsolatedAsyncioTestCase):
             second = await retriever.search(
                 {"query": "yield", "keys": ["PAPER123"], "topK": 3, "maxChars": 500}
             )
+            empty = await retriever.search(
+                {"query": "zzzz-no-such-scientific-term", "keys": ["PAPER123"], "topK": 3}
+            )
 
         self.assertEqual(first["strategy"], "hybrid-bm25-tfidf")
         self.assertEqual(first["cacheHit"], False)
@@ -87,6 +90,7 @@ class LiteratureRetrievalTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(first["results"][0]["zoteroKey"], "PAPER123")
         self.assertLessEqual(len(first["results"][0]["excerpt"]), 500)
         self.assertIn("locator", first["results"][0])
+        self.assertEqual(empty["results"], [])
 
     async def test_locator_and_context_cache_remain_bounded(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

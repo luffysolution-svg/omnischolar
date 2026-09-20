@@ -15,10 +15,43 @@ from .reading_context import ReadingContextStore
 
 
 _TOKEN = re.compile(r"[A-Za-z0-9_]+|[\u3400-\u9fff]")
+_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "in",
+    "is",
+    "it",
+    "no",
+    "of",
+    "on",
+    "or",
+    "such",
+    "that",
+    "the",
+    "term",
+    "terms",
+    "this",
+    "to",
+    "with",
+}
 
 
 def _tokens(value: str) -> list[str]:
     return [token.casefold() for token in _TOKEN.findall(value)]
+
+
+def _query_tokens(value: str) -> list[str]:
+    tokens = _tokens(value)
+    content = [token for token in tokens if token not in _STOPWORDS]
+    return content or tokens
 
 
 @dataclass(slots=True)
@@ -175,7 +208,7 @@ class LiteratureRetriever:
             raise OmniScholarError(
                 "query_required", "Focused literature search requires a query", category="validation"
             )
-        query_terms = _tokens(query)
+        query_terms = _query_tokens(query)
         if not query_terms:
             raise OmniScholarError(
                 "query_empty", "Focused literature search could not tokenize the query", category="validation"
