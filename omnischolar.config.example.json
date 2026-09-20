@@ -265,6 +265,20 @@
     "filenameSeparator": "-",
     "assetFilenameTemplate": "image-{index}{extension}",
     "conflictDirectory": ".conflicts",
-    "safeWrites": true
+    "safeWrites": true,
+    "source": {
+      "directory": "source",
+      "copyPdf": true,
+      "pdfFilenameTemplate": "paper.pdf",
+      "zoteroReadingRecordFilename": "zotero-reading-record.md",
+      "embedPdf": true
+    },
+    "analysis": {
+      "singleDirectory": "Analysis/Single",
+      "multiDirectory": "Analysis/Multi",
+      "singleFilenameTemplate": "{analysisType}",
+      "comparisonFilenameTemplate": "{date}{separator}{topic}{separator}compare",
+      "reviewFilenameTemplate": "{date}{separator}{topic}{separator}review"
+    }
   }
 }

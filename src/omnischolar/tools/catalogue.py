@@ -302,6 +302,12 @@ async def literature_context(
     return await _services(app).reading_context.execute(arguments)
 
 
+async def literature_analysis(
+    arguments: dict[str, Any], _context: ToolExecutionContext, app: Any
+) -> Any:
+    return await _services(app).analysis.execute(arguments)
+
+
 async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, app: Any) -> Any:
     services = _services(app)
     mineru = _required(services.mineru, "mineru", "MinerU")
@@ -896,6 +902,35 @@ def create_tool_definitions() -> list[ToolDefinition]:
         group="literature",
         capabilities=("literature.context.open", "literature.context.append", "literature.context.read"),
         side="filesystem",
+    )
+    add(
+        "omnischolar_analysis",
+        "Write, list, or read structured single-paper and multi-paper literature analyses with source fingerprints and relative links.",
+        obj(
+            {
+                "action": string_enum("write", "list", "get"),
+                "analysisType": string_enum("full-read", "targeted-reading", "compare", "review"),
+                "key": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "keys": {
+                    "type": "array",
+                    "items": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                    "minItems": 1,
+                    "maxItems": 50,
+                },
+                "attachmentKey": {"type": "string", "pattern": "^[A-Z0-9]{8}$"},
+                "topic": {"type": "string", "maxLength": 200},
+                "language": {"type": "string", "maxLength": 50},
+                "content": {"type": "string", "maxLength": 200_000},
+                "overwrite": BOOL,
+                "path": {"type": "string", "maxLength": 500},
+            },
+            ("action",),
+        ),
+        literature_analysis,
+        group="literature",
+        capabilities=("literature.analysis.write", "literature.analysis.read"),
+        side="filesystem",
+        interaction=True,
     )
     parse_schema = obj(
         {

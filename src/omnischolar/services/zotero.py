@@ -207,6 +207,9 @@ class ZoteroService:
                 "key": item.get("key"),
                 "version": item.get("version"),
                 "note": item.get("data", {}).get("note", ""),
+                "tags": item.get("data", {}).get("tags", []),
+                "dateAdded": item.get("data", {}).get("dateAdded"),
+                "dateModified": item.get("data", {}).get("dateModified"),
             }
             for item in children
             if item.get("data", {}).get("itemType") == "note"
@@ -224,13 +227,15 @@ class ZoteroService:
             indexed: dict[str, Any] = {"status": "unavailable"}
             local_path: str | None = None
             if is_pdf:
-                descendants = await self.list(
-                    f"/items/{item['key']}/children", limit=self.max_items
+                annotation_result = await self.list(
+                    "/items",
+                    params={"parentItem": item["key"], "itemType": "annotation"},
+                    limit=self.max_items,
                 )
                 annotations = [
-                    child
-                    for child in descendants["items"]
-                    if child.get("data", {}).get("itemType") == "annotation"
+                    annotation
+                    for annotation in annotation_result["items"]
+                    if annotation.get("data", {}).get("parentItem") == item["key"]
                 ]
                 try:
                     fulltext = await self._get(f"/items/{item['key']}/fulltext")

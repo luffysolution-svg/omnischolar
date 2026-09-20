@@ -213,6 +213,71 @@ class SyncConfig(ConfigModel):
     avoid_unnecessary_parse: bool = True
 
 
+def _relative_output_path(value: str, field_name: str) -> str:
+    normalized = value.strip().replace("\\", "/")
+    if not normalized or normalized.startswith("/") or (len(normalized) >= 2 and normalized[1] == ":"):
+        raise ValueError(f"{field_name} must be a non-empty relative path")
+    if any(part in {".", ".."} for part in normalized.split("/")):
+        raise ValueError(f"{field_name} cannot contain . or .. path segments")
+    return "/".join(part for part in normalized.split("/") if part)
+
+
+def _filename_template(value: str, field_name: str, allowed: set[str]) -> str:
+    if not value.strip():
+        raise ValueError(f"{field_name} must not be empty")
+    for _, field_name_value, _, _ in Formatter().parse(value):
+        if field_name_value is not None and field_name_value not in allowed:
+            allowed_text = ", ".join(sorted(allowed))
+            raise ValueError(f"{field_name} supports only {allowed_text}")
+    if "/" in value or "\\" in value:
+        raise ValueError(f"{field_name} must describe a single file name")
+    return value
+
+
+class SourceOutputConfig(ConfigModel):
+    directory: str = "source"
+    copy_pdf: bool = True
+    pdf_filename_template: str = "paper.pdf"
+    zotero_reading_record_filename: str = "zotero-reading-record.md"
+    embed_pdf: bool = True
+
+    @field_validator("directory")
+    @classmethod
+    def relative_directory(cls, value: str) -> str:
+        return _relative_output_path(value, "source.directory")
+
+    @field_validator("pdf_filename_template", "zotero_reading_record_filename")
+    @classmethod
+    def safe_filename(cls, value: str, info: Any) -> str:
+        return _filename_template(value, f"source.{info.field_name}", {"author", "year", "title", "zoteroKey", "separator"})
+
+
+class AnalysisOutputConfig(ConfigModel):
+    single_directory: str = "Analysis/Single"
+    multi_directory: str = "Analysis/Multi"
+    single_filename_template: str = "{analysisType}"
+    comparison_filename_template: str = "{date}{separator}{topic}{separator}compare"
+    review_filename_template: str = "{date}{separator}{topic}{separator}review"
+
+    @field_validator("single_directory", "multi_directory")
+    @classmethod
+    def relative_directory(cls, value: str, info: Any) -> str:
+        return _relative_output_path(value, f"analysis.{info.field_name}")
+
+    @field_validator(
+        "single_filename_template",
+        "comparison_filename_template",
+        "review_filename_template",
+    )
+    @classmethod
+    def safe_filename(cls, value: str, info: Any) -> str:
+        return _filename_template(
+            value,
+            f"analysis.{info.field_name}",
+            {"author", "year", "title", "zoteroKey", "topic", "date", "analysisType", "separator"},
+        )
+
+
 class OutputConfig(ConfigModel):
     root_directory: Path = Path("omnischolar-output")
     literature_directory: str = "Literatures"
@@ -222,6 +287,8 @@ class OutputConfig(ConfigModel):
     asset_filename_template: str = "image-{index}{extension}"
     conflict_directory: str = ".conflicts"
     safe_writes: bool = True
+    source: SourceOutputConfig = Field(default_factory=SourceOutputConfig)
+    analysis: AnalysisOutputConfig = Field(default_factory=AnalysisOutputConfig)
 
     @field_validator("literature_directory")
     @classmethod

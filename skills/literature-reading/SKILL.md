@@ -1,34 +1,114 @@
 ---
 name: literature-reading
-description: Interpret parsed scholarly papers from OmniScholar with bounded full-text, figure, formula, paragraph, comparison, and review workflows. Use when the user wants to understand, compare, or synthesize papers rather than only retrieve metadata.
+description: Interpret SCI papers with bounded evidence, Zotero reading records, structured single-paper analyses, targeted figure/formula/knowledge reading, and compact multi-paper comparisons or reviews.
 license: MIT
 ---
 
-# Literature reading and interpretation
+# SCI literature reading
 
-Follow the user's language. Keep the original paper and generated Markdown on disk; expose only the evidence needed for the current reading mode.
+Follow the language of the user's latest request. Keep stable field names and analysis types in English, but write headings, explanations, tables, and conclusions in the user's language. Preserve paper titles, DOI strings, formulas, chemical names, gene names, and instrument/model names unless translation is explicitly requested.
 
-## Select a mode
+## Output locations
 
-- `full`: use `omnischolar_focus` first to identify relevant sections, then read the entire paper progressively with `omnischolar_read`, following `nextCursor` until `hasMore` is false. Summarize each section before moving on.
-- `figures`: retrieve figure/table asset paths, captions, bounded analysis context, and section context. Inspect the referenced local assets when the host supports image input; distinguish visual observations from captions and author claims.
-- `formulas`: retrieve bounded displayed formulas with their section headings. Explain symbols and assumptions only when supported by nearby text.
-- `paragraphs`: use `omnischolar_locate` for stable line/character anchors, or `query` and optionally `section` with `omnischolar_read` for bounded matching paragraphs.
-- `compare`: pass multiple Zotero keys and retrieve compact, comparable metadata, abstracts, headings, and requested evidence. Add `contextId` when later questions should reuse only the selected evidence.
-- `review`: pass multiple Zotero keys and build a literature-review evidence matrix. Preserve differences in methods, population/materials, outcomes, limitations, and confidence; do not merge claims merely because titles are similar.
+- MinerU Markdown, assets, copied PDF, and `zotero-reading-record.md` belong to the managed per-paper publication directory.
+- Single-paper analyses use `omnischolar_analysis` with `analysisType=full-read` or `analysisType=targeted-reading` and are saved under the configured `Analysis/Single` directory.
+- Multi-paper analyses use `analysisType=compare` or `analysisType=review` and are saved under the configured `Analysis/Multi` directory.
+- Never write analysis content into the managed MinerU Markdown file. Use the analysis tool so source fingerprints, relative links, and conflict handling are preserved.
 
-## Workflow
+## Source and reading-record policy
 
-1. Match a Zotero record by DOI, then normalized title/year/author; report ambiguity.
-2. Use `zotero_item` with `mode=item` for metadata and `mode=aggregate` only when notes, annotations, or attachment selection are needed.
-3. Confirm the selected PDF and run `omnischolar_sync` with `action=plan` before parsing.
-4. Parse only when structured content is necessary and external upload is authorized. `omnischolar_parse` returns a local publication path and parse metadata, not the full Markdown body.
-5. Use `omnischolar_focus` for cross-paper evidence retrieval, `omnischolar_locate` for exact paragraph anchors, and `omnischolar_read` for bounded mode-specific reading. Record Zotero key, Markdown path, heading, figure/table/formula identifier, line locator, and cursor where relevant.
-6. Open an `omnischolar_context` for multi-turn work and append only selected evidence. Context reads are paginated; they are not a substitute for the original paper.
-7. State OCR, layout, formula, table, and missing-text limitations. Never treat Zotero notes or annotations as independent evidence without labeling them.
+1. Match the Zotero parent by DOI first, then normalized title/year/author. Stop on ambiguity.
+2. Use `zotero_item` with `mode=item` for identity. Use `mode=aggregate` when notes, annotations, or attachment selection are needed.
+3. Run `omnischolar_sync` with `action=plan` before parsing or refreshing a paper.
+4. After parsing, use the generated source PDF and `source/zotero-reading-record.md` when available. Zotero notes and PDF annotations are personal reading records, not independent paper evidence.
+5. Separate every answer into original evidence, author interpretation, model interpretation, user reading record, and uncertainty.
 
-Full-text mode is intentionally paginated. Never bypass pagination by requesting an oversized result. If a retrieved excerpt is truncated, continue with its cursor rather than guessing the missing text.
+## Single-paper `full-read` template
 
-## Output
+Use this for a complete SCI-paper reading. The saved document must cover:
 
-Separate original evidence, interpretation, and uncertainty. For comparisons and reviews, use a table or evidence matrix with per-paper provenance. Do not expose credentials, signed URLs, or unrelated local files.
+1. bibliographic information and paper type;
+2. one-sentence summary;
+3. research background, gap, question, and hypothesis/objective;
+4. core innovation and contribution, with comparison to prior work when evidence exists;
+5. materials, samples, datasets, instruments, controls, variables, and experimental conditions;
+6. method and research design, including statistics, models, parameters, and reproducibility details;
+7. main results with quantitative values and figure/table references;
+8. paper conclusion, applicability, and limitations;
+9. reference/evidence index with paper section, page, figure/table/formula, and stable local link;
+10. a short `Zotero 阅读记录` navigation item that links to `source/zotero-reading-record.md`. Do not copy the note or annotation bodies into `full-read`; the source reading record is the canonical page for them.
+
+Do not fill unavailable experimental conditions, statistics, or sample information from general knowledge. Write `not reported`, `not available`, or `uncertain`.
+
+## Single-paper `targeted-reading` template
+
+Use this when the user asks about a mechanism, method, result, limitation, figure, table, equation, concept, or relationship to existing knowledge. Retrieve only the relevant evidence and include:
+
+- user question and scope;
+- relevant figures, tables, schemes, and equations;
+- exact or bounded evidence with locators;
+- visual observation, caption, author claim, and model interpretation as separate fields;
+- a link to relevant existing knowledge-base notes, prior saved analyses, and the Zotero reading record when they are available; do not duplicate long note/annotation bodies;
+- links to related papers and whether the relation is support, contradiction, extension, or merely topical similarity;
+- unresolved questions and confidence.
+
+For extracted figures, tables, and formulas:
+
+- Build a compact two-column Markdown table for figures and tables. The left column is `预览` and the right column is `图表名称、原文位置与分析解读`.
+- In the left column, embed available local figure images with a bounded Obsidian thumbnail such as `![[path/to/figure.png|260]]`; the embedded image must be clickable to the source asset/PDF context when the host supports it.
+- For tables, keep the left cell compact with a collapsible or bounded table preview; do not put a very wide table inside the right cell.
+- In the right column, keep separate lines for object name, source section/page, author caption, visual or tabular observation, and interpretation. Do not turn a caption into an unsupported scientific conclusion.
+- Render important equations as an ordered list. Each item must contain the equation in block math `$$ ... $$`, followed by variables, purpose, assumptions/conditions, and the paper-specific interpretation. Never show escaped formula source inside backticks.
+- If a figure caption or formula was not extracted reliably, say so and link to the PDF/source section instead of guessing.
+
+Do not regenerate the full paper reading unless the user asks for it.
+
+## Multi-paper `compare` template
+
+Use for a user-selected set of papers. This is a comparison, not a claim of exhaustive literature coverage.
+
+- State the comparison question and dimensions first.
+- Confirm paper identity, DOI, year, journal, and Zotero key.
+- Use a compact evidence matrix. Prefer one dimension per row and one paper per column; split the matrix into multiple small tables when it becomes too wide.
+- Required dimensions normally include research question, material/sample/dataset, method/design, key conditions, main outcome, limitation, and evidence locator.
+- Follow the matrix with agreements, contradictions, condition-dependent differences, methodological effects, and remaining gaps.
+- Never merge conclusions because titles are similar; verify population/materials, conditions, outcome definitions, and uncertainty.
+
+## Multi-paper `review` template
+
+Use for a topic-level narrative or systematic/scoping review. State the review mode, question, corpus, time range, search/selection scope, and whether the result is exhaustive. Then provide:
+
+1. corpus overview;
+2. thematic or methodological taxonomy;
+3. compact evidence tables;
+4. progress and trends;
+5. consensus and controversies;
+6. bias, evidence limitations, and missing research;
+7. conclusion and future directions;
+8. per-paper source and evidence index.
+
+Do not call a bounded user-selected set a systematic review unless a systematic search and selection protocol was actually performed.
+
+## Sources and links
+
+Do not add your own duplicate `Sources` section. `omnischolar_analysis` appends one canonical `## Sources` section containing Obsidian links to the MinerU document, copied PDF, and `zotero-reading-record.md`. Use those links for navigation instead of manually constructing relative paths.
+
+## Update and follow-up workflow
+
+For a follow-up question about a previously read paper:
+
+1. Reuse the existing context only as a bounded working set.
+2. Check `omnischolar_sync` status/plan and the source fingerprint.
+3. Retrieve only missing sections, figures, formulas, annotations, or related-paper evidence.
+4. State what is new, changed, unchanged, and still uncertain.
+5. Write a new targeted analysis or update the existing analysis through `omnischolar_analysis`; never silently overwrite a user-modified file.
+
+For a changed PDF, mark the previous analysis as requiring review and regenerate only after the new source version has been verified.
+
+## Context discipline
+
+- Use `omnischolar_focus` before broad reading.
+- Use `omnischolar_locate` for exact phrases, numbers, identifiers, formulas, and claims.
+- Use `omnischolar_read` with bounded cursors for full sections.
+- Use `omnischolar_context` only for selected evidence and follow-up continuity.
+- Never put a complete paper, complete Zotero aggregate, or unbounded tool response into the model context.

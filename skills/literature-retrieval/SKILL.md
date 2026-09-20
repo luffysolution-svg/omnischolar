@@ -25,6 +25,11 @@ Use this workflow when the task is to find where a paper discusses a concept, me
 - `markdownPath` is a local provenance field. Do not expose unrelated local files, credentials, or Zotero private data.
 - A cache stores selected excerpts only. Never add an entire paper or an unbounded tool response to a context.
 - Distinguish extracted text, caption/table content, visual observations, author claims, interpretation, and uncertainty in the final answer.
+- Treat `zotero-reading-record.md` as a user-reading-record source. It contains two separate blocks: Zotero notes and PDF annotations. Do not merge either block into original-paper evidence.
+- When a single-paper answer must be persisted, use `omnischolar_analysis` with `analysisType=full-read` or `analysisType=targeted-reading`; do not write directly into MinerU Markdown.
+- When a multi-paper answer must be persisted, use `analysisType=compare` or `analysisType=review`. Keep tables compact: put dimensions in rows, split very wide comparisons into multiple tables, and retain per-paper evidence links.
+- Reuse the source PDF, MinerU Markdown, and reading record through relative links. A source change must be reported before relying on a previous analysis.
+- For persisted targeted reading, use Obsidian embeds for local figures, standard Markdown tables for tables, and `$$...$$` block math for formulas. Do not save raw absolute Windows paths or escaped formula source as the visible result.
 
 ## Handoff to reading modes
 

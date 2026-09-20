@@ -17,8 +17,9 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF
 - 调用已配置的图片服务生成或编辑科研示意图
 - 保留手工修改过的 Markdown，把待合并版本放入 `.conflicts/`
+- 将 Zotero PDF、笔记和批注保存到每篇文献的 `source/`，并将结构化分析保存到配置的 `Analysis/Single` 与 `Analysis/Multi`
 
-OmniScholar 共提供 43 个工具，完整列表见[工具目录](docs/TOOLS.md)。
+OmniScholar 共提供 44 个工具，完整列表见[工具目录](docs/TOOLS.md)。
 
 ## 安装
 

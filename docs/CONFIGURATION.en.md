@@ -62,6 +62,31 @@ The new-paper subfolder and file name can be customized as well:
 
 Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` controls each paper directory name. The shared separator accepts `-`, `+`, and `_` and is available to paper, folder, and attachment templates. Attachment filenames support `{index}`, `{original}`, `{extension}`, and `{separator}`. These settings affect new publications only; existing sync records keep the path stored in the manifest. Here, attachment means a parsed image asset, not the original Zotero PDF attachment.
 
+## Zotero reading records and structured analyses
+
+```json
+{
+  "output": {
+    "source": {
+      "directory": "source",
+      "copyPdf": true,
+      "pdfFilenameTemplate": "paper.pdf",
+      "zoteroReadingRecordFilename": "zotero-reading-record.md",
+      "embedPdf": true
+    },
+    "analysis": {
+      "singleDirectory": "Analysis/Single",
+      "multiDirectory": "Analysis/Multi",
+      "singleFilenameTemplate": "{analysisType}",
+      "comparisonFilenameTemplate": "{date}{separator}{topic}{separator}compare",
+      "reviewFilenameTemplate": "{date}{separator}{topic}{separator}review"
+    }
+  }
+}
+```
+
+The reading record keeps Zotero notes and PDF annotations in separate sections. `omnischolar_analysis` writes `full-read` or `targeted-reading` under the single-paper directory, and `compare` or `review` under the multi-paper directory. It records source fingerprints and relative links and does not overwrite local analysis edits by default.
+
 ## API keys
 
 API keys may be entered directly in the provider's `apiKey` field:

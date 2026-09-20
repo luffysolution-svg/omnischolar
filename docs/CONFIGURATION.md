@@ -62,6 +62,48 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 
 文献和文件夹模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；`folderNameTemplate` 控制每篇文献目录名。连接符目前支持 `-`、`+` 和 `_`，并由文献、文件夹、附件模板共用。附件图片模板支持 `{index}`、`{original}`、`{extension}`、`{separator}`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。这里的附件图片是解析生成的图片，不是 Zotero 原始 PDF 附件。
 
+## Zotero 阅读记录与结构化分析
+
+解析并发布论文时，OmniScholar 可以把选中的 Zotero PDF 复制到每篇文献目录的 `source/`，并生成 `zotero-reading-record.md`。该文件将 Zotero 笔记与 PDF 批注分成两个区块，保留批注类型、颜色、页码、标签、评论和 PDF 相对链接。笔记和批注是个人阅读记录，不应直接当作论文原文证据。
+
+```json
+{
+  "output": {
+    "source": {
+      "directory": "source",
+      "copyPdf": true,
+      "pdfFilenameTemplate": "paper.pdf",
+      "zoteroReadingRecordFilename": "zotero-reading-record.md",
+      "embedPdf": true
+    },
+    "analysis": {
+      "singleDirectory": "Analysis/Single",
+      "multiDirectory": "Analysis/Multi",
+      "singleFilenameTemplate": "{analysisType}",
+      "comparisonFilenameTemplate": "{date}{separator}{topic}{separator}compare",
+      "reviewFilenameTemplate": "{date}{separator}{topic}{separator}review"
+    }
+  }
+}
+```
+
+默认目录结构为：
+
+```text
+<output.rootDirectory>/
+├── Literatures/<paper>/source/
+│   ├── paper.pdf
+│   └── zotero-reading-record.md
+├── Analysis/Single/<paper>/
+│   ├── full-read.md
+│   └── targeted-reading.md
+└── Analysis/Multi/
+    ├── <date>-<topic>-compare.md
+    └── <date>-<topic>-review.md
+```
+
+使用 `omnischolar_analysis` 写入结构化分析。单篇分析使用 `full-read` 或 `targeted-reading`，多篇分析使用 `compare` 或 `review`。工具会写入来源 fingerprint 和相对链接；默认不覆盖手工修改的分析文件，而是返回冲突候选路径。
+
 ## API key
 
 API key 可以直接写入对应服务的 `apiKey`。例如：

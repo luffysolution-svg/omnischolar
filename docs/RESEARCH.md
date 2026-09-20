@@ -99,6 +99,17 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
 
 支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
 
+若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 会复制到每篇文献目录的 `source/`，并生成 `zotero-reading-record.md`。该文件将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
+
+结构化解读通过 `omnischolar_analysis` 写入：
+
+- `full-read`：单篇 SCI 文献精读；
+- `targeted-reading`：单篇针对性解读，聚焦图表、公式、机制、方法、现有笔记和关联文献；
+- `compare`：用户选定多篇文献的紧凑对比矩阵；
+- `review`：多篇文献的主题性、叙述性、系统性或范围综述。
+
+默认输出为 `Analysis/Single/<paper>/` 和 `Analysis/Multi/`，路径和文件名由 `output.source`、`output.analysis` 配置。工具会保存来源 fingerprint 和相对链接，默认不会覆盖手工修改的分析文件。
+
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
 
 同步会区分新建、无需更新、元数据变化、解析变化、渲染变化、文件缺失、冲突、排除和中断恢复。仅修复元数据、渲染或中断事务时不会上传 PDF。
