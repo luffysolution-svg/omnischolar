@@ -792,9 +792,10 @@ def manage_skills(
         return InstallResult(
             "skills", contract.id, operation, scope, "already_installed", str(target)
         )
+    previous_names = _manifest_skill_names(manifest) if manifest is not None else []
     for name in names:
         destination = target / name
-        if destination.exists() and manifest is None:
+        if destination.exists() and (manifest is None or name not in previous_names):
             raise OmniScholarError(
                 "installation_conflict",
                 f"Skill directory {name} already exists and is not managed by OmniScholar",
@@ -820,26 +821,24 @@ def manage_skills(
     if manifest is not None:
         update_backup = target / ".omnischolar-backups" / f"{time.time_ns()}-{uuid4().hex[:8]}"
         update_backup.mkdir(parents=True, exist_ok=False)
-        for name in _manifest_skill_names(manifest):
+        for name in previous_names:
             shutil.copytree(target / name, update_backup / name)
         shutil.copy2(_manifest_path(target), update_backup / ".omnischolar-install.json")
-    copied_destinations: list[Path] = []
     try:
+        for name in previous_names:
+            shutil.rmtree(target / name)
         for source_dir in skill_dirs:
             destination = target / source_dir.name
-            if destination.exists():
-                shutil.rmtree(destination)
-            copied_destinations.append(destination)
             shutil.copytree(source_dir, destination)
         _atomic_write(
             _manifest_path(target),
             (json.dumps(desired, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode(),
         )
     except BaseException:
-        for destination in copied_destinations:
-            shutil.rmtree(destination, ignore_errors=True)
+        for name in set(previous_names) | set(names):
+            shutil.rmtree(target / name, ignore_errors=True)
         if update_backup is not None and manifest is not None:
-            for name in _manifest_skill_names(manifest):
+            for name in previous_names:
                 shutil.copytree(update_backup / name, target / name, dirs_exist_ok=True)
             shutil.copy2(update_backup / ".omnischolar-install.json", _manifest_path(target))
         raise

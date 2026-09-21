@@ -46,11 +46,13 @@ Enable â€œAllow other applications on this computer to communicate with Zoteroâ€
 
 The combined view can include metadata, notes, annotations, attachment details, indexed text, and a local PDF path. OmniScholar never creates, updates, moves, tags, or deletes Zotero data.
 
-`zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. After parsing, the Markdown, images, and tables are kept in the paper's publication directory. Close reading, paragraph location, and figure/table interpretation are handled by the `paper-reading`, `literature-reading`, and `literature-retrieval` Skills through the host's local file capabilities.
+`zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. `paper-reading` only selects a PDF and prepares its MinerU Markdown and assets. After parsing, `literature-reading` owns complete or focused interpretation, evidence location, and figure/table/equation reading through the host's local file capabilities.
 
-### Local paragraph and figure/table location
+### Local paper interpretation
 
-The Skills read the MinerU Markdown directly and use the host's text search, file-reading, and image-viewing capabilities to locate evidence. A paragraph locator should retain the filename, section heading, and a reproducible line range or nearby text. Figure/table interpretation should connect the asset, caption, and related body paragraphs. Always distinguish extracted MinerU text, the authors' statements, direct visual or tabular observations, interpretation, and uncertainty.
+Unless the user asks a focused question, `literature-reading` performs a professional interpretation of the complete paper and covers its substantive sections rather than relying on the abstract and conclusion. It reads MinerU Markdown progressively, locates source evidence, and separates paper evidence, author interpretation, Agent interpretation, and uncertainty. Markdown is written only when the user asks for a file or the result is too long to remain useful in chat.
+
+Figure interpretation must combine the actual MinerU image asset, its caption, and the authors' surrounding discussion. Visual observations, author claims, and Agent inferences remain separate. A saved note embeds the real MinerU asset through a relative linked preview so the image can be viewed and opened.
 
 Notes and annotations are personal reading context, not evidence from the publication. Check the paper itself before citing a claim.
 
@@ -99,7 +101,7 @@ The MinerU Markdown and `source/zotero-reading-record.md` both include Obsidian-
 
 Publishing a paper creates `zotero-reading-record.md` in the paper's `source/` directory. When `output.source.copyPdf` is enabled, the selected Zotero PDF is copied there as well. The record keeps Zotero notes and PDF annotations in separate sections, including annotation type, color, page, tags, comments, and relative PDF links. These are personal reading records, not independent paper evidence.
 
-The Skills write an interpretation Markdown sidecar next to the MinerU Markdown using the host's local file capabilities. The user decides the filename and structure; frontmatter, headings, prose, lists, tables, or mixed formats may be used as appropriate. The source Markdown remains unchanged. If a same-named sidecar already exists, confirm before overwriting or use a new user-chosen filename.
+When a file is needed, `literature-reading` writes it in the paper directory by default or in a user-selected location. The source Markdown and assets remain unchanged, and an existing same-named note is never overwritten silently. Figures use a relative linked preview such as `[![Figure](assets/ABCD1234-image-1.png)](assets/ABCD1234-image-1.png)` so the original MinerU asset can be viewed and opened.
 
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 

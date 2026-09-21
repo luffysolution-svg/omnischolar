@@ -14,7 +14,7 @@ It can search public indexes, combine online records with your Zotero notes, sen
 - Retrieve paper details, authors, citations, references, recommendations, snippets, datasets, and journal metrics
 - Read Zotero collections, items, notes, annotations, attachments, indexed text, and local PDF paths without changing the library
 - Parse selected PDFs with MinerU and keep text, formulas, tables, and figures together
-- Interpret MinerU Markdown and local assets with SCI guidance, paragraph locators, and figure/table analysis, then save a sidecar beside the source
+- Interpret a complete MinerU paper or a user-selected focus, combining visual inspection, captions, and body context for figures; save Markdown only when requested or too long for chat
 - Find citation candidates, check bibliographic identity, and format accepted references
 - Query Materials Project and export JSON, CSV, Markdown, or CIF
 - Generate or edit scientific illustrations with configured image services

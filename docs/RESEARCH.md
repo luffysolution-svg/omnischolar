@@ -46,11 +46,13 @@ http://127.0.0.1:23119/api
 
 聚合视图可包含书目信息、笔记、批注、附件信息、索引文本和本地 PDF 路径。OmniScholar 不会创建、修改、移动、加标签或删除 Zotero 数据。
 
-`zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。完成 MinerU 解析后，正文、图片和表格会保存在每篇文献的发布目录中。后续的精读、段落定位和图表解读由 `paper-reading`、`literature-reading` 与 `literature-retrieval` Skill 使用宿主的本地文件能力完成。
+`zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。`paper-reading` 只负责选择 PDF 并准备 MinerU 原文与资产；完成解析后的完整精读、聚焦问题、证据定位以及图表或公式解读统一由 `literature-reading` 使用宿主的本地文件能力完成。
 
-### 本地段落与图表定位
+### 本地文献解读
 
-Skill 应直接读取 MinerU 生成的 Markdown，并使用宿主提供的文本搜索、文件读取和图片查看能力定位证据。段落定位至少记录文件名、章节标题和可复核的行号或相邻文本；图表解读还要关联对应图片/表格资产、图注及正文中的相关段落。要区分 MinerU 抽取文本、作者原文表述、图片或表格的直接观察、解释和不确定性。
+如果用户没有指定局部问题，`literature-reading` 默认对整篇论文进行专业解读，并覆盖实际存在的主要章节，而不是只读摘要与结论。解读应直接读取 MinerU Markdown，逐步定位原文证据，并区分论文证据、作者解释、Agent 的解释和不确定性。只有用户要求保存或内容长到不适合在对话中呈现时，才生成 Markdown 文件。
+
+图表解读必须同时核对 MinerU 图片资产、图注和作者在正文中的相关表述。视觉观察、作者结论和 Agent 推断要分开表达；不能仅凭图注猜测图片内容。输出文件中的图片使用 MinerU 实际资产路径，并以可预览、可点击的相对链接嵌入。
 
 Zotero 笔记和批注属于个人阅读记录，不应当作论文原文证据。需要引用论文结论时，仍要核对原文。
 
@@ -99,7 +101,7 @@ MinerU 原文和 `source/zotero-reading-record.md` 都包含可供 Obsidian 读�
 
 解析并发布论文时会在每篇文献目录的 `source/` 中生成 `zotero-reading-record.md`。若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 也会复制到该目录。阅读记录将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
 
-解读文件由 Skill 使用宿主的本地文件能力直接写入 MinerU Markdown 的同级目录。文件名和内容结构由用户任务决定，可使用 frontmatter、标题、段落、列表、表格或混合结构。默认应保留原文不变；如果同级已有同名解读文件，应先确认覆盖，或使用新的用户指定文件名。
+需要保存时，`literature-reading` 默认把解读文件写入 MinerU Markdown 所在的文献目录，用户也可以指定其他位置。Skill 保持原文和图片资产不变；同名文件已经存在时不得静默覆盖。图表使用类似 `[![Figure](assets/ABCD1234-image-1.png)](assets/ABCD1234-image-1.png)` 的相对链接，既可预览也可打开原始 MinerU 图片资产。
 
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
 

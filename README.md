@@ -19,7 +19,7 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 查询论文详情、作者、参考文献、施引文献、推荐、全文片段、数据集和期刊指标
 - 读取 Zotero 收藏夹、条目、笔记、批注、附件、索引文本和本地 PDF 路径，不修改文献库
 - 使用 MinerU 提取指定 PDF 的正文、公式、表格和图片
-- 基于 MinerU 原文和图片资产进行 SCI 解读、段落定位及图表解读，并将解读文件保存到原文同级目录
+- 基于 MinerU 原文进行完整或聚焦式专业解读，结合图片视觉内容、图注和正文上下文分析图表；仅在内容过长或用户要求时保存 Markdown
 - 查找引用候选，核对书目信息，再按要求生成参考文献
 - 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF
 - 调用已配置的图片服务生成或编辑科研示意图

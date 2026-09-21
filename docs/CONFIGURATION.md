@@ -96,7 +96,7 @@ MinerU 原文和 `source/zotero-reading-record.md` 都会写入 Obsidian 可读�
 └── Literatures/<paper>/<自由命名的解读文件>.md
 ```
 
-MinerU 原文、图片资产和解读文件位于同一篇文献目录。解读由 `literature-reading` 和 `literature-retrieval` Skill 通过宿主的本地文件能力完成。文件名、frontmatter、章节和 Markdown 结构由任务决定；Skill 保持 MinerU 原文不变。若同级已经存在同名文件，应先确认是否覆盖，或使用用户指定的新文件名。
+MinerU 原文和图片资产位于同一篇文献目录。`literature-reading` 默认在对话中完成整篇专业解读；只有用户要求保存或内容过长时才写入 Markdown，默认位置也是该文献目录。Skill 保持 MinerU 原文和资产不变，同名文件不得静默覆盖。输出文件中的图表引用实际 MinerU 图片，并使用可预览、可点击的相对链接。
 
 
 ## API key

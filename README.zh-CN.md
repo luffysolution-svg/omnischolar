@@ -12,7 +12,7 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 查询论文详情、作者、参考文献、施引文献、推荐、全文片段、数据集和期刊指标
 - 读取 Zotero 收藏夹、条目、笔记、批注、附件、索引文本和本地 PDF 路径，不修改文献库
 - 使用 MinerU 提取指定 PDF 的正文、公式、表格和图片
-- 基于 MinerU 原文和图片资产进行 SCI 解读、段落定位及图表解读，并将解读文件保存到原文同级目录
+- 基于 MinerU 原文进行完整或聚焦式专业解读，结合图片视觉内容、图注和正文上下文分析图表；仅在内容过长或用户要求时保存 Markdown
 - 查找引用候选，核对书目信息，再按要求生成参考文献
 - 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF
 - 调用已配置的图片服务生成或编辑科研示意图
@@ -68,7 +68,7 @@ codex plugin add omnischolar@omnischolar
 
 在 ChatGPT 桌面应用中重启应用，打开 **Plugins**，选择 **OmniScholar** Marketplace，然后安装或启用 **OmniScholar**。在 Codex CLI 中可运行 `/plugins` 浏览同一 Marketplace。
 
-插件会同时安装 10 个 Skills，并从 PyPI 最新版本启动本地 MCP：
+插件会同时安装 9 个 Skills，并从 PyPI 最新版本启动本地 MCP：
 
 ```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
@@ -197,9 +197,8 @@ OpenAlex、PubMed、arXiv 和 Crossref 无需 API key。其他服务按需启用
 | `omnischolar` | 根据科研任务选择并组合工具 |
 | `scholar-search` | 文献、专利、作者、引用网络、期刊和数据集 |
 | `zotero-research` | 本地 Zotero 匹配、笔记、批注和附件 |
-| `paper-reading` | 选择 PDF、MinerU 解析和本地解读流程 |
-| `literature-reading` | 基于 MinerU 原文的 SCI 解读、证据定位和图表解读 |
-| `literature-retrieval` | MinerU 原文中的段落、图注、图表定位 |
+| `paper-reading` | 选择 PDF 并准备 MinerU 原文和图片资产 |
+| `literature-reading` | 完整或聚焦式文献解读、证据定位和图表/公式分析 |
 | `academic-citation` | 证据核对、引用候选、格式化和参考文献 |
 | `scientific-figure` | 科研图片生成、编辑、检查和标注 |
 | `materials-project` | 材料筛选、性质、计算来源、相数据和导出 |

@@ -112,7 +112,7 @@ claude plugin install omnischolar@omnischolar --scope user
 
 Choose `--scope project` to share the enabled plugin through repository settings, or `--scope local` to enable it only for yourself in the current repository. If Claude reports `Run /reload-plugins to activate`, run that command before using the plugin.
 
-Claude Code copies the repository-root plugin into its versioned cache, discovers the ten folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command uses the latest PyPI package:
+Claude Code copies the repository-root plugin into its versioned cache, discovers the nine folders under `skills/`, and starts `.mcp.json` automatically when the plugin is enabled. The MCP command uses the latest PyPI package:
 
 ```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
@@ -188,7 +188,7 @@ A backup is created before each change. If the MCP handshake fails after install
 omnischolar rollback PATH_TO_BACKUP
 ```
 
-Other MCP servers and Skills are left in place. The command stops if an existing `omnischolar` entry was not created by this installer or if a managed Skill was edited locally.
+Other MCP servers and non-OmniScholar Skills are left in place. During an update, a previously managed Skill that is no longer bundled is backed up and removed. The command stops if an existing `omnischolar` entry was not created by this installer or if a managed Skill was edited locally.
 
 ## Use the official Skills CLI
 

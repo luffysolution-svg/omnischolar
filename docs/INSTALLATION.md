@@ -112,7 +112,7 @@ claude plugin install omnischolar@omnischolar --scope user
 
 使用 `--scope project` 可通过仓库设置与协作者共享启用状态；使用 `--scope local` 则只在当前仓库为自己启用。如果 Claude 提示 `Run /reload-plugins to activate`，请先运行该命令。
 
-Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 10 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令使用 PyPI 最新包：
+Claude Code 会把仓库根插件复制到版本化缓存，发现 `skills/` 下的 9 个 Skills，并在插件启用时自动启动 `.mcp.json`。MCP 命令使用 PyPI 最新包：
 
 ```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
@@ -188,7 +188,7 @@ omnischolar uninstall pi
 omnischolar rollback PATH_TO_BACKUP
 ```
 
-已有的其他 MCP 服务和 Skills 不会被删除。若同名配置不属于 OmniScholar，或已安装的 Skill 被手工改过，命令会停止并说明冲突。
+已有的其他 MCP 服务和非 OmniScholar Skills 不会被删除。更新时，已由 OmniScholar 管理但新版本不再提供的 Skill 会先备份再移除；若同名配置不属于 OmniScholar，或已安装的 Skill 被手工改过，命令会停止并说明冲突。
 
 ## 使用官方 Skills CLI
 

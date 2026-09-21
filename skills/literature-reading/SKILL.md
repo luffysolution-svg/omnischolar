@@ -1,35 +1,46 @@
 ---
 name: literature-reading
-description: Interpret a MinerU-parsed SCI paper from its local Markdown and assets, locate supporting paragraphs and figures or tables, and write a flexible interpretation sidecar beside the source.
+description: Guide an agent through professional interpretation of a locally parsed scholarly paper using MinerU Markdown and image assets. Default to a complete reading, narrow the scope only when the user asks, and write Markdown only when requested or when the result is too long for chat.
 license: MIT
 ---
 
-# SCI interpretation from MinerU output
+# Literature interpretation
 
-Use this Skill after a paper has been published locally by MinerU. The source of truth is the parsed Markdown, its metadata, and its sibling image and table assets. The reading checklist guides the reasoning; it does not prescribe a document template.
+Use this Skill after `paper-reading` has produced a local MinerU publication. Work from the parsed Markdown, `metadata.json`, and linked assets with the host's local file, search, and image-viewing capabilities. Do not invent a separate reading or analysis MCP tool.
 
-## Source and output
+## Defaults
 
-- Read the parsed Markdown frontmatter, `metadata.json`, and relevant sibling assets with the host's local file, search, and image-viewing capabilities.
-- Preserve the MinerU Markdown and extracted assets exactly as published.
-- Write the interpretation as a new Markdown file in the same directory as the MinerU Markdown. Use the filename requested by the user or choose a concise descriptive filename when none is provided.
-- Keep links relative to the paper directory when possible. Do not include absolute local paths, credentials, signed URLs, or private Zotero data in the visible document.
-- Adapt the organization, headings, tables, and level of detail to the user's question. Frontmatter is optional and only belongs in the output when the user requests it.
+- Unless the user asks about a specific question, section, figure, table, or equation, perform a complete professional interpretation of the paper.
+- Return the interpretation in the conversation by default. Write a Markdown file only when the user requests one or the result is too long to remain useful in chat.
+- Follow the user's language and desired depth. Preserve titles, identifiers, formulas, units, sample names, and technical terms when translation could change their meaning.
 
-## Interpretation workflow
+## Workflow
 
-1. Confirm the paper identity, source Markdown path, DOI, parser metadata, and asset directory.
-2. Read the Markdown structure first. Then search and open the sections, paragraphs, captions, formulas, tables, and figures relevant to the user's question. For a broad interpretation, cover the paper progressively and state the scope that was read.
-3. Use the SCI checklist as prompts: research question and gap, objective, materials or data, controls, methods and conditions, quantitative results, contribution, limitations, reproducibility, applicability, and conclusion. Include only the parts relevant to the request.
-4. Attach a source locator to important claims: section heading, line range, paragraph excerpt, figure/table identifier, caption, or relative link. Report missing values as unreported or unavailable.
-5. For a paragraph, figure, or table, distinguish extracted text, the authors' explicit statement, direct visual or tabular observation, interpretation, and uncertainty caused by OCR, layout, missing context, or asset quality.
-6. Write the requested interpretation beside the source file. A list, prose note, compact table, or mixed format is appropriate when it improves clarity.
-7. Re-open the saved file and verify source links, image links, paragraph locators, and formulas. Report the exact output path.
+1. Confirm the paper from the Markdown frontmatter and `metadata.json`, including title, Zotero key, DOI when present, and selected attachment. If no readable parsed publication is available, return to `paper-reading` instead of reconstructing the paper from metadata or memory.
+2. Map the document structure first: headings, captions, tables, equations, and image links. Then read progressively so long papers do not overflow the working context.
+3. For a complete interpretation, cover every substantive section, normally including the abstract, background, research question, methods or argument, results, discussion, limitations, and conclusion. Do not treat the abstract and conclusion as a substitute for the full paper.
+4. Explain the paper's problem, approach, critical conditions or assumptions, main evidence, quantitative results, reasoning, contribution, limitations, applicability, and unresolved questions. Adapt these dimensions to the paper rather than forcing a fixed report template.
+5. Attach reproducible source locators to important claims: relative Markdown filename, section heading, stable line range or identifying phrase, and figure/table/equation identifier when relevant. Keep conditions, units, comparison direction, and reported uncertainty with numerical results.
+6. Distinguish paper evidence, the authors' own interpretation, the Agent's interpretation, and uncertainty. Mark missing information as unreported or unavailable; do not fill it from general knowledge.
 
-## Evidence discipline
+## Figures, tables, and equations
 
-- A caption does not establish an observation that the asset or nearby text does not support.
-- Do not present an inference as an author claim. Label interpretation and confidence clearly.
-- Preserve units, conditions, sample names, statistical values, formulas, chemical names, gene/protein names, and instrument/model names unless translation is requested.
-- Treat Zotero notes and PDF annotations as personal reading records, not independent paper evidence.
-- If the source Markdown or assets cannot be opened, report the missing capability or path instead of reconstructing the paper from memory.
+- A figure interpretation must combine three sources: direct visual inspection of the MinerU image asset, its caption, and the surrounding passages where the authors discuss it.
+- State visual observations separately from the authors' statements and from the Agent's scientific interpretation. If the image cannot be inspected or is unclear, say so and do not infer visual details from the caption alone.
+- For tables, retain row/column meaning, units, conditions, baselines, and statistical notation. For equations, preserve the expression and explain symbols or assumptions only when supported by nearby text.
+
+## Optional Markdown output
+
+When a file is needed, save it in the paper's publication directory unless the user chooses another location. Use a concise non-colliding filename, never alter the MinerU source or assets, and do not overwrite an existing note without confirmation.
+
+Keep all source and asset links relative to the output file. Embed each interpreted MinerU image as a linked preview so the reader can both see it and open the original asset:
+
+```markdown
+[![Figure 2](assets/ZOTEROKEY-image-2.png)](assets/ZOTEROKEY-image-2.png)
+```
+
+Use the asset's actual filename and path; never fabricate an image name. Place the caption, relevant author context, visual observations, and interpretation near the preview rather than compressing long analysis into a Markdown table.
+
+Before finishing, reopen any saved file and verify that its Markdown, image previews, links, formulas, and source locators work. Report the saved path in the conversation, but do not write private absolute paths, credentials, or signed URLs into the document.
+
+Zotero notes and PDF annotations may provide personal reading context, but they are not independent evidence from the paper.

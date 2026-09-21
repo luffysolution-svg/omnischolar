@@ -80,7 +80,7 @@ Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separa
 
 MinerU Markdown and `source/zotero-reading-record.md` both include Obsidian-readable bibliographic frontmatter with the title, item type, creators, Zotero key, DOI, URL, publication title, tags, abstract, collections, and a Zotero deep link. Tags are normalized so spaces and unsupported punctuation are safe in Obsidian.
 
-Publishing a paper creates `zotero-reading-record.md` under the paper's `source/` directory. When `output.source.copyPdf` is true, the selected Zotero PDF is copied there as well. The reading record keeps Zotero notes and PDF annotations in separate sections. MinerU's Markdown, its image assets, and the interpretation file live in the same paper directory. The `literature-reading` and `literature-retrieval` Skills use the host's local file capabilities to read the source, locate paragraphs and figure/table evidence, and write a user-named Markdown sidecar. They never modify the MinerU source Markdown.
+Publishing a paper creates `zotero-reading-record.md` under the paper's `source/` directory. When `output.source.copyPdf` is true, the selected Zotero PDF is copied there as well. The reading record keeps Zotero notes and PDF annotations in separate sections. `literature-reading` interprets the complete paper in chat by default and writes Markdown only when requested or when the result is too long for chat. A saved note normally lives beside the MinerU Markdown, preserves the source and assets, and embeds actual MinerU figures with relative linked previews.
 
 
 ## API keys

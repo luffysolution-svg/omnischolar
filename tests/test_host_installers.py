@@ -14,6 +14,7 @@ from omnischolar.hosts.installer import (
     manage_host,
     manage_mcp,
     manage_pi_extension,
+    manage_skills,
 )
 
 
@@ -78,6 +79,41 @@ class WorkBuddyInstallerTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotIn("type", LATEST_MCP_PROCESS)
         self.assertEqual(CONTRACTS["codex"].server_value, LATEST_MCP_PROCESS)
         self.assertEqual(CONTRACTS["claude"].server_value.get("type"), "stdio")
+
+
+class SkillInstallerTests(unittest.TestCase):
+    @staticmethod
+    def _skill(root: Path, name: str, body: str) -> None:
+        directory = root / name
+        directory.mkdir(parents=True)
+        (directory / "SKILL.md").write_text(
+            f"---\nname: {name}\ndescription: Test skill.\n---\n\n{body}\n",
+            encoding="utf-8",
+        )
+
+    def test_update_removes_retired_managed_skill_after_backup(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            environment = InstallEnvironment(root / "home", root / "project")
+            environment.project.mkdir(parents=True)
+            first = root / "first"
+            second = root / "second"
+            self._skill(first, "keep", "first")
+            self._skill(first, "retired", "retired")
+            self._skill(second, "keep", "second")
+
+            manage_skills(
+                "codex", "install", scope="project", environment=environment, source=first
+            )
+            result = manage_skills(
+                "codex", "update", scope="project", environment=environment, source=second
+            )
+
+            target = environment.project / ".agents" / "skills"
+            self.assertEqual(result.status, "updated")
+            self.assertFalse((target / "retired").exists())
+            self.assertIn("second", (target / "keep" / "SKILL.md").read_text(encoding="utf-8"))
+            self.assertTrue((Path(result.backup or "") / "retired" / "SKILL.md").is_file())
 
 
 if __name__ == "__main__":

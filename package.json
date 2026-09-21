@@ -1,6 +1,6 @@
 {
   "name": "@luffysolution/omnischolar-pi",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Pi MCP bridge for the OmniScholar research toolkit",
   "type": "module",
   "license": "MIT",

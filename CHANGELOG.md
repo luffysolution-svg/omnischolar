@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1] - 2026-09-22
+
+- Rewrite `literature-reading` as one concise Agent workflow that defaults to complete paper interpretation and keeps focused evidence retrieval within the same Skill.
+- Require figure interpretation to combine visual inspection, captions, and the authors' surrounding discussion, with linked MinerU asset previews in optional Markdown output.
+- Keep `paper-reading` responsible only for PDF selection and MinerU publication, and remove the redundant `literature-retrieval` Skill.
+- Align parsing guidance with the runtime order: MinerU cache/upload occurs before publication conflict, exclusion, or recovery checks.
+
 ## [0.5.0] - 2026-09-22
 
 - Add shared Obsidian-ready bibliographic frontmatter to MinerU Markdown and Zotero reading records, including Zotero deep links.
