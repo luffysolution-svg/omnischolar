@@ -5,8 +5,8 @@ import tomllib
 import unittest
 from pathlib import Path
 
-from omnischolar.version import __version__
 from omnischolar.tools.catalogue import create_tool_definitions
+from omnischolar.version import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_VERSION = __version__

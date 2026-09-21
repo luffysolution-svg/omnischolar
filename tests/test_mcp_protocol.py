@@ -8,8 +8,24 @@ from omnischolar.tools.catalogue import create_tool_definitions
 
 
 class McpProtocolTests(unittest.TestCase):
+    def test_paper_interpretation_is_skill_driven(self) -> None:
+        names = {item.name for item in create_tool_definitions()}
+
+        self.assertTrue({"omnischolar_parse", "omnischolar_sync"} <= names)
+        self.assertTrue(
+            names.isdisjoint(
+                {
+                    "omnischolar_read",
+                    "omnischolar_focus",
+                    "omnischolar_locate",
+                    "omnischolar_context",
+                    "omnischolar_analysis",
+                }
+            )
+        )
+
     def test_tool_does_not_advertise_duplicate_structured_output(self) -> None:
-        definition = next(item for item in create_tool_definitions() if item.name == "omnischolar_focus")
+        definition = next(item for item in create_tool_definitions() if item.name == "literature_search")
         self.assertIsNone(tool_to_mcp(definition).outputSchema)
 
     def test_result_keeps_bounded_json_in_text_only(self) -> None:

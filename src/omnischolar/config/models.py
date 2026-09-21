@@ -252,32 +252,6 @@ class SourceOutputConfig(ConfigModel):
         return _filename_template(value, f"source.{info.field_name}", {"author", "year", "title", "zoteroKey", "separator"})
 
 
-class AnalysisOutputConfig(ConfigModel):
-    single_directory: str = "Analysis/Single"
-    multi_directory: str = "Analysis/Multi"
-    single_filename_template: str = "{analysisType}"
-    comparison_filename_template: str = "{date}{separator}{topic}{separator}compare"
-    review_filename_template: str = "{date}{separator}{topic}{separator}review"
-
-    @field_validator("single_directory", "multi_directory")
-    @classmethod
-    def relative_directory(cls, value: str, info: Any) -> str:
-        return _relative_output_path(value, f"analysis.{info.field_name}")
-
-    @field_validator(
-        "single_filename_template",
-        "comparison_filename_template",
-        "review_filename_template",
-    )
-    @classmethod
-    def safe_filename(cls, value: str, info: Any) -> str:
-        return _filename_template(
-            value,
-            f"analysis.{info.field_name}",
-            {"author", "year", "title", "zoteroKey", "topic", "date", "analysisType", "separator"},
-        )
-
-
 class OutputConfig(ConfigModel):
     root_directory: Path = Path("omnischolar-output")
     literature_directory: str = "Literatures"
@@ -288,7 +262,6 @@ class OutputConfig(ConfigModel):
     conflict_directory: str = ".conflicts"
     safe_writes: bool = True
     source: SourceOutputConfig = Field(default_factory=SourceOutputConfig)
-    analysis: AnalysisOutputConfig = Field(default_factory=AnalysisOutputConfig)
 
     @field_validator("literature_directory")
     @classmethod

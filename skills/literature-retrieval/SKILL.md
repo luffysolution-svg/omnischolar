@@ -1,39 +1,23 @@
 ---
 name: literature-retrieval
-description: Find focused evidence in parsed local papers, locate paragraphs, compare selected papers, and maintain a bounded reading context without loading whole documents.
+description: Locate supporting paragraphs, captions, figures, and tables inside a locally parsed MinerU paper.
 license: MIT
 ---
 
-# Focused literature retrieval
+# Local paragraph and figure/table retrieval
 
-Use this workflow when the task is to find where a paper discusses a concept, method, result, limitation, or comparison dimension. Retrieval is evidence selection; it is not itself a scientific conclusion.
+Use this Skill when the user asks where a parsed paper discusses a mechanism, method, result, limitation, number, formula, figure, or table. Work from the local MinerU Markdown and sibling assets, not from memory or an unverified summary.
 
 ## Workflow
 
-1. Match the Zotero parent by DOI first, then normalized title/year/author. If the match or PDF attachment is ambiguous, stop and report the choices.
-2. Use `zotero_item` with `mode=item` for identity. Use `mode=aggregate` only when attachment selection or annotations are needed.
-3. Confirm local parsed output with `omnischolar_sync` and `action=plan`. Parse only when structured content is needed and an external upload is authorized.
-4. Call `omnischolar_focus` with a short research concept, optional `keys`, `section`, `topK`, and `includeContext`. Treat returned `excerpt`, heading, paragraph ID, and line locator as the evidence packet.
-5. Call `omnischolar_locate` when the user needs exact paragraphs in one paper. Prefer `matchMode=phrase` for a quoted phrase and `allTerms` for a concept.
-6. Use `omnischolar_context` with `action=open` before a long multi-turn task. Pass its `contextId` to focus, locate, and `omnischolar_read`; retrieve the cache later with a bounded `get` call.
-7. For several papers, use `omnischolar_read` with `mode=compare` or `mode=review`, pass `contextId` when continuity is needed, and preserve per-paper provenance.
+1. Start from the exact `publication.markdownPath` or paper directory. Confirm the paper identity from the Markdown title and `metadata.json`.
+2. Search the Markdown using the host's native text-search or file-reading capability. Search exact phrases first; then search distinctive terms, section headings, figure/table labels, sample names, units, and numbers.
+3. Open the matching paragraph together with its heading, preceding/following context, caption, and any linked asset. For a figure or table, inspect the local asset when the host supports images; otherwise state that visual inspection was unavailable.
+4. Record a reproducible locator: relative Markdown filename, section heading, line range when available, paragraph excerpt, and figure/table identifier. Do not invent page or line numbers that are not available.
+5. Separate extracted text, the authors' explicit statement, direct visual or tabular observation, interpretation, and uncertainty. Preserve contradictions and missing evidence.
+6. If the user asks for an interpretation file, write it beside the source Markdown. The user chooses the filename and the content structure; a short list, prose note, table, or mixed format is valid. Never alter the source Markdown.
 
-## Retrieval policy
+## Boundaries
 
-- The current local retriever uses bounded BM25-style lexical retrieval plus a transparent TF-IDF vector score. It does not claim dense semantic embedding support; `semantic` remains `false` until a real embedding backend is configured.
-- Exact identifiers, formulas, material names, gene/protein names, numbers, and quoted phrases should be verified with `omnischolar_locate` or a section read even when focused search returns a hit.
-- `markdownPath` is a local provenance field. Do not expose unrelated local files, credentials, or Zotero private data.
-- A cache stores selected excerpts only. Never add an entire paper or an unbounded tool response to a context.
-- Distinguish extracted text, caption/table content, visual observations, author claims, interpretation, and uncertainty in the final answer.
-- Treat `zotero-reading-record.md` as a user-reading-record source. It contains two separate blocks: Zotero notes and PDF annotations. Do not merge either block into original-paper evidence.
-- When a single-paper answer must be persisted, use `omnischolar_analysis` with `analysisType=full-read` or `analysisType=targeted-reading`; do not write directly into MinerU Markdown.
-- When a multi-paper answer must be persisted, use `analysisType=compare` or `analysisType=review`. Keep tables compact: put dimensions in rows, split very wide comparisons into multiple tables, and retain per-paper evidence links.
-- Reuse the source PDF, MinerU Markdown, and reading record through relative links. A source change must be reported before relying on a previous analysis.
-- For persisted targeted reading, use Obsidian embeds for local figures, standard Markdown tables for tables, and `$$...$$` block math for formulas. Do not save raw absolute Windows paths or escaped formula source as the visible result.
-
-## Handoff to reading modes
-
-- `full`: follow `nextCursor` with `omnischolar_read`; never request an oversized page.
-- `figures`: use `omnischolar_read` with `mode=figures`; inspect the referenced asset when the host supports images, then separate caption, visual observation, and claim.
-- `formulas`: use `mode=formulas` and explain symbols only with nearby evidence.
-- `compare`/`review`: use bounded per-paper evidence and an evidence matrix; do not merge similar claims without checking methods and populations/materials.
+- This workflow covers the selected parsed paper and does not claim exhaustive retrieval across a library.
+- Zotero notes and PDF annotations are personal reading records; label them separately from original-paper evidence.

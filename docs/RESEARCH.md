@@ -46,21 +46,17 @@ http://127.0.0.1:23119/api
 
 聚合视图可包含书目信息、笔记、批注、附件信息、索引文本和本地 PDF 路径。OmniScholar 不会创建、修改、移动、加标签或删除 Zotero 数据。
 
-`zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。已解析文献使用 `omnischolar_read` 按全文游标、图表、公式、段落、对比或综述模式分段读取，完整 Markdown 仍保存在输出目录，不会默认一次返回给 Agent。
+`zotero_item` 默认返回元数据；需要笔记、批注或 PDF 选择时再显式使用 `mode=aggregate`。完成 MinerU 解析后，正文、图片和表格会保存在每篇文献的发布目录中。后续的精读、段落定位和图表解读由 `paper-reading`、`literature-reading` 与 `literature-retrieval` Skill 使用宿主的本地文件能力完成。
 
-### 聚焦检索与阅读上下文
+### 本地段落与图表定位
 
-已解析的本地文献可以用 `omnischolar_focus` 做有界的 BM25 + TF-IDF 向量混合证据检索。它返回匹配段落、章节、字符范围和 `paper.md#Lx-Ly` 行定位，不返回整篇 Markdown；可用 `keys`、`section`、`topK` 和 `maxPerDocument` 限定范围。当前本地后端会明确返回 `strategy=hybrid-bm25-tfidf`、`vectorBackend=tfidf-local` 和 `semantic=false`，因此不会把词项向量相似度误称为真正的语义 embedding 检索。
-
-需要单篇精确定位时使用 `omnischolar_locate`，按短语或全部词项匹配段落，并保留 Zotero key、标题、章节和定位锚点。图表读取使用 `omnischolar_read` 的 `figures` 模式，返回图片路径、表格 Markdown、标题以及受限的图表上下文；Agent 仍需区分图像观察、图注、作者结论和自己的解释。
-
-多轮阅读可以先用 `omnischolar_context` 的 `open` 创建上下文，再把 `contextId` 传给 `omnischolar_focus`、`omnischolar_locate` 或 `omnischolar_read`。缓存只保存选中的证据片段，`get` 仍然分页并受字符上限约束，不会自动把整篇论文再次注入 Agent。`compare` 和 `review` 模式也可以把每篇文献的有界证据加入同一个上下文。
+Skill 应直接读取 MinerU 生成的 Markdown，并使用宿主提供的文本搜索、文件读取和图片查看能力定位证据。段落定位至少记录文件名、章节标题和可复核的行号或相邻文本；图表解读还要关联对应图片/表格资产、图注及正文中的相关段落。要区分 MinerU 抽取文本、作者原文表述、图片或表格的直接观察、解释和不确定性。
 
 Zotero 笔记和批注属于个人阅读记录，不应当作论文原文证据。需要引用论文结论时，仍要核对原文。
 
 ## MinerU 解析
 
-`omnischolar_parse` 检查 PDF 文件、计算 SHA-256，并使用 MinerU 返回正文、公式、表格和图片。解析结果会缓存；同一文件和解析设置再次调用时可直接命中缓存。工具结果只返回解析摘要、文件路径和发布信息；正文通过 `omnischolar_read` 按需读取。
+`omnischolar_parse` 检查 PDF 文件、计算 SHA-256，并使用 MinerU 返回正文、公式、表格和图片。解析结果会缓存；同一文件和解析设置再次调用时可直接命中缓存。工具结果返回解析摘要和发布路径；Skill 从返回的 `publication.markdownPath` 找到原文，再读取同级的图片资产。
 
 配置好 MinerU API key 并启用服务后即可解析；OmniScholar 不会在没有凭据时自动上传。
 
@@ -99,16 +95,9 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
 
 支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
 
-若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 会复制到每篇文献目录的 `source/`，并生成 `zotero-reading-record.md`。该文件将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
+解析并发布论文时会在每篇文献目录的 `source/` 中生成 `zotero-reading-record.md`。若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 也会复制到该目录。阅读记录将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
 
-结构化解读通过 `omnischolar_analysis` 写入：
-
-- `full-read`：单篇 SCI 文献精读；
-- `targeted-reading`：单篇针对性解读，聚焦图表、公式、机制、方法、现有笔记和关联文献；
-- `compare`：用户选定多篇文献的紧凑对比矩阵；
-- `review`：多篇文献的主题性、叙述性、系统性或范围综述。
-
-默认输出为 `Analysis/Single/<paper>/` 和 `Analysis/Multi/`，路径和文件名由 `output.source`、`output.analysis` 配置。工具会保存来源 fingerprint 和相对链接，默认不会覆盖手工修改的分析文件。
+解读文件由 Skill 使用宿主的本地文件能力直接写入 MinerU Markdown 的同级目录。文件名和内容结构由用户任务决定，可使用 frontmatter、标题、段落、列表、表格或混合结构。默认应保留原文不变；如果同级已有同名解读文件，应先确认覆盖，或使用新的用户指定文件名。
 
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
 

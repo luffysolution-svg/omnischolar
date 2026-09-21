@@ -1,25 +1,21 @@
 ---
 name: paper-reading
-description: Parse and analyze a selected local PDF with OmniScholar and MinerU. Use when the task needs structured full text, equations, tables, figures, captions, or close reading beyond metadata and Zotero notes.
+description: Select and parse a local Zotero PDF with MinerU, then hand the published Markdown and assets to a flexible SCI interpretation workflow.
 license: MIT
 ---
 
 # PDF parsing and close reading
 
-Follow the user's language. MinerU receives PDF bytes over the network and may consume quota; do not parse metadata-only questions.
+Use this Skill when the user needs structured text, equations, tables, figures, captions, or close reading from a selected local PDF. Parsing is the data-preparation step; `literature-reading` and `literature-retrieval` handle interpretation after publication.
 
 ## Workflow
 
-1. Resolve the bibliographic parent and intended PDF with `zotero_item` in aggregate mode. Require an explicit `attachmentKey` when selection is ambiguous.
-2. Use `omnischolar_sync` with `action=plan`. Reuse `up_to_date` output. `metadata_changed` and `render_changed` do not by themselves require a new upload.
-3. Call `omnischolar_parse` when the plan requires parsing and MinerU is enabled with a configured API key.
-4. Do not use `force` to bypass a conflict. Do not automatically resubmit an ambiguous or timed-out task.
-5. Use the `literature-reading` workflow and `omnischolar_read` to read generated Markdown progressively: headings first, then the relevant sections, figures, tables, and equations.
-6. Use `metadata.json` for attachment identity, parse key, parser metadata, and provenance. An unknown parser version remains unknown.
-7. Distinguish extracted text, visual observation, captions, and author claims. Cite exact sections or numbered objects where possible.
-8. State OCR, equation, table, or layout limitations that affect confidence.
+1. Resolve the bibliographic parent and intended PDF with `zotero_item` in aggregate mode. Require an explicit `attachmentKey` when more than one PDF could be selected.
+2. Call `omnischolar_sync` with `action=plan` and reuse an up-to-date publication. Do not upload a different attachment as a fallback.
+3. Call `omnischolar_parse` only when parsing is necessary, MinerU is enabled, and the user has authorized the external PDF upload. Do not use `force` to bypass a conflict or automatically resubmit an ambiguous or timed-out task.
+4. Read the returned `publication.markdownPath`, `metadata.json`, and sibling assets with the host's local file and image capabilities. The complete parsed Markdown stays on disk.
+5. For SCI interpretation, follow `literature-reading`. For exact paragraph, figure, or table location, follow `literature-retrieval`.
+6. Write the interpretation as a new Markdown file beside the MinerU Markdown. Use a user-chosen filename and an evidence-driven structure; do not write into the MinerU source file.
+7. State OCR, equation, table, image, or layout limitations that affect confidence. Report the saved sidecar path.
 
-9. After successful publication, verify that the managed paper directory contains the configured `source/` PDF and `zotero-reading-record.md`. The reading record must keep Zotero notes and PDF annotations in separate sections, preserve annotation color/type/page/tag information, and link back to the copied PDF with relative paths.
-10. Use `omnischolar_analysis` to persist `full-read` or `targeted-reading` output under the configured single-paper analysis directory. Do not overwrite the MinerU source Markdown.
-
-Read [sync.md](references/sync.md) for managed-output states. If MinerU is unavailable, use bounded Zotero indexed text and notes when sufficient; otherwise report that structured full-text parsing is blocked. Never upload a different attachment as a fallback without explicit selection.
+If MinerU is unavailable, use Zotero indexed text only when it is sufficient for the user's question and label the limitation. Do not claim full-paper interpretation from metadata, notes, or annotations alone.

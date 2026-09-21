@@ -7,7 +7,6 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-
 _TAG_RE = re.compile(r"<[^>]+>")
 _COLOR_NAMES = {
     "#ffd400": "yellow",

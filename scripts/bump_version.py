@@ -7,7 +7,6 @@ import json
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:[-+][0-9A-Za-z.-]+)?$")
 
@@ -62,7 +61,7 @@ def main() -> int:
         parser.error("version must be strict semantic version syntax")
 
     pyproject = ROOT / "pyproject.toml"
-    match = re.search(r'^version = "([^"]+)"$', pyproject.read_text(encoding="utf-8"), re.M)
+    match = re.search(r'^version = "([^"]+)"$', pyproject.read_text(encoding="utf-8"), re.MULTILINE)
     if match is None:
         raise SystemExit("project version was not found in pyproject.toml")
     old = match.group(1)

@@ -13,14 +13,14 @@ It can search public indexes, combine online records with your Zotero notes, sen
 - Search Semantic Scholar, OpenAlex, PubMed/PMC, arXiv, Crossref, Unpaywall, easyScholar, Google Scholar, and Google Patents
 - Retrieve paper details, authors, citations, references, recommendations, snippets, datasets, and journal metrics
 - Read Zotero collections, items, notes, annotations, attachments, indexed text, and local PDF paths without changing the library
-- Read parsed papers by full-text cursor, figures, formulas, paragraphs, comparison, or review mode without loading the entire body into one context
 - Parse selected PDFs with MinerU and keep text, formulas, tables, and figures together
+- Interpret MinerU Markdown and local assets with SCI guidance, paragraph locators, and figure/table analysis, then save a sidecar beside the source
 - Find citation candidates, check bibliographic identity, and format accepted references
 - Query Materials Project and export JSON, CSV, Markdown, or CIF
 - Generate or edit scientific illustrations with configured image services
 - Preserve local Markdown edits and place incoming conflict versions in `.conflicts/`
 
-OmniScholar exposes 44 tools. See the [tool list](docs/TOOLS.en.md).
+OmniScholar exposes 39 tools. See the [tool list](docs/TOOLS.en.md).
 
 <details>
 <summary>Install and connect an agent</summary>
@@ -106,7 +106,7 @@ Enable the service and fill in its API key to use Ai4Scholar, image generation, 
 
 The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys: the MCP process reads the global [`omnischolar.config.example.json`](omnischolar.config.example.json), which can be created with `omnischolar config init`. The plugin copy is [`.mcp.json`](.mcp.json).
 
-Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, Zotero reading records, and structured analyses with `output.rootDirectory`, `output.literatureDirectory`, `output.source`, and `output.analysis`; see [literature and output configuration](docs/RESEARCH.en.md).
+Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, and Zotero reading records with `output.rootDirectory`, `output.literatureDirectory`, and `output.source`; interpretation sidecars are saved beside the MinerU Markdown with a task-defined filename and structure. See [literature and output configuration](docs/RESEARCH.en.md).
 
 ## Try it
 

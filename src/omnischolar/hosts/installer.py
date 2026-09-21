@@ -415,18 +415,20 @@ async def verify_mcp_handshake(*, timeout_seconds: float = 20.0) -> dict[str, An
     try:
         with _stdio_error_sink() as errors:
             async with asyncio.timeout(timeout_seconds):
-                async with stdio_client(parameters, errlog=errors) as streams:
-                    async with ClientSession(*streams) as session:
-                        await session.initialize()
-                        tools = await session.list_tools()
-                        status = await session.call_tool("omnischolar_status", {})
-                        if status.isError:
-                            raise OmniScholarError(
-                                "mcp_handshake_failed",
-                                "Installed MCP server returned an error for omnischolar_status",
-                                category="host",
-                            )
-                        return {"tools": len(tools.tools), "status": "success"}
+                async with (
+                    stdio_client(parameters, errlog=errors) as streams,
+                    ClientSession(*streams) as session,
+                ):
+                    await session.initialize()
+                    tools = await session.list_tools()
+                    status = await session.call_tool("omnischolar_status", {})
+                    if status.isError:
+                        raise OmniScholarError(
+                            "mcp_handshake_failed",
+                            "Installed MCP server returned an error for omnischolar_status",
+                            category="host",
+                        )
+                    return {"tools": len(tools.tools), "status": "success"}
     except OmniScholarError:
         raise
     except TimeoutError as exc:

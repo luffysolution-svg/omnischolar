@@ -46,21 +46,17 @@ Enable â€œAllow other applications on this computer to communicate with Zoteroâ€
 
 The combined view can include metadata, notes, annotations, attachment details, indexed text, and a local PDF path. OmniScholar never creates, updates, moves, tags, or deletes Zotero data.
 
-`zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. After parsing, use `omnischolar_read` for cursor-based full-text reading or bounded figure, formula, paragraph, comparison, and review evidence. The complete Markdown remains in the output directory and is not returned to the agent by default.
+`zotero_item` defaults to metadata-only output; request `mode=aggregate` when notes, annotations, attachments, indexed text, or PDF selection are needed. After parsing, the Markdown, images, and tables are kept in the paper's publication directory. Close reading, paragraph location, and figure/table interpretation are handled by the `paper-reading`, `literature-reading`, and `literature-retrieval` Skills through the host's local file capabilities.
 
-### Focused retrieval and reading contexts
+### Local paragraph and figure/table location
 
-Use `omnischolar_focus` over parsed local publications for bounded BM25 + TF-IDF vector evidence retrieval. It returns matching paragraphs, headings, character ranges, and `paper.md#Lx-Ly` line locators rather than a complete Markdown document. Restrict it with `keys`, `section`, `topK`, and `maxPerDocument`. The local backend explicitly reports `strategy=hybrid-bm25-tfidf`, `vectorBackend=tfidf-local`, and `semantic=false`, so term-vector similarity is not presented as dense semantic embedding retrieval.
-
-Use `omnischolar_locate` for exact paragraph location in one paper, with phrase or all-term matching and Zotero key, title, section, and stable anchors. Use `omnischolar_read` with `mode=figures` for image paths, table Markdown, captions, and bounded figure/table context. The agent must still distinguish visual observation, caption text, author claims, and interpretation.
-
-For multi-turn reading, call `omnischolar_context` with `open`, then pass its `contextId` to `omnischolar_focus`, `omnischolar_locate`, or `omnischolar_read`. The cache stores selected evidence only; `get` is paginated and bounded, so it does not automatically re-inject a complete paper into the agent. `compare` and `review` can add per-paper evidence to the same context.
+The Skills read the MinerU Markdown directly and use the host's text search, file-reading, and image-viewing capabilities to locate evidence. A paragraph locator should retain the filename, section heading, and a reproducible line range or nearby text. Figure/table interpretation should connect the asset, caption, and related body paragraphs. Always distinguish extracted MinerU text, the authors' statements, direct visual or tabular observations, interpretation, and uncertainty.
 
 Notes and annotations are personal reading context, not evidence from the publication. Check the paper itself before citing a claim.
 
 ## MinerU parsing
 
-`omnischolar_parse` validates the PDF, computes SHA-256, and asks MinerU to return text, formulas, tables, and figures. Results are cached; the same file and parser settings can return a cache hit. The tool returns parse metadata and publication paths; use `omnischolar_read` to retrieve bounded content.
+`omnischolar_parse` validates the PDF, computes SHA-256, and asks MinerU to return text, formulas, tables, and figures. Results are cached; the same file and parser settings can return a cache hit. The tool returns parse metadata and publication paths; the Skills use `publication.markdownPath` to find the source and its sibling assets.
 
 After MinerU is enabled and its API key is configured, parsing is directly available; OmniScholar does not upload without credentials.
 
@@ -99,9 +95,9 @@ The output location and new-file naming can be customized in the global configur
 
 Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` independently controls each paper directory name. `filenameSeparator` accepts `-`, `+`, and `_`, and is shared by paper, folder, and attachment templates. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, `{extension}`, and `{separator}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization. Here, attachment images means parsed image assets, not the original Zotero PDF attachment.
 
-When `output.source.copyPdf` is enabled, the selected Zotero PDF is copied into each paper's `source/` directory and `zotero-reading-record.md` is generated. The record keeps Zotero notes and PDF annotations in separate sections, including annotation type, color, page, tags, comments, and relative PDF links. These are personal reading records, not independent paper evidence.
+Publishing a paper creates `zotero-reading-record.md` in the paper's `source/` directory. When `output.source.copyPdf` is enabled, the selected Zotero PDF is copied there as well. The record keeps Zotero notes and PDF annotations in separate sections, including annotation type, color, page, tags, comments, and relative PDF links. These are personal reading records, not independent paper evidence.
 
-Use `omnischolar_analysis` to write structured analyses: `full-read` and `targeted-reading` for one paper, and `compare` and `review` for multiple papers. By default, single-paper analyses are stored under `Analysis/Single/<paper>/` and multi-paper analyses under `Analysis/Multi/`; paths and filename templates are configurable under `output.source` and `output.analysis`.
+The Skills write an interpretation Markdown sidecar next to the MinerU Markdown using the host's local file capabilities. The user decides the filename and structure; frontmatter, headings, prose, lists, tables, or mixed formats may be used as appropriate. The source Markdown remains unchanged. If a same-named sidecar already exists, confirm before overwriting or use a new user-chosen filename.
 
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
 

@@ -9,7 +9,7 @@
 - npm 包：`@luffysolution/omnischolar-pi`
 - 默认分支：`main`
 - 发布工作流：`.github/workflows/publish-npm.yml`
-- 当前已验证版本：`0.3.0`
+- 当前已验证版本：`0.4.0`
 
 ## 发布前检查
 
@@ -251,7 +251,7 @@ npx skills remove --skill '*' --agent codex --global --yes
 4. `codex plugin list` 或对应宿主的插件状态
 5. 重启宿主应用，让新的环境变量和插件缓存生效
 
-使用干净配置启动 MCP 做握手验证；当前基线应能列出 43 个工具。
+使用干净配置启动 MCP 做握手验证；当前基线应能列出 39 个工具。
 
 ## 安全与发布注意事项
 

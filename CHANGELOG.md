@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0] - 2026-09-21
+
+- Remove the dedicated literature-reading MCP tools and keep paper interpretation in Skills.
+- Keep Zotero access, MinerU parsing, and conservative synchronization as MCP capabilities.
+- Rewrite paper-reading, literature-reading, and literature-retrieval Skills around local MinerU Markdown and assets.
+- Save interpretation Markdown beside the MinerU source with task-defined filenames and structure.
+- Remove fixed structured-analysis output directories, filename templates, and analysis frontmatter generation.
+- Keep Zotero reading records under each paper's `source/` directory.
+
 ## [0.3.5] - 2026-09-21
 
 - Fix targeted-reading figure/table normalization to be idempotent.
