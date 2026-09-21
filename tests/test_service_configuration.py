@@ -21,11 +21,11 @@ class ServiceConfigurationTests(unittest.IsolatedAsyncioTestCase):
             LoadedConfig(OmniScholarConfig(), ConfigSource("defaults", None))
         )
         app.services = SimpleNamespace(
-            literature=SimpleNamespace(statuses=lambda: []),
+            literature=SimpleNamespace(statuses=list),
             media=media,
             mineru=None,
             materials=None,
-            chemistry=SimpleNamespace(sources=lambda: {}),
+            chemistry=SimpleNamespace(sources=dict),
         )
 
         await app.status()

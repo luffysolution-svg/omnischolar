@@ -31,7 +31,7 @@ jobs:
           package-manager-cache: false
       - run: python scripts/check_release_versions.py
       - run: uv run --with pytest pytest -q
-      - run: uv run --with ruff ruff check src tests scripts
+      - run: uv run --with ruff==0.14.1 ruff check src tests scripts
       - run: uv build
       - run: npm ci
       - run: npm test

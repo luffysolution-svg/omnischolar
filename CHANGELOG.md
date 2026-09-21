@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.2] - 2026-09-21
+
+- Pin the release-gate Ruff version and align test helpers with that rule set so validated releases cannot diverge between local and CI environments.
+
 ## [0.4.1] - 2026-09-21
 
 - Require explicit user confirmation of `attachmentKey` before parsing or synchronizing Zotero items with multiple PDFs.

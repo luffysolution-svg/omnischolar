@@ -6,9 +6,8 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from omnischolar.core import OmniScholarError
-from omnischolar.core import ToolExecutionContext
 from omnischolar.config import OmniScholarConfig
+from omnischolar.core import OmniScholarError, ToolExecutionContext
 from omnischolar.services.sync import (
     SyncService,
     metadata_fingerprint,
@@ -265,7 +264,8 @@ class MultiPdfSelectionTests(unittest.IsolatedAsyncioTestCase):
                 return paper
 
         class Sync:
-            published: list[str] = []
+            def __init__(self) -> None:
+                self.published: list[str] = []
 
             async def publish(self, selected_paper, *_args, **_kwargs):
                 key = selected_paper["selectedPdf"]["key"]
@@ -273,7 +273,8 @@ class MultiPdfSelectionTests(unittest.IsolatedAsyncioTestCase):
                 return {"attachmentKey": key}
 
         class MinerU:
-            parsed: list[str] = []
+            def __init__(self) -> None:
+                self.parsed: list[str] = []
 
             async def parse_pdf(self, path, *_args, **_kwargs):
                 self.parsed.append(path.name)
