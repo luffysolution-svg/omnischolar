@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.5] - 2026-09-21
+
+- Fix targeted-reading figure/table normalization to be idempotent.
+- Prevent duplicate generation of the four figure-analysis fields.
+- Remove image width aliases and keep Markdown figure tables at exactly two columns.
+- Preserve user-provided figure interpretations and author statements.
+- Add regression coverage for Chinese figure titles and complex Markdown table rows.
+
 ## [0.3.4] - 2026-09-21
 
 - Fix structured analysis frontmatter so generated documents contain one canonical frontmatter block.
