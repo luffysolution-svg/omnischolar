@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0] - 2026-09-22
+
+- Add shared Obsidian-ready bibliographic frontmatter to MinerU Markdown and Zotero reading records, including Zotero deep links.
+- Normalize creator names and Zotero tags into Obsidian-compatible list properties while retaining complete source metadata in `metadata.json`.
+- Prefix every parsed image filename and rewritten Markdown image link with the source Zotero key.
+- Document the published frontmatter and image naming contract and cover it with unit and live Zotero-to-MinerU publication checks.
+
 ## [0.4.2] - 2026-09-21
 
 - Pin the release-gate Ruff version and align test helpers with that rule set so validated releases cannot diverge between local and CI environments.

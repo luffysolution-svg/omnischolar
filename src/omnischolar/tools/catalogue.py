@@ -20,6 +20,7 @@ from omnischolar.registry import (
     ToolExecutor,
     ToolGroup,
 )
+from omnischolar.services.zotero_render import render_frontmatter
 
 
 def obj(properties: dict[str, Any], required: tuple[str, ...] = ()) -> dict[str, Any]:
@@ -65,13 +66,17 @@ def _normalized_title(value: str) -> str:
 
 
 def _prepare_publication_content(
-    title: str,
+    paper: dict[str, Any],
     markdown: str,
     assets: dict[str, bytes],
     *,
     asset_filename_template: str = "image-{index}{extension}",
     asset_filename_separator: str = "-",
 ) -> tuple[str, dict[str, bytes]]:
+    title = str(paper.get("title") or "Untitled")
+    zotero_key = re.sub(
+        r'[^A-Za-z0-9_-]+', "-", str(paper.get("zoteroKey") or "zotero")
+    ).strip("-_") or "zotero"
     body = markdown.lstrip("\ufeff\r\n")
     first_line, separator, remainder = body.partition("\n")
     if first_line.startswith("# "):
@@ -121,12 +126,13 @@ def _prepare_publication_content(
     for index, original_name in enumerate(ordered_assets, start=1):
         original_path = Path(normalized_names[original_name])
         original_stem = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", original_path.stem).strip(" .")
-        candidate = asset_filename_template.format(
+        suffix = asset_filename_template.format(
             index=index,
             original=original_stem or f"image-{index}",
             extension=original_path.suffix.lower() or ".bin",
             separator=asset_filename_separator,
         )
+        candidate = f"{zotero_key}{asset_filename_separator}{suffix}"
         candidate = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "-", candidate).strip(" .")
         if not candidate or Path(candidate).name != candidate:
             raise OmniScholarError(
@@ -147,7 +153,8 @@ def _prepare_publication_content(
 
     body = _IMAGE_LINK.sub(replace_reference, body)
     prepared_assets = {renamed[name]: assets[name] for name in ordered_assets}
-    return f"# {title}\n\n{body}", prepared_assets
+    frontmatter = render_frontmatter(paper, record_type="mineru-publication")
+    return f"{frontmatter}\n\n# {title}\n\n{body}", prepared_assets
 
 
 def _sync_parse_arguments(arguments: dict[str, Any], action: str) -> dict[str, Any]:
@@ -339,7 +346,7 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         ),
     )
     markdown, assets = _prepare_publication_content(
-        paper.get("title", "Untitled"),
+        paper,
         parsed.markdown,
         parsed.assets,
         asset_filename_template=app.loaded.config.output.asset_filename_template,

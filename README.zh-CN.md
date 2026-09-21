@@ -161,7 +161,7 @@ npx skills remove --skill '*' --agent codex --global --yes
 
 首次启动 MCP 或执行安装命令时，如果没有可发现的配置，程序会在用户配置目录自动创建包含所有服务区块和认证字段的完整 `omnischolar.config.json` 模板。也可以用 `omnischolar config init` 主动创建。API key 可以直接填写在配置文件的 `apiKey` 中；如果希望使用环境变量，也可以填写 `apiKeyEnv`。
 
-文献导入到 Obsidian 的位置、文件夹、Markdown 文件和图片附件命名可通过 `output.rootDirectory`、`output.literatureDirectory`、`output.folderNameTemplate`、`output.filenameTemplate`、`output.filenameSeparator` 和 `output.assetFilenameTemplate` 自定义，详见[文献与输出配置](docs/RESEARCH.md)。解读文件与 MinerU 原文位于同一文献目录，文件名和内容结构由任务决定。
+文献导入到 Obsidian 的位置、文件夹、Markdown 文件和图片附件命名可通过 `output.rootDirectory`、`output.literatureDirectory`、`output.folderNameTemplate`、`output.filenameTemplate`、`output.filenameSeparator` 和 `output.assetFilenameTemplate` 自定义。MinerU 原文与 Zotero 阅读记录都会写入书目信息 frontmatter，解析图片始终以 Zotero key 开头。详见[文献与输出配置](docs/RESEARCH.md)。
 
 最小的本地配置可以只写 Zotero 和输出目录：
 

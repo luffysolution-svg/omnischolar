@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import html
 import re
+import unicodedata
 from collections.abc import Mapping
 from typing import Any
+
+import yaml
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _COLOR_NAMES = {
@@ -50,6 +53,72 @@ def _tags(value: Any) -> list[str]:
 
 def _tag_line(tags: list[str]) -> str:
     return " ".join(f"`#{html.escape(tag.replace('`', ''))}`" for tag in tags)
+
+
+def _obsidian_tag(value: str) -> str | None:
+    tag = unicodedata.normalize("NFKC", value).strip().lstrip("#").strip()
+    tag = re.sub(r"\s+", "-", tag)
+    tag = re.sub(r"[^\w/-]+", "-", tag, flags=re.UNICODE)
+    tag = re.sub(r"-{2,}", "-", tag).strip("-_/ ")
+    if not tag:
+        return None
+    return f"tag-{tag}" if tag.isdecimal() else tag
+
+
+def _creator_names(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    names: list[str] = []
+    for creator in value:
+        if not isinstance(creator, Mapping):
+            continue
+        name = str(creator.get("name") or "").strip()
+        if not name:
+            name = " ".join(
+                part
+                for field in ("firstName", "lastName")
+                if (part := str(creator.get(field) or "").strip())
+            )
+        if name:
+            names.append(name)
+    return list(dict.fromkeys(names))
+
+
+def render_frontmatter(
+    paper: Mapping[str, Any],
+    *,
+    record_type: str,
+    source_kinds: list[str] | None = None,
+) -> str:
+    """Render shared Zotero-backed YAML properties for Obsidian Markdown."""
+
+    collections = paper.get("collections")
+    tags = [tag for value in _tags(paper.get("tags")) if (tag := _obsidian_tag(value))]
+    zotero_key = str(paper.get("zoteroKey") or "")
+    properties: dict[str, Any] = {
+        "recordType": record_type,
+        "title": str(paper.get("title") or "Untitled"),
+        "itemType": paper.get("itemType"),
+        "creators": _creator_names(paper.get("creators")),
+        "zoteroKey": zotero_key,
+        "DOI": paper.get("doi"),
+        "URL": paper.get("url"),
+        "publicationTitle": paper.get("publicationTitle"),
+        "tags": list(dict.fromkeys(tags)),
+        "abstract": paper.get("abstract"),
+        "collections": list(collections) if isinstance(collections, list) else [],
+        "zoteroLink": f"zotero://select/library/items/{zotero_key}" if zotero_key else None,
+    }
+    if source_kinds is not None:
+        properties["sourceKinds"] = source_kinds
+    document = yaml.safe_dump(
+        properties,
+        allow_unicode=True,
+        default_flow_style=False,
+        sort_keys=False,
+        width=100_000,
+    ).rstrip()
+    return f"---\n{document}\n---"
 
 
 def _annotation_data(annotation: Mapping[str, Any]) -> dict[str, Any]:
@@ -115,13 +184,12 @@ def render_zotero_reading_record(
     """Render a human-readable record while preserving note/annotation provenance."""
 
     title = str(paper.get("title") or "Untitled")
-    key = str(paper.get("zoteroKey") or "")
     lines = [
-        "---",
-        "recordType: zotero-reading-record",
-        f"zoteroKey: {key}",
-        "sourceKinds: [zotero-note, pdf-annotation]",
-        "---",
+        render_frontmatter(
+            paper,
+            record_type="zotero-reading-record",
+            source_kinds=["zotero-note", "pdf-annotation"],
+        ),
         "",
         f"# Zotero 阅读记录：{title}",
         "",

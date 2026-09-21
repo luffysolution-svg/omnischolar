@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+import yaml
+
 from omnischolar.config import OmniScholarConfig
 from omnischolar.core import OmniScholarError, ToolExecutionContext
 from omnischolar.services.sync import (
@@ -23,6 +25,41 @@ from omnischolar.tools.catalogue import (
 
 
 class PublicationContentTests(unittest.TestCase):
+    def test_mineru_frontmatter_contains_zotero_properties(self) -> None:
+        paper = {
+            "title": "Paper title",
+            "itemType": "journalArticle",
+            "creators": [{"creatorType": "author", "name": "Research Team"}],
+            "zoteroKey": "PAPER123",
+            "doi": "10.1000/example",
+            "url": "https://example.test/paper",
+            "publicationTitle": "Journal of Tests",
+            "tags": [{"tag": "solid state"}, {"tag": "battery:interface"}],
+            "abstract": "Abstract text.",
+            "collections": ["COLLECTION1"],
+        }
+
+        markdown, _ = _prepare_publication_content(paper, "Body", {})
+        frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
+
+        self.assertEqual(
+            frontmatter,
+            {
+                "recordType": "mineru-publication",
+                "title": "Paper title",
+                "itemType": "journalArticle",
+                "creators": ["Research Team"],
+                "zoteroKey": "PAPER123",
+                "DOI": "10.1000/example",
+                "URL": "https://example.test/paper",
+                "publicationTitle": "Journal of Tests",
+                "tags": ["solid-state", "battery-interface"],
+                "abstract": "Abstract text.",
+                "collections": ["COLLECTION1"],
+                "zoteroLink": "zotero://select/library/items/PAPER123",
+            },
+        )
+
     def test_duplicate_title_is_removed_and_assets_follow_reference_order(self) -> None:
         title = (
             "Unveiling the Synergistic Role of Frustrated Lewis Pairs in "
@@ -35,7 +72,7 @@ class PublicationContentTests(unittest.TestCase):
         )
 
         markdown, assets = _prepare_publication_content(
-            title,
+            {"title": title, "zoteroKey": "PAPER123"},
             parsed,
             {
                 "images/a.png": b"a",
@@ -44,45 +81,57 @@ class PublicationContentTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(markdown.count("\n# "), 0)
-        self.assertTrue(markdown.startswith(f"# {title}\n\nText."))
-        self.assertIn("![](assets/image-1.png)", markdown)
-        self.assertIn("![](assets/image-2.png)", markdown)
-        self.assertEqual(list(assets), ["image-1.png", "image-2.png", "image-3.jpg"])
-        self.assertEqual(assets["image-1.png"], b"b")
-        self.assertEqual(assets["image-2.png"], b"a")
+        self.assertEqual(markdown.count("\n# "), 1)
+        self.assertIn(f"# {title}\n\nText.", markdown)
+        self.assertIn("![](assets/PAPER123-image-1.png)", markdown)
+        self.assertIn("![](assets/PAPER123-image-2.png)", markdown)
+        self.assertEqual(
+            list(assets),
+            ["PAPER123-image-1.png", "PAPER123-image-2.png", "PAPER123-image-3.jpg"],
+        )
+        self.assertEqual(assets["PAPER123-image-1.png"], b"b")
+        self.assertEqual(assets["PAPER123-image-2.png"], b"a")
+
+        frontmatter = yaml.safe_load(markdown.split("---", 2)[1])
+        self.assertEqual(frontmatter["recordType"], "mineru-publication")
+        self.assertEqual(frontmatter["title"], title)
+        self.assertEqual(frontmatter["zoteroKey"], "PAPER123")
+        self.assertTrue(markdown.startswith("---\n"))
 
     def test_distinct_leading_heading_is_preserved(self) -> None:
         markdown, assets = _prepare_publication_content(
-            "Paper title",
+            {"title": "Paper title", "zoteroKey": "PAPER123"},
             "# Methods\n\nBody\n\n![](assets/image_hash.jpg)\n",
             {"image_hash.jpg": b"image"},
         )
 
-        self.assertTrue(markdown.startswith("# Paper title\n\n# Methods"))
-        self.assertIn("![](assets/image-1.jpg)", markdown)
-        self.assertEqual(list(assets), ["image-1.jpg"])
+        self.assertIn("# Paper title\n\n# Methods", markdown)
+        self.assertIn("![](assets/PAPER123-image-1.jpg)", markdown)
+        self.assertEqual(list(assets), ["PAPER123-image-1.jpg"])
 
     def test_ambiguous_asset_basenames_are_rejected(self) -> None:
         with self.assertRaisesRegex(OmniScholarError, "ambiguous reference names"):
             _prepare_publication_content(
-                "Title",
+                {"title": "Title", "zoteroKey": "PAPER123"},
                 "![](one/same.png)",
                 {"one/same.png": b"1", "two/same.png": b"2"},
             )
 
     def test_custom_asset_template_preserves_original_stem_and_extension(self) -> None:
         markdown, assets = _prepare_publication_content(
-            "Title",
+            {"title": "Title", "zoteroKey": "PAPER123"},
             "![](images/figure-b.PNG)\n![](images/figure-a.jpg)\n",
             {"images/figure-a.jpg": b"a", "images/figure-b.PNG": b"b"},
             asset_filename_template="figure{separator}{index}{separator}{original}{extension}",
             asset_filename_separator="+",
         )
 
-        self.assertIn("![](assets/figure+1+figure-b.png)", markdown)
-        self.assertIn("![](assets/figure+2+figure-a.jpg)", markdown)
-        self.assertEqual(list(assets), ["figure+1+figure-b.png", "figure+2+figure-a.jpg"])
+        self.assertIn("![](assets/PAPER123+figure+1+figure-b.png)", markdown)
+        self.assertIn("![](assets/PAPER123+figure+2+figure-a.jpg)", markdown)
+        self.assertEqual(
+            list(assets),
+            ["PAPER123+figure+1+figure-b.png", "PAPER123+figure+2+figure-a.jpg"],
+        )
 
 
 class PaperStemTests(unittest.TestCase):

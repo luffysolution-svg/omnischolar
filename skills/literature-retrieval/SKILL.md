@@ -10,7 +10,7 @@ Use this Skill when the user asks where a parsed paper discusses a mechanism, me
 
 ## Workflow
 
-1. Start from the exact `publication.markdownPath` or paper directory. Confirm the paper identity from the Markdown title and `metadata.json`.
+1. Start from the exact `publication.markdownPath` or paper directory. Confirm the paper identity from its frontmatter, Markdown title, and `metadata.json`.
 2. Search the Markdown using the host's native text-search or file-reading capability. Search exact phrases first; then search distinctive terms, section headings, figure/table labels, sample names, units, and numbers.
 3. Open the matching paragraph together with its heading, preceding/following context, caption, and any linked asset. For a figure or table, inspect the local asset when the host supports images; otherwise state that visual inspection was unavailable.
 4. Record a reproducible locator: relative Markdown filename, section heading, line range when available, paragraph excerpt, and figure/table identifier. Do not invent page or line numbers that are not available.

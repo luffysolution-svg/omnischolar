@@ -93,7 +93,9 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
 }
 ```
 
-支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。若不同 Zotero 文献生成相同目录名，后创建的目录会附加 Zotero key，避免覆盖已有文献。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
+支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。`assetFilenameTemplate` 控制 Zotero key 后面的图片名称部分，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。每张解析图片都以 `<zoteroKey><separator>` 开头；默认名称类似 `ABCD1234-image-1.png`。新文献写入 `rootDirectory/literatureDirectory`，图片位于每篇文献目录下的 `assets/`。若不同 Zotero 文献生成相同目录名，后创建的目录会附加 Zotero key，避免覆盖已有文献。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
+
+MinerU 原文和 `source/zotero-reading-record.md` 都包含可供 Obsidian 读取的 YAML frontmatter：`recordType`、`title`、`itemType`、`creators`、`zoteroKey`、`DOI`、`URL`、`publicationTitle`、`tags`、`abstract`、`collections` 和 `zoteroLink`。阅读记录还包含 `sourceKinds`。`creators` 使用姓名列表，`zoteroLink` 可直接跳转到本地 Zotero 条目。Zotero 标签中的空格会转换为连字符，不适用于 Obsidian 标签的符号也会安全转换；纯数字标签会增加 `tag-` 前缀。
 
 解析并发布论文时会在每篇文献目录的 `source/` 中生成 `zotero-reading-record.md`。若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 也会复制到该目录。阅读记录将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
 

@@ -60,9 +60,11 @@ OmniScholar 使用 `schemaVersion: 1` 的 JSON 配置。可直接复制根目录
 }
 ```
 
-文献和文件夹模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；`folderNameTemplate` 控制每篇文献目录名。连接符目前支持 `-`、`+` 和 `_`，并由文献、文件夹、附件模板共用。附件图片模板支持 `{index}`、`{original}`、`{extension}`、`{separator}`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。这里的附件图片是解析生成的图片，不是 Zotero 原始 PDF 附件。
+文献和文件夹模板支持 `{author}`、`{year}`、`{title}`、`{separator}`；`folderNameTemplate` 控制每篇文献目录名。连接符支持 `-`、`+` 和 `_`，并由文献、文件夹、附件模板共用。附件图片模板支持 `{index}`、`{original}`、`{extension}`、`{separator}`，用于控制 Zotero key 前缀之后的名称；默认图片名类似 `ABCD1234-image-1.png`。这些设置只影响新建文献，已有同步记录沿用 manifest 中的路径。这里的附件图片是解析生成的图片，不是 Zotero 原始 PDF 附件。
 
 ## Zotero 阅读记录与本地解读
+
+MinerU 原文和 `source/zotero-reading-record.md` 都会写入 Obsidian 可读取的书目信息 frontmatter，包括标题、条目类型、作者、Zotero key、DOI、URL、期刊或会议名称、标签、摘要、集合以及 Zotero 跳转链接。标签会转换为空格安全、符号安全的 Obsidian 标签格式。
 
 解析并发布论文时，OmniScholar 会在每篇文献目录的 `source/` 中生成 `zotero-reading-record.md`。当 `output.source.copyPdf` 为 true 时，选中的 Zotero PDF 也会复制到该目录。阅读记录将 Zotero 笔记与 PDF 批注分成两个区块，保留批注类型、颜色、页码、标签、评论和 PDF 相对链接。笔记和批注是个人阅读记录，不应直接当作论文原文证据。
 

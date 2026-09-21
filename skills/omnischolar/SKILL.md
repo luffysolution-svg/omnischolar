@@ -70,4 +70,4 @@ Write only beneath the configured output root. The default managed layout is:
     └── zotero-reading-record.md
 ```
 
-Preserve provenance in `metadata.json`, respect the user's citation style and language, and keep missing or uncertain values explicit.
+Use the bibliographic frontmatter in the MinerU Markdown and Zotero reading record for Obsidian properties and identity checks. Parsed image filenames begin with the Zotero key. Preserve full provenance in `metadata.json`, respect the user's citation style and language, and keep missing or uncertain values explicit.

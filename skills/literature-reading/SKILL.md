@@ -10,7 +10,7 @@ Use this Skill after a paper has been published locally by MinerU. The source of
 
 ## Source and output
 
-- Read the parsed Markdown, `metadata.json`, and relevant sibling assets with the host's local file, search, and image-viewing capabilities.
+- Read the parsed Markdown frontmatter, `metadata.json`, and relevant sibling assets with the host's local file, search, and image-viewing capabilities.
 - Preserve the MinerU Markdown and extracted assets exactly as published.
 - Write the interpretation as a new Markdown file in the same directory as the MinerU Markdown. Use the filename requested by the user or choose a concise descriptive filename when none is provided.
 - Keep links relative to the paper directory when possible. Do not include absolute local paths, credentials, signed URLs, or private Zotero data in the visible document.

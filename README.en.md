@@ -106,7 +106,7 @@ Enable the service and fill in its API key to use Ai4Scholar, image generation, 
 
 The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys. On first use, the MCP process creates a user-level configuration from [`omnischolar.config.example.json`](omnischolar.config.example.json); `omnischolar config init` can create it explicitly. The plugin copy is [`.mcp.json`](.mcp.json).
 
-Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, and Zotero reading records with `output.rootDirectory`, `output.literatureDirectory`, and `output.source`; interpretation sidecars are saved beside the MinerU Markdown with a task-defined filename and structure. See [literature and output configuration](docs/RESEARCH.en.md).
+Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, and Zotero reading records with `output.rootDirectory`, `output.literatureDirectory`, and `output.source`. MinerU Markdown and Zotero reading records include bibliographic frontmatter, and every parsed image filename begins with its Zotero key. See [literature and output configuration](docs/RESEARCH.en.md).
 
 ## Try it
 

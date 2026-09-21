@@ -60,7 +60,7 @@ The new-paper subfolder and file name can be customized as well:
 }
 ```
 
-Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` controls each paper directory name. The shared separator accepts `-`, `+`, and `_` and is available to paper, folder, and attachment templates. Attachment filenames support `{index}`, `{original}`, `{extension}`, and `{separator}`. These settings affect new publications only; existing sync records keep the path stored in the manifest. Here, attachment means a parsed image asset, not the original Zotero PDF attachment.
+Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` controls each paper directory name. The shared separator accepts `-`, `+`, and `_` and is available to paper, folder, and attachment templates. Attachment templates support `{index}`, `{original}`, `{extension}`, and `{separator}` and control the part after the required Zotero-key prefix; the default image name looks like `ABCD1234-image-1.png`. These settings affect new publications only; existing sync records keep the path stored in the manifest. Here, attachment means a parsed image asset, not the original Zotero PDF attachment.
 
 ## Zotero reading records and local interpretations
 
@@ -77,6 +77,8 @@ Paper and folder templates support `{author}`, `{year}`, `{title}`, and `{separa
   }
 }
 ```
+
+MinerU Markdown and `source/zotero-reading-record.md` both include Obsidian-readable bibliographic frontmatter with the title, item type, creators, Zotero key, DOI, URL, publication title, tags, abstract, collections, and a Zotero deep link. Tags are normalized so spaces and unsupported punctuation are safe in Obsidian.
 
 Publishing a paper creates `zotero-reading-record.md` under the paper's `source/` directory. When `output.source.copyPdf` is true, the selected Zotero PDF is copied there as well. The reading record keeps Zotero notes and PDF annotations in separate sections. MinerU's Markdown, its image assets, and the interpretation file live in the same paper directory. The `literature-reading` and `literature-retrieval` Skills use the host's local file capabilities to read the source, locate paragraphs and figure/table evidence, and write a user-named Markdown sidecar. They never modify the MinerU source Markdown.
 

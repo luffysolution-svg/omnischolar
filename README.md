@@ -148,7 +148,7 @@ npx skills remove --skill '*' --agent codex --global --yes
 }
 ```
 
-`mcp.json` 只负责启动 MCP，不保存 API key；服务凭据和 Obsidian 输出位置填写在 [`omnischolar.config.example.json`](omnischolar.config.example.json) 对应字段中，可执行 `omnischolar config init` 创建实际配置。插件内部使用的配置文件是 [`.mcp.json`](.mcp.json)。文件夹、Markdown 文件和图片附件命名可通过 `output` 区块自定义，详见[文献与输出配置](docs/RESEARCH.md)。
+`mcp.json` 只负责启动 MCP，不保存 API key；服务凭据和 Obsidian 输出位置填写在 [`omnischolar.config.example.json`](omnischolar.config.example.json) 对应字段中，可执行 `omnischolar config init` 创建实际配置。插件内部使用的配置文件是 [`.mcp.json`](.mcp.json)。MinerU 原文与 Zotero 阅读记录都会写入书目信息 frontmatter，解析图片始终以 Zotero key 开头；文件夹、Markdown 文件和图片命名可通过 `output` 区块自定义，详见[文献与输出配置](docs/RESEARCH.md)。
 
 ## 使用示例
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "luffysolution-omnischolar"
-version = "0.4.2"
+version = "0.5.0"
 description = "Literature, Zotero, PDF, citation, materials, and scientific image tools for local MCP agents"
 readme = "README.md"
 requires-python = ">=3.11"
