@@ -93,13 +93,15 @@ OmniScholar 不会自动把 Zotero 附件上传到 MinerU。应先确认具体�
 }
 ```
 
-支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
+支持的文献文件名变量为 `{author}`、`{year}`、`{title}` 和 `{separator}`；`folderNameTemplate` 单独控制每篇文献目录名。`filenameSeparator` 当前支持 `-`、`+` 和 `_`，会同时提供给文献、文件夹和附件模板。附件图片支持 `assetFilenameTemplate`，变量为 `{index}`、`{original}`、`{extension}` 和 `{separator}`。新文献会写入 `rootDirectory/literatureDirectory`，图片放在每篇文献目录下的 `assets/`。若不同 Zotero 文献生成相同目录名，后创建的目录会附加 Zotero key，避免覆盖已有文献。已有 manifest 记录会沿用原路径，避免改配置后破坏增量同步。这里的附件图片是解析结果中的图片，不是 Zotero 原始 PDF 附件。
 
 解析并发布论文时会在每篇文献目录的 `source/` 中生成 `zotero-reading-record.md`。若 `output.source.copyPdf` 为 true，选中的 Zotero PDF 也会复制到该目录。阅读记录将 Zotero 笔记和 PDF 批注分成两个区块，批注保留类型、颜色、页码、标签、评论和 PDF 相对链接；它们属于个人阅读记录，不应直接作为论文原文证据。
 
 解读文件由 Skill 使用宿主的本地文件能力直接写入 MinerU Markdown 的同级目录。文件名和内容结构由用户任务决定，可使用 frontmatter、标题、段落、列表、表格或混合结构。默认应保留原文不变；如果同级已有同名解读文件，应先确认覆盖，或使用新的用户指定文件名。
 
 `omnischolar_sync` 会先给出计划，再写入 `output.rootDirectory`。该目录可以是普通文件夹，也可以位于 Obsidian Vault 中。
+
+如果一个 Zotero 条目包含多个 PDF，先用聚合读取结果列出附件键和文件名，并请用户确认。只有带明确 `attachmentKey` 的解析或同步调用才会继续，避免静默选择错误附件。
 
 同步会区分新建、无需更新、元数据变化、解析变化、渲染变化、文件缺失、冲突、排除和中断恢复。仅修复元数据、渲染或中断事务时不会上传 PDF。
 

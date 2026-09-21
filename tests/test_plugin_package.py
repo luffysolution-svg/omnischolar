@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import tomllib
 import unittest
 from pathlib import Path
@@ -133,6 +134,20 @@ class CodexPluginPackageTests(unittest.TestCase):
 
         self.assertNotIn("allowPaid", encoded)
         self.assertNotIn("allowExternalUpload", encoded)
+
+    def test_documented_tool_lists_match_runtime_catalogue(self) -> None:
+        names = {definition.name for definition in create_tool_definitions()}
+        for relative in ("docs/TOOLS.md", "docs/TOOLS.en.md"):
+            text = (ROOT / relative).read_text(encoding="utf-8")
+            documented = set(re.findall(r"^\| `([a-z0-9_]+)` \|", text, re.MULTILINE))
+            self.assertEqual(documented, names, relative)
+
+    def test_readmes_report_current_tool_count_and_refresh_command(self) -> None:
+        expected_count = len(create_tool_definitions())
+        for relative in ("README.md", "README.en.md", "README.zh-CN.md"):
+            text = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn(str(expected_count), text, relative)
+            self.assertNotIn("uvx --from luffysolution-omnischolar@latest", text, relative)
 
 
 if __name__ == "__main__":

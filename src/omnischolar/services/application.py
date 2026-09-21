@@ -219,6 +219,9 @@ class OmniScholarApplication:
             source_pdf_filename_template=config.output.source.pdf_filename_template,
             zotero_reading_record_filename=config.output.source.zotero_reading_record_filename,
             embed_pdf=config.output.source.embed_pdf,
+            conflict_policy=config.sync.conflict_policy,
+            conflict_directory=config.output.conflict_directory,
+            max_source_pdf_bytes=config.mineru.max_pdf_bytes,
         )
         self.services = ApplicationServices(
             literature,

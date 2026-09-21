@@ -13,6 +13,7 @@ from defusedxml import ElementTree as ET
 from defusedxml.common import DefusedXmlException
 
 from omnischolar.core import OmniScholarError
+from omnischolar.version import __version__
 
 from .models import Author, LiteratureRecord, ProviderStatus, SearchRequest, SearchResult
 from .transport import LiteratureTransport
@@ -856,7 +857,17 @@ class ArxivProvider(BaseProvider):
 
     async def _query(self, params: Mapping[str, Any]) -> list[LiteratureRecord]:
         await self.gate.wait()
-        return self._parse(await self.transport.text("GET", self.base_url, params=params))
+        return self._parse(
+            await self.transport.text(
+                "GET",
+                self.base_url,
+                params=params,
+                headers={
+                    "Accept": "application/atom+xml",
+                    "User-Agent": f"OmniScholar/{__version__} (mailto:LuffySolution@gmail.com)",
+                },
+            )
+        )
 
     async def search(self, request: SearchRequest) -> SearchResult:
         self.ensure_enabled()
@@ -932,7 +943,7 @@ class CrossrefProvider(BaseProvider):
 
     def _headers(self) -> dict[str, str]:
         address = self.email or "noreply@example.invalid"
-        return {"User-Agent": f"OmniScholar/0.1 (mailto:{address})"}
+        return {"User-Agent": f"OmniScholar/{__version__} (mailto:{address})"}
 
     @staticmethod
     def _map(raw_value: Any, fallback: str | None = None) -> LiteratureRecord:
@@ -963,8 +974,9 @@ class CrossrefProvider(BaseProvider):
         params: dict[str, Any] = {
             "query.bibliographic": request.query,
             "rows": min(request.limit, 1_000),
-            "cursor": request.cursor or "*",
         }
+        if request.cursor:
+            params["cursor"] = request.cursor
         payload = _object(
             await self.transport.json("GET", self.base_url, params=params, headers=self._headers()),
             self.id,

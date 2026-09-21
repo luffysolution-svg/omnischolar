@@ -174,6 +174,8 @@ class SyncService:
         source_pdf_filename_template: str = "paper.pdf",
         zotero_reading_record_filename: str = "zotero-reading-record.md",
         embed_pdf: bool = True,
+        conflict_policy: Literal["preserve-local", "fail"] = "preserve-local",
+        conflict_directory: str = ".conflicts",
         max_source_pdf_bytes: int = 200 * 1024 * 1024,
     ) -> None:
         self.root = output_root.resolve()
@@ -188,12 +190,13 @@ class SyncService:
         self.source_pdf_filename_template = source_pdf_filename_template
         self.zotero_reading_record_filename = zotero_reading_record_filename
         self.embed_pdf = embed_pdf
+        self.conflict_policy = conflict_policy
         self.max_source_pdf_bytes = max_source_pdf_bytes
         self.state_root = self.root / ".omnischolar"
         self.manifest_path = self.state_root / "manifest.json"
         self.transaction_root = self.state_root / "transactions"
         self.backup_root = self.state_root / "backups"
-        self.conflict_root = self.root / ".conflicts"
+        self.conflict_root = confined_path(self.root, conflict_directory)
 
     def _publication_relative_path(self, paper: dict[str, Any]) -> str:
         stem = paper_stem(
@@ -202,6 +205,23 @@ class SyncService:
             separator=self.filename_separator,
         )
         return "/".join(part for part in (self.literature_directory, stem) if part)
+
+    def _unique_publication_relative_path(
+        self, paper: dict[str, Any], manifest: dict[str, Any], identifier: str
+    ) -> str:
+        candidate = self._publication_relative_path(paper)
+        occupied = {
+            entry.get("relativePath")
+            for publication, entry in manifest.get("entries", {}).items()
+            if publication != identifier and isinstance(entry, dict)
+        }
+        if candidate not in occupied:
+            return candidate
+        zotero_key = _safe_component(str(paper.get("zoteroKey") or "paper"), "paper")
+        suffixed = f"{candidate}{self.filename_separator}{zotero_key}"
+        if suffixed not in occupied:
+            return suffixed
+        return f"{suffixed}{self.filename_separator}{stable_hash(identifier)[:8]}"
 
     def _source_pdf_name(self, paper: dict[str, Any]) -> str:
         raw_creators = paper.get("creators")
@@ -457,11 +477,20 @@ class SyncService:
             parse_key=parse_key,
             candidate_render_key=candidate_render_key,
         )
-        if plan.status in {"conflict", "recovery_required", "excluded"}:
-            candidate = await self._save_conflict(plan.publication_id, markdown, assets)
+        if plan.status == "excluded":
+            raise OmniScholarError("sync_excluded", plan.reason, category="authorization")
+        if plan.status == "recovery_required":
+            raise OmniScholarError("recovery_required", plan.reason, category="conflict")
+        if plan.status == "conflict":
+            candidate: Path | None = None
+            if self.conflict_policy == "preserve-local":
+                candidate = await self._save_conflict(plan.publication_id, markdown, assets)
+            message = plan.reason
+            if candidate is not None:
+                message = f"{message}; candidate saved at {candidate}"
             raise OmniScholarError(
                 "sync_conflict",
-                f"{plan.reason}; candidate saved at {candidate}",
+                message,
                 category="conflict",
             )
         if plan.status == "missing" and not force:
@@ -471,7 +500,10 @@ class SyncService:
             template=self.filename_template,
             separator=self.filename_separator,
         )
-        relative = plan.relative_path or self._publication_relative_path(paper)
+        existing_manifest = await self.manifest()
+        relative = plan.relative_path or self._unique_publication_relative_path(
+            paper, existing_manifest, plan.publication_id
+        )
         destination = confined_path(self.root, relative)
         staging = confined_path(self.state_root, f"staging/{uuid.uuid4()}")
         journal = confined_path(self.transaction_root, f"{uuid.uuid4()}.json")
@@ -482,6 +514,11 @@ class SyncService:
                 await anyio.to_thread.run_sync(
                     lambda: shutil.copytree(destination, staging, dirs_exist_ok=True)
                 )
+                previous = existing_manifest["entries"].get(plan.publication_id, {})
+                for managed_path in previous.get("baseline", {}):
+                    target = confined_path(staging, managed_path)
+                    if target.is_file():
+                        await anyio.Path(target).unlink()
             managed: dict[str, str] = {}
             markdown_name = f"{stem}.md"
             await atomic_write(staging, markdown_name, markdown.encode())

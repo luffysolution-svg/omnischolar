@@ -112,6 +112,10 @@ class ConfigBootstrapTests(unittest.TestCase):
 
         self.assertEqual(config.output.filename_separator, "_")
 
+    def test_conflict_directory_must_stay_beneath_output_root(self) -> None:
+        with self.assertRaises(ValueError):
+            OmniScholarConfig.model_validate({"output": {"conflictDirectory": "../outside"}})
+
 
 if __name__ == "__main__":
     unittest.main()

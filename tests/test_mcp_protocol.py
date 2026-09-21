@@ -8,6 +8,14 @@ from omnischolar.tools.catalogue import create_tool_definitions
 
 
 class McpProtocolTests(unittest.TestCase):
+    def test_status_declares_remote_model_discovery(self) -> None:
+        definition = next(
+            item for item in create_tool_definitions() if item.name == "omnischolar_status"
+        )
+
+        self.assertTrue(definition.requires_network)
+        self.assertTrue(tool_to_mcp(definition).annotations.openWorldHint)
+
     def test_paper_interpretation_is_skill_driven(self) -> None:
         names = {item.name for item in create_tool_definitions()}
 

@@ -28,7 +28,7 @@ The generated configuration enables provider sections by default. Use providers 
 
 1. Search only when discovery is needed; preserve provider provenance and identifiers.
 2. Match a local Zotero record by DOI, then normalized title/year/author. Never guess between ambiguous candidates.
-3. Read the aggregate Zotero item and identify the intended attachment.
+3. Read the aggregate Zotero item and identify the intended attachment. If multiple PDFs are available, show the choices and ask the user to confirm one `attachmentKey` before planning, parsing, or synchronizing it.
 4. Call `omnischolar_sync` with `action=plan` before parsing or changing output.
 5. Call `omnischolar_parse` only when structured PDF extraction is necessary and both configuration and the current tool call authorize external upload.
 6. Read the published Markdown and sibling assets progressively with the host's local file and image capabilities, then verify claims against the source.
@@ -64,7 +64,10 @@ Write only beneath the configured output root. The default managed layout is:
 <output-root>/Literatures/<paper>/
 ├── <paper>.md
 ├── metadata.json
-└── assets/
+├── assets/
+└── source/
+    ├── paper.pdf
+    └── zotero-reading-record.md
 ```
 
 Preserve provenance in `metadata.json`, respect the user's citation style and language, and keep missing or uncertain values explicit.

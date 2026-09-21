@@ -16,7 +16,30 @@ permissions:
   id-token: write
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: python scripts/check_release_versions.py
+      - run: uv run --with pytest pytest -q
+      - run: uv run --with ruff ruff check src tests scripts
+      - run: uv build
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm pack --dry-run
+
   python:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -33,6 +56,7 @@ jobs:
           skip-existing: true
 
   npm:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -72,7 +96,7 @@ jobs:
           fi
 
   github-release:
-    needs: [python, npm]
+    needs: [validate, python, npm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

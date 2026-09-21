@@ -6,7 +6,7 @@
 
 | 工具 | 分组 | 功能 | 可能产生的操作 | 联网 | 所需凭据 | 费用类型 |
 |---|---|---|---|---:|---|---|
-| `omnischolar_status` | runtime | `runtime.status` | none | no | none | free |
+| `omnischolar_status` | runtime | `runtime.status` | none | yes | none | free |
 | `omnischolar_capabilities` | runtime | `runtime.capabilities` | none | no | none | free |
 | `research_sources` | literature | `literature.sources` | none | no | none | free |
 | `literature_search` | literature | `literature.search` | none | yes | none | free |

@@ -7,7 +7,11 @@ import httpx
 
 from omnischolar.core import BoundedHttpClient, OmniScholarError
 from omnischolar.providers.literature.models import SearchRequest
-from omnischolar.providers.literature.providers import SemanticScholarProvider
+from omnischolar.providers.literature.providers import (
+    ArxivProvider,
+    CrossrefProvider,
+    SemanticScholarProvider,
+)
 
 
 class FakeLiteratureTransport:
@@ -80,6 +84,38 @@ class SemanticScholarProviderTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(error.retryable)
         self.assertGreater(error.details["retryAfterSeconds"], 0)
         self.assertLessEqual(error.details["retryAfterSeconds"], 60)
+
+
+class LiteratureHttpContractTests(unittest.IsolatedAsyncioTestCase):
+    async def test_arxiv_sends_atom_accept_and_contact_user_agent(self) -> None:
+        class Transport(FakeLiteratureTransport):
+            async def text(self, method, url, *, params=None, headers=None):
+                self.calls.append((method, url, params, headers, None))
+                return '<feed xmlns="http://www.w3.org/2005/Atom"></feed>'
+
+        transport = Transport()
+        provider = ArxivProvider(transport)
+
+        await provider.search(SearchRequest("solid state battery", limit=1))
+
+        headers = transport.calls[0][3]
+        self.assertEqual(headers["Accept"], "application/atom+xml")
+        self.assertIn("mailto:", headers["User-Agent"])
+
+    async def test_crossref_omits_wildcard_cursor_on_first_page(self) -> None:
+        class Transport(FakeLiteratureTransport):
+            async def json(self, method, url, *, params=None, headers=None, body=None):
+                self.calls.append((method, url, params, headers, body))
+                return {"message": {"items": [], "next-cursor": "next"}}
+
+        transport = Transport()
+        provider = CrossrefProvider(transport)
+
+        await provider.search(SearchRequest("solid state battery", limit=1))
+        await provider.search(SearchRequest("solid state battery", limit=1, cursor="next"))
+
+        self.assertNotIn("cursor", transport.calls[0][2])
+        self.assertEqual(transport.calls[1][2]["cursor"], "next")
 
 
 if __name__ == "__main__":

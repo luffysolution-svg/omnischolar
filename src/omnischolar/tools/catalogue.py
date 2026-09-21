@@ -278,12 +278,49 @@ async def zotero_item(arguments: dict[str, Any], _context: ToolExecutionContext,
     )
 
 
+def _pdf_attachments(paper: dict[str, Any]) -> list[dict[str, Any]]:
+    attachments = paper.get("attachments")
+    if not isinstance(attachments, list):
+        return []
+    return [
+        item
+        for item in attachments
+        if isinstance(item, dict)
+        and (
+            item.get("contentType") == "application/pdf"
+            or str(item.get("filename") or "").lower().endswith(".pdf")
+        )
+    ]
+
+
+def _require_attachment_selection(paper: dict[str, Any], attachment_key: str | None) -> None:
+    attachments = _pdf_attachments(paper)
+    if attachment_key or len(attachments) <= 1:
+        return
+    choices = [
+        {
+            "key": item.get("key"),
+            "filename": item.get("filename"),
+            "title": item.get("title"),
+            "localReadable": bool(item.get("localPath")),
+        }
+        for item in attachments
+    ]
+    raise OmniScholarError(
+        "attachment_selection_required",
+        "Multiple PDF attachments are available; ask the user to choose an attachmentKey",
+        category="validation",
+        details={"attachments": choices},
+    )
+
+
 async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, app: Any) -> Any:
     services = _services(app)
     mineru = _required(services.mineru, "mineru", "MinerU")
     paper = await services.zotero.item(
         arguments["key"], attachment_key=arguments.get("attachmentKey")
     )
+    _require_attachment_selection(paper, arguments.get("attachmentKey"))
     selected = paper.get("selectedPdf")
     if not selected or not selected.get("localPath"):
         raise OmniScholarError(
@@ -296,7 +333,10 @@ async def parse_tool(arguments: dict[str, Any], context: ToolExecutionContext, a
         enable_formula=arguments.get("enableFormula", True),
         enable_table=arguments.get("enableTable", True),
         is_ocr=arguments.get("isOcr", False),
-        force=arguments.get("_parseForce", arguments.get("force", False)),
+        force=(
+            arguments.get("_parseForce", arguments.get("force", False))
+            or not app.loaded.config.sync.avoid_unnecessary_parse
+        ),
     )
     markdown, assets = _prepare_publication_content(
         paper.get("title", "Untitled"),
@@ -322,6 +362,10 @@ async def sync_tool(arguments: dict[str, Any], context: ToolExecutionContext, ap
     if action == "status" and not arguments.get("key"):
         return await services.sync.manifest()
     if action == "recover":
+        if not app.loaded.config.sync.recovery:
+            raise OmniScholarError(
+                "recovery_disabled", "Sync recovery is disabled by configuration", category="config"
+            )
         return await services.sync.recover()
     if not arguments.get("key"):
         raise OmniScholarError(
@@ -330,6 +374,7 @@ async def sync_tool(arguments: dict[str, Any], context: ToolExecutionContext, ap
     paper = await services.zotero.item(
         arguments["key"], attachment_key=arguments.get("attachmentKey")
     )
+    _require_attachment_selection(paper, arguments.get("attachmentKey"))
     plan = await services.sync.plan(paper)
     if action in {"status", "plan"}:
         return asdict(plan)
@@ -583,11 +628,12 @@ def create_tool_definitions() -> list[ToolDefinition]:
 
     add(
         "omnischolar_status",
-        "Report configuration source, enabled groups, provider and credential presence, local services, defaults, and runtime without revealing secrets.",
+        "Report configuration, provider and credential presence, defaults, runtime, and discovered image models without revealing secrets.",
         obj({}),
         status_tool,
         group="runtime",
         capabilities=("runtime.status",),
+        network=True,
     )
 
     async def capabilities_tool(_a: dict[str, Any], _c: ToolExecutionContext, app: Any) -> Any:
@@ -778,7 +824,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     )
     add(
         "omnischolar_parse",
-        "Parse a Zotero PDF through MinerU v4 with deterministic cache and transactional local publication.",
+        "Parse one confirmed Zotero PDF through MinerU v4 with deterministic cache and transactional local publication; multiple PDFs require an explicit attachmentKey.",
         parse_schema,
         parse_tool,
         group="parsing",
@@ -791,7 +837,7 @@ def create_tool_definitions() -> list[ToolDefinition]:
     )
     add(
         "omnischolar_sync",
-        "Plan and control conservative incremental sync, conflict, recovery, exclude, restore, repair and reparse actions.",
+        "Plan and control conservative incremental sync for one confirmed PDF; multiple PDFs require an explicit attachmentKey.",
         obj(
             {
                 "action": string_enum(

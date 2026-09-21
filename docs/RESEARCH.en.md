@@ -93,13 +93,15 @@ The output location and new-file naming can be customized in the global configur
 }
 ```
 
-Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` independently controls each paper directory name. `filenameSeparator` accepts `-`, `+`, and `_`, and is shared by paper, folder, and attachment templates. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, `{extension}`, and `{separator}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization. Here, attachment images means parsed image assets, not the original Zotero PDF attachment.
+Supported paper filename variables are `{author}`, `{year}`, `{title}`, and `{separator}`; `folderNameTemplate` independently controls each paper directory name. `filenameSeparator` accepts `-`, `+`, and `_`, and is shared by paper, folder, and attachment templates. Attachment images support `assetFilenameTemplate` with `{index}`, `{original}`, `{extension}`, and `{separator}`. New papers are written under `rootDirectory/literatureDirectory`, with images under each paper directory's `assets/` folder. If distinct Zotero publications produce the same folder name, the later directory receives a Zotero-key suffix instead of overwriting the existing publication. Existing manifest records keep their original paths so changing the configuration does not break incremental synchronization. Here, attachment images means parsed image assets, not the original Zotero PDF attachment.
 
 Publishing a paper creates `zotero-reading-record.md` in the paper's `source/` directory. When `output.source.copyPdf` is enabled, the selected Zotero PDF is copied there as well. The record keeps Zotero notes and PDF annotations in separate sections, including annotation type, color, page, tags, comments, and relative PDF links. These are personal reading records, not independent paper evidence.
 
 The Skills write an interpretation Markdown sidecar next to the MinerU Markdown using the host's local file capabilities. The user decides the filename and structure; frontmatter, headings, prose, lists, tables, or mixed formats may be used as appropriate. The source Markdown remains unchanged. If a same-named sidecar already exists, confirm before overwriting or use a new user-chosen filename.
 
 `omnischolar_sync` shows a plan before writing under `output.rootDirectory`. The directory can be a regular folder or part of an Obsidian vault.
+
+If one Zotero item contains multiple PDFs, list their attachment keys and filenames from the aggregate item and ask the user to choose. Parsing and per-paper sync continue only with an explicit confirmed `attachmentKey`, so no attachment is selected silently.
 
 Sync distinguishes new content, no change, metadata changes, parse changes, render changes, missing files, conflicts, exclusions, and interrupted recovery. Metadata repair, rerendering, and transaction recovery do not upload a PDF.
 

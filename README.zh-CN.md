@@ -71,10 +71,10 @@ codex plugin add omnischolar@omnischolar
 插件会同时安装 10 个 Skills，并从 PyPI 最新版本启动本地 MCP：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
-采用插件安装方式时无需另外执行 `pip install`。`@latest` 会让 `uvx` 解析最新包，不把插件锁死在某个版本号。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
+采用插件安装方式时无需另外执行 `pip install`。`--refresh-package` 会在启动前刷新包索引，`@latest` 不会把插件锁死在某个版本号。各服务的凭据与可选配置仍保存在 OmniScholar 配置中，插件安装不会收集这些信息。
 
 ### Claude Code 插件安装
 
@@ -125,7 +125,7 @@ WorkBuddy/CodeBuddy 的用户级配置位于 `~/.codebuddy/.mcp.json`，项目�
 直接运行最新 MCP 的命令为：
 
 ```sh
-uvx --from luffysolution-omnischolar@latest omnischolar mcp
+uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
 ```
 
 通常无需手动运行，Agent 会根据 MCP 配置启动该进程。安装器写入受支持的配置后，会检查 `initialize`、`tools/list` 和 `omnischolar_status`。

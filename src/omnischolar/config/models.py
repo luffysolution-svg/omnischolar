@@ -263,6 +263,11 @@ class OutputConfig(ConfigModel):
     safe_writes: bool = True
     source: SourceOutputConfig = Field(default_factory=SourceOutputConfig)
 
+    @field_validator("conflict_directory")
+    @classmethod
+    def relative_conflict_directory(cls, value: str) -> str:
+        return _relative_output_path(value, "conflictDirectory")
+
     @field_validator("literature_directory")
     @classmethod
     def relative_literature_directory(cls, value: str) -> str:

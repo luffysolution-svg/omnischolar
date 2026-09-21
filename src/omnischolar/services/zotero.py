@@ -8,6 +8,7 @@ from typing import Any
 from urllib.parse import unquote, urlparse
 
 from omnischolar.core import OmniScholarError
+from omnischolar.version import __version__
 
 from .transport import ServiceTransport
 
@@ -53,7 +54,7 @@ class ZoteroService:
         self.headers = {
             "Zotero-API-Version": "3",
             "Zotero-Allowed-Request": "1",
-            "User-Agent": "OmniScholar/0.1",
+            "User-Agent": f"OmniScholar/{__version__}",
         }
 
     def _url(self, path: str) -> str:

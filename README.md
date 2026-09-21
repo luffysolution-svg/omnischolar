@@ -18,14 +18,15 @@ OmniScholar 通过本地 Python MCP 服务，为 Codex、Claude Code、Cursor、
 - 检索 Semantic Scholar、OpenAlex、PubMed/PMC、arXiv、Crossref、Unpaywall、easyScholar、Google Scholar 和 Google Patents
 - 查询论文详情、作者、参考文献、施引文献、推荐、全文片段、数据集和期刊指标
 - 读取 Zotero 收藏夹、条目、笔记、批注、附件、索引文本和本地 PDF 路径，不修改文献库
-- 按全文游标、图表、公式、段落、文献对比和文献综述模式读取已解析文献，避免整篇正文一次进入上下文
 - 使用 MinerU 提取指定 PDF 的正文、公式、表格和图片
+- 基于 MinerU 原文和图片资产进行 SCI 解读、段落定位及图表解读，并将解读文件保存到原文同级目录
 - 查找引用候选，核对书目信息，再按要求生成参考文献
 - 查询 Materials Project，并导出 JSON、CSV、Markdown 或 CIF
 - 调用已配置的图片服务生成或编辑科研示意图
 - 保留手工修改过的 Markdown，把待合并版本放入 `.conflicts/`
+- 将 Zotero PDF、笔记和批注保存到每篇文献的 `source/`
 
-OmniScholar 共提供 43 个工具，完整列表见[工具目录](docs/TOOLS.md)。
+OmniScholar 共提供 39 个工具，完整列表见[工具目录](docs/TOOLS.md)。
 
 <details>
 <summary>安装与部署</summary>

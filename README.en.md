@@ -104,7 +104,7 @@ On the first MCP start or installer run, OmniScholar creates a complete user-lev
 
 Enable the service and fill in its API key to use Ai4Scholar, image generation, MinerU, and reference-image uploads directly.
 
-The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys: the MCP process reads the global [`omnischolar.config.example.json`](omnischolar.config.example.json), which can be created with `omnischolar config init`. The plugin copy is [`.mcp.json`](.mcp.json).
+The root [`mcp.json`](mcp.json) is a reusable MCP stdio example. It intentionally contains no API keys. On first use, the MCP process creates a user-level configuration from [`omnischolar.config.example.json`](omnischolar.config.example.json); `omnischolar config init` can create it explicitly. The plugin copy is [`.mcp.json`](.mcp.json).
 
 Configure the Obsidian output location, paper folders, Markdown files, parsed image assets, and Zotero reading records with `output.rootDirectory`, `output.literatureDirectory`, and `output.source`; interpretation sidecars are saved beside the MinerU Markdown with a task-defined filename and structure. See [literature and output configuration](docs/RESEARCH.en.md).
 

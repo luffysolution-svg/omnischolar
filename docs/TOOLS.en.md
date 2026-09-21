@@ -6,7 +6,7 @@ Tool and capability names match the values returned to agents.
 
 | Tool | Group | Capabilities | Side effects | Network | Credentials | Cost |
 |---|---|---|---|---:|---|---|
-| `omnischolar_status` | runtime | `runtime.status` | none | no | none | free |
+| `omnischolar_status` | runtime | `runtime.status` | none | yes | none | free |
 | `omnischolar_capabilities` | runtime | `runtime.capabilities` | none | no | none | free |
 | `research_sources` | literature | `literature.sources` | none | no | none | free |
 | `literature_search` | literature | `literature.search` | none | yes | none | free |

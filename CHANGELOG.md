@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1] - 2026-09-21
+
+- Require explicit user confirmation of `attachmentKey` before parsing or synchronizing Zotero items with multiple PDFs.
+- Fix arXiv requests by sending the required Atom and contact headers, and keep Crossref's first search page relevant by omitting the wildcard cursor.
+- Mark `omnischolar_status` as network-capable while preserving live image-model discovery.
+- Honor configured sync conflict behavior and conflict directories, reject unsafe conflict paths, and wire cache/recovery controls to their runtime behavior.
+- Remove obsolete managed assets during republish, preserve unmanaged user files, and prevent distinct Zotero publications with identical stems from sharing a directory.
+- Align the Skills, bilingual documentation, tool counts, latest-package commands, runtime user agents, and release validation workflow.
+
 ## [0.4.0] - 2026-09-21
 
 - Remove the dedicated literature-reading MCP tools and keep paper interpretation in Skills.
