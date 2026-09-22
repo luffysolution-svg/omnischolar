@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0] - 2026-09-22
+
+- Add the `obsidian-literature-base` Skill for building seven Obsidian Base views over MinerU publications and Zotero reading records.
+- Generate per-paper catalogue notes with prefixed or AI-assisted topics, cover images, and foldable galleries containing every parsed image.
+- Add an optional topic Wiki with a generated literature hub, shared-topic pages, bidirectional Wikilinks, preserved manual synthesis sections, and stale-page reporting.
+- Keep MinerU and Zotero managed artifacts read-only, refuse unsafe overwrites, and cover Base, gallery, topic, Wiki, and refresh behavior with automated tests.
+
 ## [0.5.1] - 2026-09-22
 
 - Rewrite `literature-reading` as one concise Agent workflow that defaults to complete paper interpretation and keeps focused evidence retrieval within the same Skill.

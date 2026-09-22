@@ -68,7 +68,7 @@ codex plugin add omnischolar@omnischolar
 
 在 ChatGPT 桌面应用中重启应用，打开 **Plugins**，选择 **OmniScholar** Marketplace，然后安装或启用 **OmniScholar**。在 Codex CLI 中可运行 `/plugins` 浏览同一 Marketplace。
 
-插件会同时安装 9 个 Skills，并从 PyPI 最新版本启动本地 MCP：
+插件会同时安装 10 个 Skills，并从 PyPI 最新版本启动本地 MCP：
 
 ```sh
 uvx --refresh-package luffysolution-omnischolar --from luffysolution-omnischolar@latest omnischolar mcp
@@ -199,6 +199,7 @@ OpenAlex、PubMed、arXiv 和 Crossref 无需 API key。其他服务按需启用
 | `zotero-research` | 本地 Zotero 匹配、笔记、批注和附件 |
 | `paper-reading` | 选择 PDF 并准备 MinerU 原文和图片资产 |
 | `literature-reading` | 完整或聚焦式文献解读、证据定位和图表/公式分析 |
+| `obsidian-literature-base` | 为 MinerU 与 Zotero 产物建立可浏览的 Obsidian Base、图片画廊和主题 Wiki |
 | `academic-citation` | 证据核对、引用候选、格式化和参考文献 |
 | `scientific-figure` | 科研图片生成、编辑、检查和标注 |
 | `materials-project` | 材料筛选、性质、计算来源、相数据和导出 |
